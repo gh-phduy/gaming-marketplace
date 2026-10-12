@@ -6,6 +6,7 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useCallback,
   useState,
 } from "react";
 
@@ -160,10 +161,10 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   };
 
-  const resetCart = () => {
+  const resetCart = useCallback(() => {
     setCartItems([]);
     writeCartItemsToStorage([]);
-  };
+  }, []);
 
   const value = useMemo(
     () => ({

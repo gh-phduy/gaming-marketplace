@@ -1,3 +1,5 @@
+import HERO_PRODUCTS from "./hero-products.json";
+
 // Hero carousel slides configuration
 export interface HeroSlide {
   id: string;
@@ -34,32 +36,12 @@ export const HERO_SLIDES_TOPUP: HeroSlide[] = [
   },
 ];
 
-export const HERO_SLIDES: HeroSlide[] = [
-  {
-    id: "marathon",
-    image: "/hero-slide-1.webp",
-    alt: "Marathon",
-    link: "/buy-cheap?id=a1b2c3d4-e5f6-7a8b-9c0d-1e2f3a4b5c6d",
-  },
-  {
-    id: "resident-evil",
-    image: "/hero-slide-2.webp", 
-    alt: "Resident Evil Requiem",
-    link: "/buy-cheap?id=d4e5f6a1-2b3c-4d5e-6f7a-8b9c0d1e2f3a",
-  },
-  {
-    id: "reanimal",
-    image: "/hero-slide-3.webp",
-    alt: "Reanimal",
-    link: "/buy-cheap?id=7cbcd226-f75e-407b-8391-b3b426bb9bdc",
-  },
-  {
-    id: "arc-raiders",
-    image: "/hero-slide-4.webp",
-    alt: "Arc Raiders",
-    link: "/buy-cheap?id=e06c7477-94a2-4a0b-93df-811c83c31aa1",
-  },
-];
+export const HERO_SLIDES: HeroSlide[] = HERO_PRODUCTS.map((product, index) => ({
+  id: product.slug,
+  image: `/hero-slide-${index + 1}.webp`,
+  alt: product.title,
+  link: `/buy-cheap?id=${product.id}`,
+}));
 
 // Side banners configuration
 export interface SideBanner {

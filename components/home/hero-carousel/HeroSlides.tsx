@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import type { CarouselApi } from "@/components/ui/carousel";
 import {
   Carousel,
@@ -97,7 +97,7 @@ export function HeroSlides({ activeTab }: HeroSlidesProps) {
             return (
               <CarouselItem key={slide.id} className="h-full">
                 {slide.link ? (
-                  <Link href={slide.link} className="block h-full w-full">
+                  <Link href={slide.link} className="block h-full w-full" aria-label={`View ${slide.alt || slide.id}`}>
                     {slideContent}
                   </Link>
                 ) : (

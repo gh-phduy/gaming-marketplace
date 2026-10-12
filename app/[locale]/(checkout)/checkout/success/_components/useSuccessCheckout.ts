@@ -1,15 +1,16 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { useSearchParams } from "next/navigation";
-import { supabase } from "@/lib/supabase";
+import { paymentRequest } from "@/lib/payments/client";
 import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  readCheckoutOrderSnapshot,
+  saveCheckoutOrderSnapshot,
   type CheckoutOrderSnapshot,
 } from "@/components/checkout/checkout-session";
 import { addMarketplaceNotification } from "@/components/notifications/notification-store";
+import { useCheckoutPaymentStatus } from "@/components/checkout/CheckoutPaymentStatus";
 
 export const PROCESSED_PAYMENT_INTENT_KEY = "processed_payment_intent";
 
@@ -47,6 +48,7 @@ export function useSuccessCheckout() {
   const searchParams = useSearchParams();
   const { resetCart } = useCart();
   const { user, isLoading: isAuthLoading } = useAuth();
+  const { setResult } = useCheckoutPaymentStatus();
   
   const [status, setStatus] = useState<"succeeded" | "failed" | null>(null);
   const [orderSnapshot, setOrderSnapshot] = useState<CheckoutOrderSnapshot | null>(null);
@@ -55,147 +57,77 @@ export function useSuccessCheckout() {
   const [isSyncing, setIsSyncing] = useState(false);
 
   const paymentIntent = searchParams.get("payment_intent");
-  const redirectStatus = searchParams.get("redirect_status");
   const accountId = user?.id || user?.email || null;
 
-  const saveOrderToDb = async (
-    snapshot: CheckoutOrderSnapshot | null,
-    currentUser: any
-  ) => {
-    if (!snapshot || !currentUser?.id || !paymentIntent) return;
-
-    setIsSyncing(true);
-    setDbError(null);
-
-    const isUuid = (val: string) =>
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(val);
-
-    if (!isUuid(currentUser.id)) {
-      setDbError(
-        "You are logged in with a mock user. Cannot save transaction to database. Please log in using Google."
-      );
-      setIsSyncing(false);
+  const verifyAndRecord = useCallback(async (signal?: AbortSignal) => {
+    if (!paymentIntent || !user?.id) {
+      setStatus("failed");
+      setResult(paymentIntent ? { paymentIntent, status: "failed" } : null);
       return;
     }
-
+    setIsSyncing(true);
+    setDbError(null);
     try {
-      const { error: upsertError } = await supabase
-        .from("users")
-        .upsert(
-          {
-            id: currentUser.id,
-            email: currentUser.email || "",
-            display_name: currentUser.name || currentUser.email || "User",
-            avatar_url: currentUser.picture || "/avt1.png",
-          },
-          { onConflict: "id" }
-        );
-
-      if (upsertError) {
-        console.error("Error upserting user in Supabase:", upsertError);
-        setDbError(`Failed to sync user profile: ${upsertError.message}`);
-        setIsSyncing(false);
+      const result = await paymentRequest<{
+        status: string;
+        recorded: boolean;
+        snapshot?: CheckoutOrderSnapshot;
+        error?: string;
+      }>("/api/payments/verify", { paymentIntent }, signal);
+      if (signal?.aborted) return;
+      if (result.status !== "succeeded") {
+        setStatus("failed");
+        setResult({ paymentIntent, status: "failed" });
         return;
       }
-
-      const orderRows = snapshot.items.map((item) => ({
-        buyer_id: currentUser.id,
-        product_id: isUuid(item.id) ? item.id : null,
-        quantity: item.quantity,
-        total_price: item.price * item.quantity,
-        currency: item.currency || "USD",
-        status: "completed",
-        stripe_payment_intent: paymentIntent,
-      }));
-
-      const { error: orderError } = await supabase
-        .from("orders")
-        .insert(orderRows);
-
-      if (orderError) {
-        // If it's a unique constraint violation, the order was already saved (e.g. from a strict-mode double execution)
-        if (
-          orderError.code === "23505" ||
-          orderError.message?.includes("duplicate key value violates unique constraint")
-        ) {
-          console.log("Order already exists in database. Treating as success.");
-        } else {
-          console.error("Error writing order to Supabase:", orderError);
-          setDbError(`Failed to save transaction: ${orderError.message}`);
-          setIsSyncing(false);
-          return;
-        }
+      setStatus("succeeded");
+      setResult({ paymentIntent, status: "succeeded" });
+      setOrderSnapshot(result.snapshot ?? null);
+      if (!result.recorded || !result.snapshot) {
+        setDbError(result.error || "Payment confirmed, but order recording is pending. Please retry.");
+        return;
       }
-
-      console.log("Successfully recorded order in database");
-
-      addMarketplaceNotification(
-        {
-          id: `payment-${paymentIntent}`,
-          kind: "payment",
-          title: "Payment confirmed",
-          description: getNotificationDescription(
-            snapshot,
-            formatCurrency(snapshot?.total ?? 0, snapshot?.currency ?? "$")
-          ),
-          href: `/checkout/success?payment_intent=${encodeURIComponent(
-            paymentIntent
-          )}&redirect_status=succeeded`,
-        },
-        accountId
-      );
-
-      resetCart();
-      const processedPaymentIntentKey = accountId
-        ? `${PROCESSED_PAYMENT_INTENT_KEY}:${accountId}`
-        : PROCESSED_PAYMENT_INTENT_KEY;
-      localStorage.setItem(processedPaymentIntentKey, paymentIntent);
-      setDbError(null);
-    } catch (err: any) {
-      console.error("Unexpected sync error:", err);
-      setDbError(`Unexpected error during system sync: ${err.message || err}`);
+      const snapshot = result.snapshot;
+      saveCheckoutOrderSnapshot(snapshot);
+      const processedKey = `${PROCESSED_PAYMENT_INTENT_KEY}:${accountId}`;
+      if (localStorage.getItem(processedKey) !== paymentIntent) {
+        addMarketplaceNotification({
+          id: `payment-${paymentIntent}`, kind: "payment", title: "Payment confirmed",
+          description: getNotificationDescription(snapshot, formatCurrency(snapshot.total, snapshot.currency)),
+          href: `/checkout/success?payment_intent=${encodeURIComponent(paymentIntent)}`,
+        }, accountId);
+        if (!snapshot.topUp) resetCart();
+        localStorage.setItem(processedKey, paymentIntent);
+        setShowToast(true);
+      }
+    } catch (error) {
+      if (!signal?.aborted) {
+        setStatus("failed");
+        setResult({ paymentIntent, status: "failed" });
+        setDbError(error instanceof Error ? error.message : "Unable to verify payment.");
+      }
     } finally {
-      setIsSyncing(false);
+      if (!signal?.aborted) setIsSyncing(false);
     }
-  };
+  }, [paymentIntent, user?.id, accountId, resetCart, setResult]);
 
-  const syncAttemptedRef = useRef<string | null>(null);
+  const saveOrderToDb = () => verifyAndRecord();
 
   useEffect(() => {
     if (isAuthLoading) return;
+    const controller = new AbortController();
+    setStatus(null);
+    setOrderSnapshot(null);
+    setResult(paymentIntent ? { paymentIntent, status: "processing" } : null);
+    void verifyAndRecord(controller.signal);
+    return () => controller.abort();
+  }, [isAuthLoading, verifyAndRecord, paymentIntent, setResult]);
 
-    if (!paymentIntent) {
-      setStatus("failed");
-      return;
-    }
-
-    if (redirectStatus !== "succeeded") {
-      setStatus("failed");
-      return;
-    }
-
-    const snapshot = readCheckoutOrderSnapshot();
-    setOrderSnapshot(snapshot);
-    setStatus("succeeded");
-    setShowToast(true);
-
-    const processedPaymentIntentKey = accountId
-      ? `${PROCESSED_PAYMENT_INTENT_KEY}:${accountId}`
-      : PROCESSED_PAYMENT_INTENT_KEY;
-    const processedPaymentIntent = localStorage.getItem(processedPaymentIntentKey);
-
-    if (processedPaymentIntent !== paymentIntent && syncAttemptedRef.current !== paymentIntent) {
-      syncAttemptedRef.current = paymentIntent;
-      if (snapshot && user) {
-        void saveOrderToDb(snapshot, user);
-      } else if (!user) {
-        setDbError("No logged in user found. Please sign in to complete system sync.");
-      }
-    }
-
-    const timeoutId = window.setTimeout(() => setShowToast(false), 6200);
-    return () => window.clearTimeout(timeoutId);
-  }, [accountId, isAuthLoading, paymentIntent, redirectStatus, user]);
+  useEffect(() => {
+    if (!showToast) return;
+    const timer = window.setTimeout(() => setShowToast(false), 6200);
+    return () => window.clearTimeout(timer);
+  }, [showToast]);
 
   const itemCount = useMemo(
     () =>

@@ -722,11 +722,11 @@ export async function getSellerProfile(
 
   try {
     // 1. Fetch user details from public.users table by matching display_name (case-insensitive)
-    const { data: userData, error: userError } = await supabase
+    const profileQuery = supabase
       .from("users")
-      .select("*")
-      .ilike("display_name", sellerRouteKey)
-      .maybeSingle();
+      .select("id, display_name, avatar_url, rating, is_verified_seller, created_at, updated_at");
+    const isId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(sellerRouteKey);
+    const { data: userData, error: userError } = await (isId ? profileQuery.eq("id", sellerRouteKey) : profileQuery.ilike("display_name", sellerRouteKey.replace(/-/g, " "))).maybeSingle();
 
     if (userError || !userData) {
       console.log(`Seller ${sellerRouteKey} not found in public.users, falling back to static offers filtering.`);
@@ -742,7 +742,7 @@ export async function getSellerProfile(
         console.error(`Error fetching products for seller ${sellerRouteKey}:`, productsError);
       }
 
-      const rating = Number(userData.rating || 5);
+      const rating = Number(userData.rating ?? 0);
       const sellerProducts = productsData || [];
       
       const offers: SellerOfferItem[] = sellerProducts.map((p): SellerOfferItem => ({
@@ -751,8 +751,8 @@ export async function getSellerProfile(
           name: p.title,
           type: p.category || "Games",
           platform: p.platform || "PC",
-          edition: "Standard",
-          delivery: "Instant",
+          edition: p.edition || "Standard",
+          delivery: p.delivery || "Instant",
           activationRegion: p.region || "Global",
           price: Number(p.price),
           currency: p.currency || "$",
@@ -762,16 +762,16 @@ export async function getSellerProfile(
           id: userData.id,
           name: userData.display_name,
           avatar: userData.avatar_url || "/avt1.png",
-          isOnline: true,
-          badge: rating >= 4.9 ? "Legendary" : "Verified",
+          isOnline: false,
+          badge: userData.is_verified_seller ? "Verified Seller" : "Seller",
           tier: rating >= 4.9 ? "Legendary" : rating >= 4.8 ? "Elite" : "Pro",
           rating: rating,
-          successRate: 98.5,
-          totalFeedbacks: 120,
+          successRate: 0,
+          totalFeedbacks: 0,
           timezone: "GMT +07:00",
-          totalSales: 1420,
-          positiveFeedbacks: 98.5,
-          negativeFeedbacks: 1.5,
+          totalSales: sellerProducts.reduce((sum, product) => sum + Number(product.sales ?? 0), 0),
+          positiveFeedbacks: 0,
+          negativeFeedbacks: 0,
         }
       }));
 
@@ -780,26 +780,26 @@ export async function getSellerProfile(
         name: userData.display_name,
         avatar: userData.avatar_url || "/avt1.png",
         banner: "/easy-key-banner.svg",
-        badge: rating >= 4.9 ? "Legendary" : "Verified",
+        badge: userData.is_verified_seller ? "Verified Seller" : "Seller",
         tier: rating >= 4.9 ? "Legendary" : rating >= 4.8 ? "Elite" : "Pro",
         rating: rating,
-        successRate: 98.5,
-        totalFeedbacks: 120,
-        totalSales: 1420,
-        positiveFeedbacks: 98.5,
-        negativeFeedbacks: 1.5,
+        successRate: 0,
+        totalFeedbacks: 0,
+        totalSales: sellerProducts.reduce((sum, product) => sum + Number(product.sales ?? 0), 0),
+        positiveFeedbacks: 0,
+        negativeFeedbacks: 0,
         timezone: "GMT +07:00",
         currency: "$",
         language: "English, Vietnamese",
         location: "Vietnam",
-        followers: 185,
-        memberSince: "Jul 2026",
-        description: "Official retail store. Fast delivery & 24/7 client support.",
+        followers: 0,
+        memberSince: new Date(userData.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+        description: "Game seller on Difmark.",
         offerCount: sellerProducts.length,
         averagePrice: sellerProducts.length > 0 ? Number((sellerProducts.reduce((sum, p) => sum + Number(p.price), 0) / sellerProducts.length).toFixed(2)) : 0,
         offers: offers,
-        reviews: createDefaultReviews(userData.display_name),
-        followersList: createDefaultFollowers(userData.id),
+        reviews: [],
+        followersList: [],
         followingList: [],
       };
     }
@@ -821,8 +821,8 @@ export async function getTrustedSellers(): Promise<SellerProfile[]> {
     // 1. Fetch all verified sellers from Supabase
     const { data: dbSellers, error: sellersError } = await supabase
       .from("users")
-      .select("*")
-      .eq("is_verified_seller", true);
+      .select("id, display_name, avatar_url, rating, is_verified_seller, created_at, updated_at")
+      ;
 
     if (sellersError || !dbSellers) {
       console.error("Error fetching trusted sellers from Supabase:", sellersError);
@@ -842,6 +842,7 @@ export async function getTrustedSellers(): Promise<SellerProfile[]> {
       // 3. Construct profiles
       for (const u of dbSellers) {
         const sellerProducts = (dbProducts || []).filter(p => p.seller_id === u.id);
+        if (!sellerProducts.length) continue;
         
         const offers: SellerOfferItem[] = sellerProducts.map((p): SellerOfferItem => ({
           data: {
@@ -849,8 +850,8 @@ export async function getTrustedSellers(): Promise<SellerProfile[]> {
             name: p.title,
             type: p.category || "Games",
             platform: p.platform || "PC",
-            edition: "Standard",
-            delivery: "Instant",
+            edition: p.edition || "Standard",
+            delivery: p.delivery || "Instant",
             activationRegion: p.region || "Global",
             price: Number(p.price),
             currency: p.currency || "$",
@@ -860,60 +861,60 @@ export async function getTrustedSellers(): Promise<SellerProfile[]> {
             id: u.id,
             name: u.display_name,
             avatar: u.avatar_url || "/avt1.png",
-            isOnline: true,
-            badge: u.rating >= 4.9 ? "Legendary" : "Verified",
+            isOnline: false,
+            badge: u.is_verified_seller ? "Verified Seller" : "Seller",
             tier: u.rating >= 4.9 ? "Legendary" : u.rating >= 4.8 ? "Elite" : "Pro",
-            rating: Number(u.rating || 5),
-            successRate: 98.5,
-            totalFeedbacks: 120,
+            rating: Number(u.rating ?? 0),
+            successRate: 0,
+            totalFeedbacks: 0,
             timezone: "GMT +07:00",
-            totalSales: 1420,
-            positiveFeedbacks: 98.5,
-            negativeFeedbacks: 1.5,
+            totalSales: sellerProducts.reduce((sum, product) => sum + Number(product.sales ?? 0), 0),
+            positiveFeedbacks: 0,
+            negativeFeedbacks: 0,
           }
         }));
 
-        const rating = Number(u.rating || 5);
+        const rating = Number(u.rating ?? 0);
         const profile: SellerProfile = {
           id: u.id,
           name: u.display_name,
           avatar: u.avatar_url || "/avt1.png",
           banner: "/easy-key-banner.svg",
-          badge: rating >= 4.9 ? "Legendary" : "Verified",
+          badge: u.is_verified_seller ? "Verified Seller" : "Seller",
           tier: rating >= 4.9 ? "Legendary" : rating >= 4.8 ? "Elite" : "Pro",
           rating: rating,
-          successRate: 98.5,
-          totalFeedbacks: 120,
-          totalSales: 1420,
-          positiveFeedbacks: 98.5,
-          negativeFeedbacks: 1.5,
+          successRate: 0,
+          totalFeedbacks: 0,
+          totalSales: sellerProducts.reduce((sum, product) => sum + Number(product.sales ?? 0), 0),
+          positiveFeedbacks: 0,
+          negativeFeedbacks: 0,
           timezone: "GMT +07:00",
           currency: "$",
           language: "English, Vietnamese",
           location: "Vietnam",
-          followers: 185,
-          memberSince: "Jul 2026",
-          description: "Official retail store. Fast delivery & 24/7 client support.",
+          followers: 0,
+          memberSince: new Date(u.created_at).toLocaleDateString("en-US", { month: "short", year: "numeric" }),
+          description: "Game seller on Difmark.",
           offerCount: sellerProducts.length,
           averagePrice: sellerProducts.length > 0 ? Number((sellerProducts.reduce((sum, p) => sum + Number(p.price), 0) / sellerProducts.length).toFixed(2)) : 0,
           offers: offers,
-          reviews: createDefaultReviews(u.display_name),
-          followersList: createDefaultFollowers(u.id),
+          reviews: [],
+          followersList: [],
           followingList: [],
         };
 
         profiles.push(profile);
       }
 
-      // Sort by rating
-      profiles.sort((a, b) => b.rating - a.rating);
+      // Rank the directory by published offer count, as on the homepage.
+      profiles.sort((a, b) => b.offerCount - a.offerCount || a.id.localeCompare(b.id));
 
-      return [cloneProfile(EASY_KEY_PROFILE), ...profiles];
+      return profiles;
     }
   } catch (error) {
     console.error("Failed to get trusted sellers dynamically:", error);
   }
 
   // Fallback to static list
-  return [cloneProfile(EASY_KEY_PROFILE)];
+  return [];
 }

@@ -15,6 +15,7 @@ export type CheckoutOrderItem = {
 };
 
 export type CheckoutOrderSnapshot = {
+  topUp?: import("@/lib/payments/topup").TopUpSelection;
   items: CheckoutOrderItem[];
   subtotal: number;
   total: number;

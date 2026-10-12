@@ -8,18 +8,30 @@ import { Skeleton } from "@/components/ui/skeleton";
 import {
   TitleSkeleton,
   ProductSectionSkeleton,
+  ProductDescriptionSkeleton,
+  SellerListSkeleton,
+  ProductContentSkeleton,
 } from "@/components/product/PageSkeletons";
+import { PRODUCT_PAGE_CLASS } from "@/components/product/product-layout";
 
 export default function Loading() {
   return (
-    <main className="flex w-full max-w-[1590px] flex-col items-center gap-y-6 px-3 pt-28 sm:gap-y-8 sm:px-5 sm:pt-32 md:px-6 md:pt-40 lg:px-8">
+    <main id="main-content" aria-busy="true" className={PRODUCT_PAGE_CLASS}>
+      <span role="status" className="sr-only">
+        Loading product…
+      </span>
       {/* Breadcrumbs Skeleton */}
-      <div className="flex w-full gap-2">
-        <Skeleton className="h-4 w-16" />
-        <Skeleton className="h-4 w-4" />
-        <Skeleton className="h-4 w-24" />
-        <Skeleton className="h-4 w-4" />
-        <Skeleton className="h-4 w-32" />
+      <div
+        aria-hidden="true"
+        className="flex h-6 w-full items-center gap-2 overflow-hidden pb-1"
+      >
+        <Skeleton className="h-5 w-5 shrink-0" />
+        <Skeleton className="h-3 w-3 shrink-0" />
+        <Skeleton className="h-3.5 w-20 shrink-0" />
+        <Skeleton className="h-3 w-3 shrink-0" />
+        <Skeleton className="h-3.5 w-24 shrink-0" />
+        <Skeleton className="h-3 w-3 shrink-0" />
+        <Skeleton className="h-3.5 w-24 shrink-0" />
       </div>
 
       {/* Title Skeleton */}
@@ -29,10 +41,11 @@ export default function Loading() {
       <ProductSectionSkeleton />
 
       {/* Description Section Skeleton */}
-      <Skeleton className="h-[200px] w-full rounded-xl" />
+      <ProductDescriptionSkeleton />
 
       {/* Seller List Skeleton */}
-      <Skeleton className="h-[300px] w-full rounded-xl" />
+      <SellerListSkeleton />
+      <ProductContentSkeleton />
     </main>
   );
 }

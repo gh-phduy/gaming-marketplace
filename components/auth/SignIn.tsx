@@ -102,6 +102,7 @@ export default function SignIn() {
       <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         {/* Trigger button to open the modal */}
         <DialogTrigger
+          aria-label={t("signIn")}
           onClick={() => setIsOpen(true)}
           className="flex cursor-pointer items-center gap-x-2 border-none bg-transparent px-2 py-4 text-dm-text-secondary outline-hidden transition-colors duration-500 hover:text-dm-text-primary"
         >

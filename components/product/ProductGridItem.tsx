@@ -3,10 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { BiSolidKey } from "react-icons/bi";
-import { HiComputerDesktop } from "react-icons/hi2";
-import { SiNintendoswitch } from "react-icons/si";
-import { FaPlaystation } from "react-icons/fa";
-import { BsXbox } from "react-icons/bs";
+import PlatformBadges from "@/components/shared/PlatformBadges";
 import { useTranslations } from "next-intl";
 
 /* ============================================
@@ -82,12 +79,12 @@ export default function ProductGridItem({
 
         {/* Price Overlay on Image (Marketplace Style) */}
         <div className="absolute right-0 bottom-0 left-0 flex items-center justify-between bg-black/50 px-1.5 py-1 sm:p-2">
-          <div className="xs:flex hidden items-center gap-1.5 text-gray-300 sm:flex">
-            {Array.isArray(platform) ? (
-              platform.map((p) => <PlatformIcon key={p} platform={p} />)
-            ) : (
-              <PlatformIcon platform={platform} />
-            )}
+          <div className="flex min-w-0 items-center gap-1.5 text-gray-300">
+            <PlatformBadges
+              platform={platform}
+              size={14}
+              className="gap-1.5 sm:gap-2"
+            />
           </div>
           <div className="flex items-center gap-1 sm:gap-2">
             <span className="text-xs font-medium text-steel-500 sm:text-sm">
@@ -109,18 +106,3 @@ export default function ProductGridItem({
     </Link>
   );
 }
-
-const PlatformIcon = ({ platform }: { platform?: string }) => {
-  switch (platform?.toLowerCase()) {
-    case "pc":
-      return <HiComputerDesktop size={16} />;
-    case "xbox":
-      return <BsXbox size={14} />;
-    case "playstation":
-      return <FaPlaystation size={16} />;
-    case "nintendo":
-      return <SiNintendoswitch size={14} />;
-    default:
-      return null;
-  }
-};

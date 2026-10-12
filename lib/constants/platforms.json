@@ -1,0 +1,33 @@
+[
+  { "id": "pc", "label": "PC", "value": "PC", "family": "pc" },
+  {
+    "id": "ps5",
+    "label": "PlayStation 5",
+    "value": "PS5",
+    "family": "playstation"
+  },
+  {
+    "id": "ps4",
+    "label": "PlayStation 4",
+    "value": "PS4",
+    "family": "playstation"
+  },
+  {
+    "id": "xbox-series-x",
+    "label": "Xbox Series X/S",
+    "value": "Xbox Series X/S",
+    "family": "xbox"
+  },
+  {
+    "id": "xbox-one",
+    "label": "Xbox One",
+    "value": "Xbox One",
+    "family": "xbox"
+  },
+  {
+    "id": "nintendo-switch",
+    "label": "Nintendo Switch",
+    "value": "Nintendo Switch",
+    "family": "nintendo"
+  }
+]

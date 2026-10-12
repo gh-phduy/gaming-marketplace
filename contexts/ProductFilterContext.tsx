@@ -1,6 +1,7 @@
 "use client";
 
 import React, { createContext, useContext, useState, ReactNode } from "react";
+import { ALL_PRICES } from "@/lib/price-filter";
 
 /* ============================================
    TYPES
@@ -37,8 +38,7 @@ interface ProductFilterProviderProps {
 }
 
 const DEFAULT_PRICE_RANGE: PriceRange = {
-  min: 0,
-  max: 1450,
+  ...ALL_PRICES,
 };
 
 export function ProductFilterProvider({

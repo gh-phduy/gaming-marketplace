@@ -154,6 +154,7 @@ export default function SuccessClient() {
             We could not confirm this payment. Your cart has not been cleared,
             so you can review the order and try again securely.
           </p>
+          {dbError && <p role="alert" className="mt-3 text-sm text-red-300">{dbError}</p>}
           <div className="mt-8 flex flex-col justify-center gap-3 sm:flex-row">
             <Button
               asChild
@@ -193,7 +194,7 @@ export default function SuccessClient() {
               </p>
               <div className="mt-4 flex gap-3">
                 <Button
-                  onClick={() => void saveOrderToDb(orderSnapshot, user)}
+                  onClick={() => void saveOrderToDb()}
                   disabled={isSyncing}
                   className="h-9 rounded bg-[#62d676] px-4 text-xs font-bold text-[#111827] hover:bg-[#56c96a] disabled:opacity-50"
                 >
@@ -216,11 +217,11 @@ export default function SuccessClient() {
                   Payment confirmed
                 </p>
                 <h1 className="mt-2 text-3xl leading-tight font-bold text-white sm:text-4xl">
-                  Your order is ready
+                  {dbError ? "Your test payment is confirmed" : "Your test order is recorded"}
                 </h1>
                 <p className="mt-3 max-w-[680px] text-sm leading-6 text-slate-300">
-                  Thank you for your purchase. We have confirmed the payment and
-                  secured the products below for your Difmark account.
+                  {dbError ? "Payment is confirmed; order recording needs a retry. " : "Your Stripe test payment is confirmed and recorded. "}
+                  No real money was charged and no game key is delivered in this test checkout.
                 </p>
               </div>
             </div>
@@ -318,7 +319,7 @@ export default function SuccessClient() {
                 </div>
                 <div className="flex justify-between">
                   <span className="text-slate-400">Delivery</span>
-                  <span className="font-semibold text-white">Instant</span>
+                  <span className="font-semibold text-white">Test mode</span>
                 </div>
               </div>
             </div>
@@ -328,10 +329,9 @@ export default function SuccessClient() {
                 <div className="flex gap-3">
                   <ShieldCheck className="mt-0.5 h-5 w-5 text-[#62d676]" />
                   <div>
-                    <p className="font-semibold text-white">Order protected</p>
+                    <p className="font-semibold text-white">Test transaction</p>
                     <p className="mt-1 text-sm leading-5 text-slate-400">
-                      Difmark protection remains active while your order is
-                      delivered.
+                      No real money was charged for this test order.
                     </p>
                   </div>
                 </div>
@@ -340,8 +340,7 @@ export default function SuccessClient() {
                   <div>
                     <p className="font-semibold text-white">Next step</p>
                     <p className="mt-1 text-sm leading-5 text-slate-400">
-                      Check your account inventory and seller messages for
-                      delivery details.
+                      Review the recorded test order in your account.
                     </p>
                   </div>
                 </div>

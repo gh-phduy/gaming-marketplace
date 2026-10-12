@@ -18,58 +18,21 @@ import { IoIosArrowForward } from "react-icons/io";
 import { MdArrowBackIos, MdArrowForwardIos } from "react-icons/md";
 import { useTranslations } from "next-intl";
 
-import { supabase } from "@/lib/supabase";
+import type { PopularSeller } from "@/lib/popular-sellers";
 
 /* ==========================================================================
    TYPE DEFINITIONS & INTERFACES
    ========================================================================== */
 
 interface SellerItemProps {
+  id: string;
+  productCount: number;
   avatar: string;
   name: string;
   rating: string;
   verified?: boolean;
-  badge?: string;
   profileName?: string;
 }
-
-const DEFAULT_SELLERS: SellerItemProps[] = [
-  {
-    avatar: "/avt1.png",
-    name: "Gaming_sto...",
-    profileName: "Gaming_store",
-    rating: "4.8",
-    badge: "Legendary",
-  },
-  {
-    avatar: "/avt1.png",
-    name: "Easy-key",
-    profileName: "Easy-key",
-    rating: "5.0",
-    badge: "Legendary",
-  },
-  {
-    avatar: "/avt1.png",
-    name: "Just_Gurus",
-    profileName: "Just_Digital_Gurus",
-    rating: "5.0",
-    badge: "Legendary",
-  },
-  {
-    avatar: "/avt1.png",
-    name: "FowGame",
-    profileName: "FowGame",
-    rating: "5.0",
-    badge: "Legendary",
-  },
-  {
-    avatar: "/avt1.png",
-    name: "BitStore",
-    profileName: "BitStore",
-    rating: "4.9",
-    badge: "Legendary",
-  },
-];
 
 /* ==========================================================================
    SUBCOMPONENT: SellerItem Card
@@ -81,18 +44,19 @@ const DEFAULT_SELLERS: SellerItemProps[] = [
  * and current performance tier badge. Links to the seller profile page.
  */
 function SellerItem({
+  id,
+  productCount,
   avatar,
   name,
   rating,
-  verified = true,
-  badge = "Legendary",
+  verified = false,
   profileName = name,
 }: SellerItemProps) {
   const t = useTranslations("home");
 
   return (
     <Link
-      href={getSellerProfilePath(profileName)}
+      href={getSellerProfilePath(id)}
       className="block w-[252px] cursor-pointer overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-white/10 hover:brightness-125"
       aria-label={`View ${profileName} profile`}
     >
@@ -140,7 +104,7 @@ function SellerItem({
             {Array.from({ length: 5 }, (_, index) => (
               <ImStarFull
                 key={index}
-                className="text-xs text-yellow-300"
+                className={`text-xs ${index < Math.round(Number(rating)) ? "text-yellow-300" : "text-slate-600"}`}
                 aria-hidden="true"
               />
             ))}
@@ -152,7 +116,7 @@ function SellerItem({
       <div className="flex h-[44px] w-full items-center justify-between bg-[#2b3545] px-4">
         <div className="flex items-center gap-2 text-[14px] text-white">
           <Trophy className="h-4 w-4 text-cyan-300" aria-hidden="true" />
-          {badge}
+          {productCount} {t("products")}
         </div>
         <span className="flex items-center gap-x-2 text-[#C0C3C9] transition-colors hover:text-white">
           <span className="text-[16px]">{t("view")}</span>
@@ -167,44 +131,11 @@ function SellerItem({
    MAIN COMPONENT: PopularSellers Carousel Section
    ========================================================================== */
 
-export default function PopularSellers() {
+export default function PopularSellers({ sellers }: { sellers: PopularSeller[] }) {
   const t = useTranslations("home");
   const [api, setApi] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
   const [canScrollNext, setCanScrollNext] = useState(false);
-  const [sellers, setSellers] = useState<SellerItemProps[]>([]);
-
-  useEffect(() => {
-    async function fetchSellers() {
-      try {
-        const { data, error } = await supabase
-          .from("users")
-          .select("*")
-          .eq("is_verified_seller", true)
-          .order("rating", { ascending: false });
-
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setSellers(
-            data.map((u: any): SellerItemProps => ({
-              avatar: u.avatar_url && u.avatar_url.startsWith("http") ? u.avatar_url : "/avt1.png",
-              name: u.display_name,
-              profileName: u.display_name,
-              rating: u.rating ? Number(u.rating).toFixed(1) : "5.0",
-              badge: u.rating >= 4.9 ? "Legendary" : u.rating >= 4.8 ? "Elite" : "Pro",
-              verified: true,
-            }))
-          );
-        } else {
-          setSellers(DEFAULT_SELLERS);
-        }
-      } catch (e) {
-        console.error("Error fetching popular sellers:", e);
-        setSellers(DEFAULT_SELLERS);
-      }
-    }
-    fetchSellers();
-  }, []);
 
   // Callback handlers for manually driving carousel movements
   const scrollPrev = useCallback(() => {
@@ -251,6 +182,7 @@ export default function PopularSellers() {
         viewAllAriaLabel={t("viewAllPopularSellers")}
       />
 
+      {sellers.length === 0 && <p className="py-6 text-sm text-slate-400">No sellers available.</p>}
       <div className="relative">
         <Carousel
           setApi={setApi}
@@ -284,9 +216,11 @@ export default function PopularSellers() {
             }}
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {sellers.map((seller, index) => (
-                <CarouselItem key={index} className="basis-auto pl-2 md:pl-4">
-                  <SellerItem {...seller} />
+              {sellers.map((seller) => (
+                <CarouselItem key={seller.id} className="basis-auto pl-2 md:pl-4">
+                  <SellerItem id={seller.id} productCount={seller.productCount}
+                    avatar={seller.avatar_url || "/avt-placeholder.jpg"} name={seller.display_name}
+                    rating={seller.rating.toFixed(1)} verified={seller.is_verified_seller} />
                 </CarouselItem>
               ))}
             </CarouselContent>

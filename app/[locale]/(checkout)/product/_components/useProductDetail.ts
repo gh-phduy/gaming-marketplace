@@ -5,7 +5,15 @@ import { supabase } from "@/lib/supabase";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { useProductFilter } from "@/contexts/ProductFilterContext";
-import { PRODUCT_TYPES_DATA } from "@/components/product/sidebar/filter-data";
+import { getPriceCeiling } from "@/lib/price-filter";
+import {
+  normalizeFilterId,
+  formatFilterLabel,
+  getFilterQueryValues,
+  filterListingProducts,
+  ROUTE_PRODUCT_TYPE_FILTERS,
+} from "../_lib/product-listing";
+export { normalizeFilterId, formatFilterLabel } from "../_lib/product-listing";
 
 export interface Product {
   id: number;
@@ -43,117 +51,6 @@ export const SORT_OPTIONS: { label: string; value: ProductSortKey }[] = [
 export const FILTERS_COLLAPSED_HEIGHT = 36;
 export const ITEMS_PER_PAGE = 8;
 
-const PRODUCT_FILTER_LABEL_BY_ID = new Map(
-  PRODUCT_TYPES_DATA.flatMap((type) =>
-    type.subItems.map((subItem) => [subItem.id, subItem.label] as const)
-  )
-);
-
-const ROUTE_PRODUCT_TYPE_LABEL_BY_ID = new Map<string, string>([
-  ["game-keys", "Game Keys"],
-  ["console-games", "Console Games"],
-  ["pc-games", "PC Games"],
-  ["mobile", "Mobile"],
-  ["game-currency", "Game Currency"],
-  ["game-accounts", "Game Accounts"],
-  ["game-items", "Game Items"],
-  ["power-leveling", "Power Leveling"],
-  ["software", "Software"],
-  ["gift-cards", "Gift Cards"],
-  ["game-cards", "Game Cards"],
-]);
-
-const FILTER_LABEL_BY_ID = new Map<string, string>([
-  ...PRODUCT_FILTER_LABEL_BY_ID,
-  ...ROUTE_PRODUCT_TYPE_LABEL_BY_ID,
-]);
-
-const ROUTE_PRODUCT_TYPE_FILTERS = new Set(
-  ROUTE_PRODUCT_TYPE_LABEL_BY_ID.keys()
-);
-
-const PLATFORM_QUERY_ALIASES: Record<string, string> = {
-  "battle.net": "battle-net",
-  battlenet: "battle-net",
-  "battle-net": "battle-net",
-  "electronic-arts": "ea",
-  "epic-games": "epic",
-};
-
-export function normalizeFilterId(value: string) {
-  const normalized = value
-    .trim()
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-
-  return PLATFORM_QUERY_ALIASES[normalized] ?? normalized;
-}
-
-export function formatFilterLabel(filterId: string) {
-  return (
-    FILTER_LABEL_BY_ID.get(filterId) ??
-    filterId
-      .split("-")
-      .filter(Boolean)
-      .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-      .join(" ")
-  );
-}
-
-function getFilterQueryValues(searchParams: Pick<URLSearchParams, "getAll">) {
-  return [
-    ...searchParams.getAll("productType"),
-    ...searchParams.getAll("type"),
-    ...searchParams.getAll("platform"),
-    ...searchParams.getAll("category"),
-    ...searchParams.getAll("genre"),
-    ...searchParams.getAll("brand"),
-  ]
-    .flatMap((value) => value.split(","))
-    .map(normalizeFilterId)
-    .filter(Boolean);
-}
-
-function getProductFilterValues(product: Product) {
-  const platformValues = Array.isArray(product.platform)
-    ? product.platform
-    : [product.platform];
-  const explicitFilters = product.filters ?? [];
-
-  return [
-    ...explicitFilters,
-    ...platformValues,
-    product.platformLabel,
-    product.type,
-    product.productType,
-    product.category,
-    product.genre,
-  ]
-    .filter((value): value is string => Boolean(value))
-    .map(normalizeFilterId);
-}
-
-function productMatchesSelectedFilter(
-  product: Product,
-  selectedFilter: string
-) {
-  const productFilterValues = getProductFilterValues(product);
-  const selectedLabel = FILTER_LABEL_BY_ID.get(selectedFilter);
-  const selectedLabelId = selectedLabel
-    ? normalizeFilterId(selectedLabel)
-    : selectedFilter;
-
-  return productFilterValues.some((filterValue) => {
-    return (
-      filterValue === selectedFilter ||
-      filterValue === selectedLabelId ||
-      filterValue.includes(selectedFilter) ||
-      selectedFilter.includes(filterValue)
-    );
-  });
-}
-
 const mapDbProductToClientProduct = (row: any): Product => {
   return {
     id: row.id,
@@ -169,11 +66,10 @@ const mapDbProductToClientProduct = (row: any): Product => {
   };
 };
 
-const fetchListingProducts = async ({ signal }: { signal?: AbortSignal } = {}): Promise<Product[]> => {
-  let query = supabase
-    .from("products")
-    .select("*")
-    .eq("status", "published");
+const fetchListingProducts = async ({
+  signal,
+}: { signal?: AbortSignal } = {}): Promise<Product[]> => {
+  let query = supabase.from("products").select("*").eq("status", "published");
 
   if (signal) {
     query = query.abortSignal(signal);
@@ -201,6 +97,7 @@ export function useProductDetail() {
 
   const {
     priceRange,
+    setPriceRange,
     resetProductFilters,
     selectedPlatforms,
     setSelectedPlatforms,
@@ -219,13 +116,13 @@ export function useProductDetail() {
       searchParams.get("name") || searchParams.get("search") || "";
     const initialPage = Number(searchParams.get("page") || "1");
     const initialPlatforms = Array.from(
-      new Set(getFilterQueryValues(searchParams))
+      new Set(getFilterQueryValues(searchParams)),
     );
 
     setSearchTerm(initialSearch);
     setSelectedPlatforms(initialPlatforms);
     setCurrentPage(
-      Number.isFinite(initialPage) && initialPage > 0 ? initialPage : 1
+      Number.isFinite(initialPage) && initialPage > 0 ? initialPage : 1,
     );
     setHasLoadedUrlFilters(true);
   }, [searchParams, setSelectedPlatforms]);
@@ -286,68 +183,45 @@ export function useProductDetail() {
   useEffect(() => {
     if (filtersRef.current) {
       setIsOverflowing(
-        filtersRef.current.scrollHeight > FILTERS_COLLAPSED_HEIGHT + 4
+        filtersRef.current.scrollHeight > FILTERS_COLLAPSED_HEIGHT + 4,
       );
     }
   }, [products, searchTerm, selectedPlatforms, sortBy]);
 
-  // Filter products based on price range and platforms
-  const filteredProducts = useMemo(() => {
-    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
-
-    return products.filter((product) => {
-      const selectedProductTypes = selectedPlatforms.filter((filterId) =>
-        ROUTE_PRODUCT_TYPE_FILTERS.has(filterId)
-      );
-      const selectedSecondaryFilters = selectedPlatforms.filter(
-        (filterId) => !ROUTE_PRODUCT_TYPE_FILTERS.has(filterId)
-      );
-      
-      const matchesPrice =
-        product.price >= priceRange.min && product.price <= priceRange.max;
-
-      const matchesProductType =
-        selectedProductTypes.length === 0 ||
-        selectedProductTypes.some((selectedFilter) =>
-          productMatchesSelectedFilter(product, selectedFilter)
-        );
-
-      const matchesSecondaryFilters =
-        selectedSecondaryFilters.length === 0 ||
-        selectedSecondaryFilters.some((selectedFilter) =>
-          productMatchesSelectedFilter(product, selectedFilter)
-        );
-
-      const productTitle = product.title.toLowerCase();
-      const productPlatform = Array.isArray(product.platform)
-        ? product.platform.join(" ").toLowerCase()
-        : product.platform.toLowerCase();
-      const productFilterText = [
-        product.platformLabel,
-        product.type,
-        product.productType,
-        product.category,
-        product.genre,
-        ...(product.filters ?? []),
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-      
-      const matchesSearch =
-        normalizedSearchTerm.length === 0 ||
-        productTitle.includes(normalizedSearchTerm) ||
-        productPlatform.includes(normalizedSearchTerm) ||
-        productFilterText.includes(normalizedSearchTerm);
-
-      return (
-        matchesPrice &&
-        matchesProductType &&
-        matchesSecondaryFilters &&
-        matchesSearch
-      );
-    });
-  }, [products, priceRange, searchTerm, selectedPlatforms]);
+  // Price distribution ignores the selected price range so the graph remains
+  // stable while dragging. Platform counts ignore selected platforms, but use
+  // the current search, category, and price range.
+  const priceProducts = useMemo(
+    () =>
+      filterListingProducts(products, {
+        searchTerm,
+        selectedFilters: selectedPlatforms,
+      }),
+    [products, searchTerm, selectedPlatforms],
+  );
+  const platformProducts = useMemo(
+    () =>
+      filterListingProducts(products, {
+        searchTerm,
+        selectedFilters: selectedPlatforms.filter((id) =>
+          ROUTE_PRODUCT_TYPE_FILTERS.has(id),
+        ),
+        priceRange,
+      }),
+    [products, searchTerm, selectedPlatforms, priceRange],
+  );
+  const filteredProducts = useMemo(
+    () =>
+      priceProducts.filter(
+        (product) =>
+          product.price >= priceRange.min && product.price <= priceRange.max,
+      ),
+    [priceProducts, priceRange],
+  );
+  const priceCeiling = useMemo(
+    () => getPriceCeiling(products.map((product) => product.price)),
+    [products],
+  );
 
   const sortedProducts = useMemo(() => {
     const indexedProducts = filteredProducts.map((product, index) => ({
@@ -380,7 +254,7 @@ export function useProductDetail() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredProducts.length / ITEMS_PER_PAGE)
+    Math.ceil(filteredProducts.length / ITEMS_PER_PAGE),
   );
 
   useEffect(() => {
@@ -400,12 +274,12 @@ export function useProductDetail() {
         id: platform,
         label: formatFilterLabel(platform),
       })),
-    [selectedPlatforms]
+    [selectedPlatforms],
   );
 
   const primarySelectedPlatform =
     selectedPlatformFilters.find(
-      (filter) => !ROUTE_PRODUCT_TYPE_FILTERS.has(filter.id)
+      (filter) => !ROUTE_PRODUCT_TYPE_FILTERS.has(filter.id),
     )?.label ?? selectedPlatformFilters[0]?.label;
 
   const selectedSortLabel =
@@ -414,6 +288,11 @@ export function useProductDetail() {
 
   return {
     products,
+    priceProducts,
+    platformProducts,
+    priceCeiling,
+    priceRange,
+    setPriceRange,
     isLoading,
     searchTerm,
     setSearchTerm,

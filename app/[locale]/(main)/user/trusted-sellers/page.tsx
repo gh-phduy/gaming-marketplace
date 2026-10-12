@@ -10,18 +10,18 @@ export default async function TrustedSellersPage() {
   return (
     <main className="w-full bg-midnight-950 px-4 pt-36 pb-16 text-white">
       <div className="mx-auto w-full max-w-[1120px]">
-        <h1 className="mb-6 text-3xl font-bold">Trusted Sellers</h1>
+        <h1 className="mb-6 text-3xl font-bold">Sellers</h1>
 
         {sellers.length === 0 ? (
           <div className="rounded-lg border border-midnight-700 bg-midnight-800 p-8 text-center text-steel-500">
-            No trusted sellers available.
+            No sellers available.
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 800:grid-cols-2">
             {sellers.map((seller) => (
               <Link
                 key={seller.id}
-                href={getSellerProfilePath(seller.name)}
+                href={getSellerProfilePath(seller.id)}
                 className="hover:border-forest-600 flex items-center gap-4 rounded-lg border border-midnight-700 bg-midnight-800 p-4 transition-colors"
               >
                 <div className="relative h-14 w-14 overflow-hidden rounded-full">

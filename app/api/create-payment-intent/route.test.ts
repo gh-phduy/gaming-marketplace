@@ -1,47 +1,24 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { POST } from "./route";
-
-// Mock Stripe
-vi.mock("stripe", () => {
-  return {
-    default: class Stripe {
-      paymentIntents = {
-        create: vi.fn().mockResolvedValue({
-          client_secret: "mock-client-secret-123",
-        }),
-      };
-    },
-  };
-});
-
-// Polyfill Request if needed in test environment, but Next.js Request should be available.
-// If it's not, we can construct one or use a mock.
-describe("POST /api/create-payment-intent", () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    process.env.STRIPE_SECRET_KEY = "test_key";
+import { PaymentError } from "@/lib/payments/server";
+const mocks = vi.hoisted(() => ({ auth: vi.fn(), create: vi.fn() }));
+vi.mock("@/lib/payments/server", async importOriginal => ({
+  ...await importOriginal<typeof import("@/lib/payments/server")>(),
+  authenticatePaymentRequest: mocks.auth, createCheckoutPayment: mocks.create,
+}));
+describe("authenticated checkout endpoint", () => {
+  beforeEach(() => { vi.clearAllMocks(); mocks.auth.mockResolvedValue({client:{}, user:{id:"buyer"}}); });
+  it("rejects requests without a valid session", async () => {
+    mocks.auth.mockRejectedValue(new PaymentError("Please sign in to pay.", 401));
+    const response = await POST(new Request("http://localhost/api/create-payment-intent", {method:"POST"}));
+    expect(response.status).toBe(401); expect(mocks.create).not.toHaveBeenCalled();
   });
-
-  it("should create a payment intent with the provided amount", async () => {
-    const request = new Request("http://localhost/api/create-payment-intent", {
-      method: "POST",
-      body: JSON.stringify({ amount: 5000 }),
-    });
-
-    const response = await POST(request);
-    const data = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(data).toHaveProperty("clientSecret", "mock-client-secret-123");
-  });
-
-  it("should default to amount 100 if none provided", async () => {
-    const request = new Request("http://localhost/api/create-payment-intent", {
-      method: "POST",
-      body: JSON.stringify({}),
-    });
-
-    const response = await POST(request);
-    expect(response.status).toBe(200);
+  it("passes cart identifiers to server pricing and disables response caching", async () => {
+    const cart = { requestId:"request", items:[{id:"product",quantity:2}] };
+    mocks.create.mockResolvedValue({clientSecret:"test-secret",amount:79.98});
+    const response = await POST(new Request("http://localhost/api/create-payment-intent", {method:"POST",body:JSON.stringify(cart)}));
+    expect(mocks.create).toHaveBeenCalledWith({},"buyer",cart);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect((await response.json()).amount).toBe(79.98);
   });
 });

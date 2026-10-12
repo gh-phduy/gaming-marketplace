@@ -9,7 +9,7 @@
 
 import { useState, useCallback } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 /* ============================================
@@ -37,7 +37,7 @@ interface PlatformItemProps {
 
 const DEFAULTS = {
   name: "PlayStation 5",
-  href: "/product?platform=playstation",
+  href: "/product?platform=ps5",
   bgImage: "/bg-flatform.png",
   hoverImage: "/hover-fp.svg",
   consoleImageDark: "/ps5-hover.webp",
@@ -75,7 +75,7 @@ export default function PlatformItem({
   return (
     <Link
       href={href}
-      className="relative group responsive-platforms-item-bg block select-none cursor-pointer focus-visible:ring-2 focus-visible:ring-dm-accent-green/70 focus-visible:outline-none"
+      className="group relative block responsive-platforms-item-bg cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-dm-accent-green/70 focus-visible:outline-none"
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onFocus={handleMouseEnter}
@@ -84,19 +84,14 @@ export default function PlatformItem({
     >
       {/* Hover overlay */}
       <div
-        className="absolute inset-0 z-20 opacity-0 group-hover:opacity-100 transition-all duration-1000 ease-linear"
+        className="absolute inset-0 z-20 opacity-0 transition-all duration-1000 ease-linear group-hover:opacity-100"
         aria-hidden="true"
       >
-        <Image
-          src={hoverImage}
-          alt=""
-          fill
-          className="object-cover"
-        />
+        <Image src={hoverImage} alt="" fill className="object-cover" />
       </div>
 
       {/* Background */}
-      <div className="w-full z-10 h-full rounded-sm overflow-hidden absolute inset-0">
+      <div className="absolute inset-0 z-10 h-full w-full overflow-hidden rounded-sm">
         <Image
           src={bgImage}
           alt=""
@@ -106,22 +101,21 @@ export default function PlatformItem({
         />
 
         {/* Platform name */}
-        <h3 className="absolute bottom-8 left-1/2 -translate-x-1/2 z-20 text-[20px] text-dm-text-primary font-semibold">
+        <h3 className="absolute bottom-8 left-1/2 z-20 -translate-x-1/2 text-[20px] font-semibold text-dm-text-primary">
           {name}
         </h3>
       </div>
 
       {/* Console image container */}
-      <div
-        className="responsive-platforms-item-content group-hover:scale-105 group-hover:-translate-y-9 transition-transform duration-1000 absolute left-1/2 -translate-y-10 -translate-x-1/2 z-20"
-      >
+      <div className="absolute left-1/2 z-20 responsive-platforms-item-content -translate-x-1/2 -translate-y-10 transition-transform duration-1000 group-hover:-translate-y-9 group-hover:scale-105">
         {/* Console image - dark (default) */}
         <Image
           src={consoleImageDark}
           alt={t("consoleAlt", { name })}
           fill
-          className={`object-contain transition-opacity duration-1000 ${isHovered ? "opacity-10" : "opacity-100"
-            }`}
+          className={`object-contain transition-opacity duration-1000 ${
+            isHovered ? "opacity-10" : "opacity-100"
+          }`}
           sizes="(max-width: 990px) 155px, (max-width: 1280px) 210px, 290px"
         />
 
@@ -130,8 +124,9 @@ export default function PlatformItem({
           src={consoleImageLight}
           alt=""
           fill
-          className={`object-contain transition-opacity duration-1000 ${isHovered ? "opacity-100" : "opacity-10"
-            }`}
+          className={`object-contain transition-opacity duration-1000 ${
+            isHovered ? "opacity-100" : "opacity-10"
+          }`}
           aria-hidden="true"
           sizes="(max-width: 990px) 155px, (max-width: 1280px) 210px, 290px"
         />

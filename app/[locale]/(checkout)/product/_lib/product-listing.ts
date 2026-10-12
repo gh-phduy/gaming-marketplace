@@ -1,5 +1,14 @@
 import { PRODUCT_TYPES_DATA } from "@/components/product/sidebar/filter-data";
 import { supabase } from "@/lib/supabase";
+import type { PriceRange } from "@/lib/price-filter";
+import {
+  CATALOG_PLATFORMS,
+  getPlatformFamily,
+  getProductPlatforms,
+  isCatalogPlatformFilter,
+  matchesPlatformFilter,
+  normalizePlatformId,
+} from "@/lib/platforms";
 
 export interface Product {
   id: number;
@@ -60,6 +69,9 @@ const ROUTE_PRODUCT_TYPE_LABEL_BY_ID = new Map<string, string>([
 const FILTER_LABEL_BY_ID = new Map<string, string>([
   ...PRODUCT_FILTER_LABEL_BY_ID,
   ...ROUTE_PRODUCT_TYPE_LABEL_BY_ID,
+  ...CATALOG_PLATFORMS.map(
+    (platform) => [platform.id, platform.label] as const,
+  ),
 ]);
 
 const PLATFORM_QUERY_ALIASES: Record<string, string> = {
@@ -110,7 +122,7 @@ export function normalizeFilterId(value: string) {
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
 
-  return PLATFORM_QUERY_ALIASES[normalized] ?? normalized;
+  return normalizePlatformId(PLATFORM_QUERY_ALIASES[normalized] ?? normalized);
 }
 
 export function formatFilterLabel(filterId: string) {
@@ -141,9 +153,7 @@ export function getFilterQueryValues(
 }
 
 function getProductFilterValues(product: Product) {
-  const platformValues = Array.isArray(product.platform)
-    ? product.platform
-    : [product.platform];
+  const platformValues = getProductPlatforms(product.platform);
   const explicitFilters = product.filters ?? [];
 
   return [
@@ -163,6 +173,19 @@ export function productMatchesSelectedFilter(
   product: Product,
   selectedFilter: string,
 ) {
+  const platformValues = getProductPlatforms(product.platform);
+  if (isCatalogPlatformFilter(selectedFilter))
+    return platformValues.some((platform) =>
+      matchesPlatformFilter(platform, selectedFilter),
+    );
+  if (selectedFilter === "pc-games")
+    return platformValues.some(
+      (platform) => getPlatformFamily(platform) === "pc",
+    );
+  if (selectedFilter === "console-games")
+    return platformValues.some((platform) =>
+      ["playstation", "xbox", "nintendo"].includes(getPlatformFamily(platform)),
+    );
   const productFilterValues = getProductFilterValues(product);
   const selectedLabel = FILTER_LABEL_BY_ID.get(selectedFilter);
   const selectedLabelId = selectedLabel
@@ -176,6 +199,58 @@ export function productMatchesSelectedFilter(
       filterValue.includes(selectedFilter) ||
       selectedFilter.includes(filterValue)
     );
+  });
+}
+
+export function filterListingProducts(
+  products: Product[],
+  {
+    searchTerm = "",
+    selectedFilters = [],
+    priceRange,
+  }: {
+    searchTerm?: string;
+    selectedFilters?: string[];
+    priceRange?: PriceRange;
+  },
+) {
+  const search = searchTerm.trim().toLowerCase();
+  const types = selectedFilters.filter((id) =>
+    ROUTE_PRODUCT_TYPE_FILTERS.has(id),
+  );
+  const secondary = selectedFilters.filter(
+    (id) => !ROUTE_PRODUCT_TYPE_FILTERS.has(id),
+  );
+  return products.filter((product) => {
+    if (
+      priceRange &&
+      (product.price < priceRange.min || product.price > priceRange.max)
+    )
+      return false;
+    if (
+      types.length &&
+      !types.some((id) => productMatchesSelectedFilter(product, id))
+    )
+      return false;
+    if (
+      secondary.length &&
+      !secondary.some((id) => productMatchesSelectedFilter(product, id))
+    )
+      return false;
+    const text = [
+      product.title,
+      ...getProductPlatforms(product.platform),
+      product.platformLabel,
+      product.type,
+      product.productType,
+      product.category,
+      product.genre,
+      ...(product.filters ?? []),
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return !search || text.includes(search);
   });
 }
 

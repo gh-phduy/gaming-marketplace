@@ -13,42 +13,42 @@ const PLATFORM_ITEMS = [
   {
     id: "playstation-5",
     name: "Playstation 5",
-    href: "/product?platform=playstation",
+    href: "/product?platform=ps5",
     consoleImageDark: "/ps5-hover.webp",
     consoleImageLight: "/ps5.webp",
   },
   {
     id: "playstation-4",
     name: "Playstation 4",
-    href: "/product?platform=playstation",
+    href: "/product?platform=ps4",
     consoleImageDark: "/platform-device/ps4-hover.webp",
     consoleImageLight: "/platform-device/ps4.webp",
   },
   {
     id: "pc",
     name: "PC",
-    href: "/product?productType=pc-games",
+    href: "/product?platform=pc",
     consoleImageDark: "/platform-device/pc-hover.webp",
     consoleImageLight: "/platform-device/pc.webp",
   },
   {
     id: "xbox-series-x",
     name: "Xbox series X",
-    href: "/product?platform=xbox-live",
+    href: "/product?platform=xbox-series-x",
     consoleImageDark: "/platform-device/xboxX-hover.webp",
     consoleImageLight: "/platform-device/xboxX.webp",
   },
   {
     id: "xbox-one",
     name: "Xbox One",
-    href: "/product?platform=xbox-live",
+    href: "/product?platform=xbox-one",
     consoleImageDark: "/platform-device/xboxOne-hover.webp",
     consoleImageLight: "/platform-device/xboxOne.webp",
   },
   {
     id: "nintendo-switch",
     name: "Nintendo Switch",
-    href: "/product?platform=nintendo",
+    href: "/product?platform=nintendo-switch",
     consoleImageDark: "/platform-device/nintendo-hover.webp",
     consoleImageLight: "/platform-device/nintendo.webp",
   },
@@ -81,7 +81,7 @@ export default function PlatformsSection() {
         titleClassName="-translate-x-[22px]"
         viewAllAriaLabel={t("viewAllPlatforms")}
       />
-      
+
       {/* Desktop Layout Grid (>= 800px) */}
       <div className="hidden grid-cols-2 gap-4 800:grid 990:grid-cols-3 990:gap-6">
         {PLATFORM_ITEMS.map((platform) => (
@@ -94,7 +94,7 @@ export default function PlatformsSection() {
           />
         ))}
       </div>
-      
+
       {/* Mobile Layout Carousel (< 800px) */}
       <div className="block overflow-visible 800:hidden">
         <ProductCarousel>
@@ -112,4 +112,3 @@ export default function PlatformsSection() {
     </section>
   );
 }
-

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import { supabase } from "@/lib/supabase";
 import { useSearchParams } from "next/navigation";
 import { loadStripe } from "@stripe/stripe-js";
@@ -13,6 +13,14 @@ import {
 } from "@/components/checkout/checkout-session";
 import { ProductApiResponse } from "@/types/api-product";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
+import { paymentRequest } from "@/lib/payments/client";
+import { findTopUpPackage, validateTopUpSelection, type TopUpSelection } from "@/lib/payments/topup";
+import dynamic from "next/dynamic";
+
+const SignIn = dynamic(() => import("@/components/auth/SignIn"));
+
+type PreparedPayment = { clientSecret: string; amount: number; items: CheckoutOrderItem[]; cartKey: string };
 
 // Import modular presentational components
 import { PaymentFilters } from "./PaymentFilters";
@@ -36,10 +44,16 @@ export default function CheckoutClient() {
   const productId = searchParams.get("id");
   const isDirectTopUpCheckout = searchParams.get("directTopUp") === "1";
   const { cartItems } = useCart();
+  const { user, isLoading: isAuthLoading } = useAuth();
 
   // Component local states
-  const [selectedMethod, setSelectedMethod] = useState("visa");
-  const [clientSecret, setClientSecret] = useState("");
+  const [preparedPayment, setPreparedPayment] = useState<PreparedPayment | null>(null);
+  const [paymentError, setPaymentError] = useState<string | null>(null);
+  const [isPreparing, setIsPreparing] = useState(false);
+  const [retry, setRetry] = useState(0);
+  const [topUpSelection, setTopUpSelection] = useState<TopUpSelection | null>(null);
+  const [topUpDetailsConfirmed, setTopUpDetailsConfirmed] = useState(false);
+  const requestIds = useRef(new Map<string, string>());
   const [directTopUpOrder, setDirectTopUpOrder] = useState<
     CheckoutOrderSnapshot | null | undefined
   >(undefined);
@@ -50,12 +64,12 @@ export default function CheckoutClient() {
 
   // Memoized lazy initializer for loadStripe promise wrapper
   const stripePromise = useMemo(() => {
-    if (!clientSecret || !process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
+    if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
       return null;
     }
 
     return loadStripe(process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY);
-  }, [clientSecret]);
+  }, []);
 
   // Compute total value sum of standard items in the cart
   const cartTotal = useMemo(
@@ -68,10 +82,10 @@ export default function CheckoutClient() {
   const amount = useMemo(() => {
     if (isDirectTopUpCheckout && directTopUpOrder)
       return directTopUpOrder.total;
-    if (isDirectTopUpCheckout && directTopUpOrder === undefined) return 0;
+    if (isDirectTopUpCheckout) return 0;
     if (!productId && cartTotal > 0) return cartTotal;
     if (productData?.data.price) return productData.data.price;
-    return 99.97;
+    return 0;
   }, [
     cartTotal,
     directTopUpOrder,
@@ -96,8 +110,8 @@ export default function CheckoutClient() {
       ];
     }
 
-    if (isDirectTopUpCheckout && directTopUpOrder) {
-      return directTopUpOrder.items;
+    if (isDirectTopUpCheckout) {
+      return directTopUpOrder?.items ?? [];
     }
 
     return cartItems.map((item) => ({
@@ -111,6 +125,9 @@ export default function CheckoutClient() {
     }));
   }, [cartItems, directTopUpOrder, isDirectTopUpCheckout, productData]);
 
+  const cartKey = JSON.stringify([user?.id, orderItems.map(item => [item.id, item.quantity]), isDirectTopUpCheckout ? topUpSelection : null]);
+  const activePayment = preparedPayment?.cartKey === cartKey ? preparedPayment : null;
+
   // Sync direct topup cache snapshot details
   useEffect(() => {
     if (!isDirectTopUpCheckout) {
@@ -118,11 +135,17 @@ export default function CheckoutClient() {
       return;
     }
 
-    setDirectTopUpOrder(readCheckoutOrderSnapshot());
+    const snapshot = readCheckoutOrderSnapshot();
+    setDirectTopUpOrder(snapshot);
+    const selected = snapshot?.items.length === 1 ? findTopUpPackage(snapshot.items[0].id) : null;
+    setTopUpSelection(selected ? { gameSlug: selected.game.slug, packageId: selected.item.id, fields: snapshot?.topUp?.fields ?? {} } : null);
+    setTopUpDetailsConfirmed(false);
   }, [isDirectTopUpCheckout]);
 
   // Fetch product data details from Supabase database
   useEffect(() => {
+    setIsLoading(true);
+    setProductData(null);
     if (!productId) {
       setIsLoading(false);
       return;
@@ -157,8 +180,8 @@ export default function CheckoutClient() {
             name: data.title,
             type: data.category,
             platform: data.platform || "PC",
-            edition: "Standard",
-            delivery: "Instant",
+            edition: data.edition || "Standard",
+            delivery: data.delivery || "Instant",
             activationRegion: data.region,
             price: Number(data.price),
             currency: data.currency,
@@ -190,34 +213,40 @@ export default function CheckoutClient() {
     fetchProduct();
   }, [productId]);
 
-  // Generate PaymentIntent secrets via Supabase Edge Function
+  // Prices and payment ownership are verified by the application server.
   useEffect(() => {
-    if (amount <= 0) {
-      setClientSecret("");
+    setPreparedPayment(null);
+    setPaymentError(null);
+    setIsPreparing(false);
+    if (isLoading || isAuthLoading || !user || orderItems.length === 0) return;
+    if (isDirectTopUpCheckout) {
+      if (!topUpDetailsConfirmed || !topUpSelection) return;
+      try { validateTopUpSelection(topUpSelection); }
+      catch { setPaymentError("Please enter valid player details."); return; }
+    }
+    if (!stripePromise) {
+      setPaymentError("Payment service is not configured.");
       return;
     }
-
-    async function getStripeSecret() {
+    const controller = new AbortController();
+    const requestId = requestIds.current.get(cartKey) ?? crypto.randomUUID();
+    requestIds.current.set(cartKey, requestId);
+    setIsPreparing(true);
+    async function preparePayment() {
       try {
-        const { data, error } = await supabase.functions.invoke("create-payment-intent", {
-          body: { amount: Math.round(amount * 100) },
-        });
-
-        if (error) {
-          console.error("Failed to invoke create-payment-intent edge function:", error);
-          return;
-        }
-
-        if (data?.clientSecret) {
-          setClientSecret(data.clientSecret);
-        }
-      } catch (err) {
-        console.error("Error calling edge function:", err);
+        const data = await paymentRequest<Omit<PreparedPayment, "cartKey">>("/api/create-payment-intent", {
+          requestId, ...(isDirectTopUpCheckout ? { topUp: topUpSelection } : { items: orderItems.map(({ id, quantity }) => ({ id, quantity })) }),
+        }, controller.signal);
+        if (!controller.signal.aborted) setPreparedPayment({ ...data, cartKey });
+      } catch (error) {
+        if (!controller.signal.aborted) setPaymentError(error instanceof Error ? error.message : "Unable to prepare payment.");
+      } finally {
+        if (!controller.signal.aborted) setIsPreparing(false);
       }
     }
-
-    getStripeSecret();
-  }, [amount]);
+    void preparePayment();
+    return () => controller.abort();
+  }, [cartKey, orderItems, isLoading, isAuthLoading, user, isDirectTopUpCheckout, stripePromise, retry, topUpSelection, topUpDetailsConfirmed]);
 
   // Loading indicator overlay boundary
   if (isLoading) {
@@ -238,12 +267,12 @@ export default function CheckoutClient() {
         {/* Product details and Cart summary */}
         <CheckoutOrderSummary
           productData={productData}
-          orderItems={orderItems}
+          orderItems={activePayment?.items ?? orderItems}
           isDirectTopUpCheckout={isDirectTopUpCheckout}
         />
 
         {/* Checkout Billing Total details */}
-        <CheckoutTotalCard amount={amount} />
+        <CheckoutTotalCard amount={activePayment?.amount ?? amount} />
       </div>
 
       {/* ==========================================
@@ -258,10 +287,45 @@ export default function CheckoutClient() {
 
         {/* Active Payment Elements Forms (Loaded once keys sync up) */}
         <div className="space-y-3">
-          {clientSecret && stripePromise && (
+          {isDirectTopUpCheckout && topUpSelection && (() => {
+            const selected = findTopUpPackage(topUpSelection.packageId);
+            if (!selected) return null;
+            return <form className="space-y-4 rounded-lg border border-[#30363d] bg-midnight-750 p-5" onSubmit={event => {
+              event.preventDefault();
+              setTopUpDetailsConfirmed(true);
+            }}>
+              <h2 className="text-lg font-semibold text-white">Player details</h2>
+              <p className="text-sm text-slate-400">Confirm the account for {selected.game.title}. Region: {selected.game.regionLabel}.</p>
+              <div className="grid gap-4 sm:grid-cols-2">
+                {selected.game.inputs.map(field => <label key={field.id} className="space-y-2 text-sm text-slate-300">
+                  <span>{field.label}</span>
+                  <input required maxLength={100} value={topUpSelection.fields[field.id] ?? ""} placeholder={field.placeholder}
+                    onChange={event => { setTopUpDetailsConfirmed(false); setTopUpSelection(current => current ? { ...current, fields: { ...current.fields, [field.id]: event.target.value } } : null); }}
+                    className="w-full rounded-lg bg-midnight-650 px-4 py-3 text-white outline-none focus:ring-2 focus:ring-dm-accent-green" />
+                </label>)}
+              </div>
+              <p className="text-sm text-amber-200">Test payment only. No in-game currency will be delivered.</p>
+              {!topUpDetailsConfirmed && <button type="submit" className="rounded-lg bg-dm-accent-green px-5 py-3 font-semibold text-white">Continue to payment</button>}
+            </form>;
+          })()}
+          {isDirectTopUpCheckout && directTopUpOrder !== undefined && !topUpSelection && <p role="alert" className="text-slate-300">Choose a top-up package on the Direct Top-Up page to continue.</p>}
+          {!isAuthLoading && !user && (
+            <div className="rounded-lg bg-[#1f2937] p-5 text-white">
+              <p>Please sign in before paying.</p>
+              <SignIn />
+            </div>
+          )}
+          {!isLoading && orderItems.length === 0 && <p role="alert" className="text-slate-300">No products available for checkout.</p>}
+          {isPreparing && <p role="status" className="text-slate-300">Preparing secure payment…</p>}
+          {paymentError && <div role="alert" className="rounded-lg bg-red-500/10 p-4 text-red-300">
+            <p>{paymentError}</p>
+            <button className="mt-2 cursor-pointer underline" onClick={() => setRetry(value => value + 1)}>Retry</button>
+          </div>}
+          {activePayment && stripePromise && (
             <Elements
+              key={activePayment.clientSecret}
               options={{
-                clientSecret,
+                clientSecret: activePayment.clientSecret,
                 appearance: {
                   theme: "night",
                   labels: "floating",
@@ -274,7 +338,7 @@ export default function CheckoutClient() {
               }}
               stripe={stripePromise}
             >
-              <CheckoutForm amount={amount} orderItems={orderItems} />
+              <CheckoutForm amount={activePayment.amount} orderItems={activePayment.items} />
             </Elements>
           )}
         </div>

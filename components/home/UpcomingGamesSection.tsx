@@ -1,48 +1,27 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import ProductCarousel from "../product/ProductCarousel";
-import { CanvasTextImage } from "../shared/TextImageCanvas";
 import UpcomingGameCard from "./UpcomingGameCard";
-import UpcomingGameCardSkeleton from "./UpcomingGameCardSkeleton";
-import { useTranslations } from "next-intl";
-import { supabase } from "@/lib/supabase";
-import { cn } from "@/lib/utils";
-import Link from "next/link";
+import { useFormatter, useTranslations } from "next-intl";
 import SectionHeader from "../shared/SectionHeader";
+import type { HomepageGame } from "@/lib/homepage-products";
 
-async function getUpcomingGames() {
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .ilike("image_url", "%/upcoming-game/%")
-      .eq("status", "published")
-      .limit(8);
-
-    if (error) {
-      console.error("Error fetching upcoming games from Supabase:", error);
-      return [];
-    }
-    return data || [];
-  } catch (error) {
-    console.error("Error fetching upcoming games:", error);
-    return [];
-  }
-}
-
-export default function UpcomingGamesSection() {
+export default function UpcomingGamesSection({
+  games,
+}: {
+  games: HomepageGame[];
+}) {
   const t = useTranslations("home");
-  const [games, setGames] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoading(true);
-    getUpcomingGames().then((data) => {
-      setGames(data);
-      setIsLoading(false);
-    });
-  }, []);
+  const format = useFormatter();
+  const formatReleaseDate = (date: string | null) =>
+    date
+      ? format.dateTime(new Date(`${date}T00:00:00Z`), {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+          timeZone: "UTC",
+        })
+      : undefined;
 
   // Helper to render a column of up to 2 games with custom breakpoint visibility
   const renderColumn = (colIndex: number) => {
@@ -67,53 +46,19 @@ export default function UpcomingGamesSection() {
             price={`${game.currency}${Number(game.price).toFixed(2)}`}
             coverImage={game.image_url}
             previewVideo={game.video_url || undefined}
-            platform={game.platform as any}
-            releaseDate="28 Aug 2026"
+            platform={game.platform}
+            releaseDate={formatReleaseDate(game.release_date)}
           />
         ))}
       </div>
     );
   };
 
-  if (isLoading) {
-    return (
-      <section className="w-full 800:px-0 px-8 responsive">
-        {/* Title Skeleton */}
-        <div className="h-[24px] w-[220px] bg-midnight-800 animate-pulse rounded -translate-x-[22px]" />
-        
-        {/* Grid Skeleton (Desktop >= 800px) */}
-        <div className="mt-10 hidden 800:grid grid-cols-1 990:grid-cols-3 1920:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, colIdx) => {
-            let visibilityClass = "";
-            if (colIdx === 1 || colIdx === 2) {
-              visibilityClass = "hidden 990:block";
-            } else if (colIdx === 3) {
-              visibilityClass = "hidden 1920:block";
-            }
-            return (
-              <div key={colIdx} className={cn("space-y-4", visibilityClass)}>
-                <UpcomingGameCardSkeleton />
-                <UpcomingGameCardSkeleton />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Carousel Skeleton (Mobile/Tablet < 800px) */}
-        <div className="mt-10 flex gap-4 overflow-hidden 800:hidden px-4">
-          <div className="min-w-[252px] opacity-50">
-            <UpcomingGameCardSkeleton />
-          </div>
-          <div className="min-w-[252px] opacity-30">
-            <UpcomingGameCardSkeleton />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="w-full 800:px-0 px-8 responsive" aria-labelledby="upcoming-games-heading">
+    <section
+      className="w-full responsive px-8 800:px-0"
+      aria-labelledby="upcoming-games-heading"
+    >
       <SectionHeader
         headingId="upcoming-games-heading"
         headingText={t("upcomingGamesHeading")}
@@ -121,15 +66,23 @@ export default function UpcomingGamesSection() {
         titleClassName="-translate-x-[22px]"
         actionText={t("viewAll")}
         viewAllHref="/product"
-        viewAllAriaLabel={t("viewAllUpcomingGames") || "View all upcoming games"}
+        viewAllAriaLabel={
+          t.has("viewAllUpcomingGames")
+            ? t("viewAllUpcomingGames")
+            : t("viewAll")
+        }
       />
-      <div className="mt-10 hidden 800:grid grid-cols-1 990:grid-cols-3 1920:grid-cols-4 gap-4" role="list" aria-label={t("upcomingGamesAria")}>
+      <div
+        className="mt-10 hidden grid-cols-1 gap-4 800:grid 990:grid-cols-3 1920:grid-cols-4"
+        role="list"
+        aria-label={t("upcomingGamesAria")}
+      >
         {renderColumn(0)}
         {renderColumn(1)}
         {renderColumn(2)}
         {renderColumn(3)}
       </div>
-      <div className="block 800:hidden" >
+      <div className="block 800:hidden">
         <ProductCarousel>
           {games.map((game) => (
             <UpcomingGameCard
@@ -139,8 +92,8 @@ export default function UpcomingGamesSection() {
               price={`${game.currency}${Number(game.price).toFixed(2)}`}
               coverImage={game.image_url}
               previewVideo={game.video_url || undefined}
-              platform={game.platform as any}
-              releaseDate="28 Aug 2026"
+              platform={game.platform}
+              releaseDate={formatReleaseDate(game.release_date)}
             />
           ))}
         </ProductCarousel>

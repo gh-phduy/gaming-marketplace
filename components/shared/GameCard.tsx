@@ -12,6 +12,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
 import { BsPersonFillCheck, BsBasket3Fill } from "react-icons/bs";
+import PlatformBadges from "./PlatformBadges";
 
 /* ============================================
    TYPES
@@ -35,6 +36,7 @@ interface GameItemProps {
   sellerRank?: string;
   /** On add to cart callback */
   onAddToCart?: () => void;
+  platform?: string;
 }
 
 /* ============================================
@@ -80,6 +82,7 @@ export default function GameItem({
   sellerAvatar = DEFAULTS.sellerAvatar,
   sellerRank = DEFAULTS.sellerRank,
   onAddToCart,
+  platform,
 }: GameItemProps) {
   // State
   const [isHovered, setIsHovered] = useState(false);
@@ -88,7 +91,8 @@ export default function GameItem({
 
   useEffect(() => {
     const checkIsMobile = () => {
-      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)")
+        .matches;
       const isSmallScreen = window.innerWidth <= 800;
       setIsMobile(isTouch || isSmallScreen);
     };
@@ -123,7 +127,7 @@ export default function GameItem({
           duration: ANIMATION.containerExpand,
           ease: "power2.out",
         },
-        0
+        0,
       )
       // Fade out image
       .to(
@@ -133,7 +137,7 @@ export default function GameItem({
           duration: ANIMATION.imageFade,
           ease: "power2.out",
         },
-        0
+        0,
       )
       // Fade in video
       .to(
@@ -143,7 +147,7 @@ export default function GameItem({
           duration: ANIMATION.videoFade,
           ease: "power2.out",
         },
-        0.1
+        0.1,
       )
       // Slide in cart button
       .to(
@@ -153,7 +157,7 @@ export default function GameItem({
           duration: ANIMATION.cartSlide,
           ease: "power2.out",
         },
-        0.2
+        0.2,
       )
       // Change footer background
       .to(
@@ -163,7 +167,7 @@ export default function GameItem({
           duration: ANIMATION.footerColor,
           ease: "power2.out",
         },
-        0.3
+        0.3,
       );
 
     return () => {
@@ -180,7 +184,9 @@ export default function GameItem({
 
   // Event handlers
   const handleMouseEnter = useCallback(() => {
-    const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const hasMouse = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
     if (!hasMouse) return;
 
     isHoveredRef.current = true;
@@ -214,21 +220,24 @@ export default function GameItem({
     timelineRef.current?.reverse();
   }, []);
 
-  const handleAddToCart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    onAddToCart?.();
-  }, [onAddToCart]);
+  const handleAddToCart = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      onAddToCart?.();
+    },
+    [onAddToCart],
+  );
 
   return (
     <article
-      className="relative w-[252px] 800:w-full h-[300px] mx-auto select-none"
+      className="relative mx-auto h-[300px] w-[252px] select-none 800:w-full"
       role="listitem"
     >
       <Link href={`/buy-cheap?id=${id}`} className="block h-full w-full">
         <div
           ref={containerRef}
-          className="w-full cursor-pointer absolute top-1/2 group -translate-y-1/2 left-1/2 -translate-x-1/2 h-[275px] rounded-lg overflow-hidden bg-surface-base flex flex-col"
+          className="group absolute top-1/2 left-1/2 flex h-[275px] w-full -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col overflow-hidden rounded-lg bg-surface-base"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           tabIndex={0}
@@ -236,100 +245,100 @@ export default function GameItem({
           onBlur={handleMouseLeave}
           aria-label={`${title} - ${price}`}
         >
-        {/* Media Container */}
-        <div className="relative flex-1">
-          {/* Cover Image */}
-          <div
-            ref={imageRef}
-            className="absolute inset-0 w-full h-full"
-          >
-            <Image
-              src={coverImage}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 800px) 252px, 100%"
-            />
-          </div>
-
-          {/* Preview Video */}
-          {!isMobile && (
-            <video
-              ref={videoRef}
-              className="absolute inset-0 h-full w-full object-cover opacity-0"
-              src={videoSrc}
-              muted
-              loop
-              playsInline
-              preload="none"
-              onCanPlay={handleCanPlay}
-              aria-hidden="true"
-            />
-          )}
-
-          {/* Seller Info Overlay */}
-          <div className="absolute bottom-0 w-full">
-            <div className="w-full relative gap-x-2 backdrop-blur-xs bg-surface-card/30 h-[65px] flex items-center px-4">
-              {/* Seller Avatar */}
-              <Image
-                src={sellerAvatar}
-                alt={`${sellerName} avatar`}
-                width={30}
-                height={30}
-                className="rounded-full"
+          {/* Media Container */}
+          <div className="relative flex-1">
+            {platform && (
+              <PlatformBadges
+                platform={platform}
+                className="absolute top-0 left-0 z-10 rounded-br-lg bg-black/55 px-2 py-1.5 text-white backdrop-blur-sm"
               />
+            )}
+            {/* Cover Image */}
+            <div ref={imageRef} className="absolute inset-0 h-full w-full">
+              <Image
+                src={coverImage}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 800px) 252px, 100%"
+              />
+            </div>
 
-              {/* Seller Details */}
-              <div className="flex flex-col">
-                <div className="flex text-dm-text-primary gap-x-1 items-center">
-                  <span className="text-[12px]">{sellerName}</span>
-                  <BsPersonFillCheck
-                    size={15}
-                    aria-label="Verified seller"
-                  />
-                </div>
-                <span className="text-dm-text-muted text-[10px]">
-                  Rank: {sellerRank}
-                </span>
-              </div>
+            {/* Preview Video */}
+            {!isMobile && (
+              <video
+                ref={videoRef}
+                className="absolute inset-0 h-full w-full object-cover opacity-0"
+                src={videoSrc}
+                muted
+                loop
+                playsInline
+                preload="none"
+                onCanPlay={handleCanPlay}
+                aria-hidden="true"
+              />
+            )}
 
-              {/* Add to Cart Button (slides in on hover) */}
-              <div
-                ref={cardHoverRef}
-                className="absolute inset-0 w-[225px]"
-                style={{ transform: "translateX(-100%)" }}
-              >
-                <button
-                  onClick={handleAddToCart}
-                  className="relative h-full w-full bg-dm-accent-green pr-8 transition-colors hover:bg-dm-accent-green-hover"
-                  style={{
-                    clipPath:
-                      "polygon(0 0, calc(100% - 30px) 0, 100% 50%, calc(100% - 30px) 100%, 0 100%)",
-                  }}
-                  aria-label={`Add ${title} to cart`}
-                >
-                  <div className="absolute inset-0 flex h-full w-full items-center gap-x-3 px-5 pr-12 text-[14px] font-bold text-dm-text-primary">
-                    <BsBasket3Fill aria-hidden="true" />
-                    <span>ADD TO CART</span>
+            {/* Seller Info Overlay */}
+            <div className="absolute bottom-0 w-full">
+              <div className="relative flex h-[65px] w-full items-center gap-x-2 bg-surface-card/30 px-4 backdrop-blur-xs">
+                {/* Seller Avatar */}
+                <Image
+                  src={sellerAvatar}
+                  alt={`${sellerName} avatar`}
+                  width={30}
+                  height={30}
+                  className="rounded-full"
+                />
+
+                {/* Seller Details */}
+                <div className="flex flex-col">
+                  <div className="flex items-center gap-x-1 text-dm-text-primary">
+                    <span className="text-[12px]">{sellerName}</span>
+                    <BsPersonFillCheck size={15} aria-label="Verified seller" />
                   </div>
-                </button>
+                  <span className="text-[10px] text-dm-text-muted">
+                    Rank: {sellerRank}
+                  </span>
+                </div>
+
+                {/* Add to Cart Button (slides in on hover) */}
+                <div
+                  ref={cardHoverRef}
+                  className="absolute inset-0 w-[225px]"
+                  style={{ transform: "translateX(-100%)" }}
+                >
+                  <button
+                    onClick={handleAddToCart}
+                    className="relative h-full w-full bg-dm-accent-green pr-8 transition-colors hover:bg-dm-accent-green-hover"
+                    style={{
+                      clipPath:
+                        "polygon(0 0, calc(100% - 30px) 0, 100% 50%, calc(100% - 30px) 100%, 0 100%)",
+                    }}
+                    aria-label={`Add ${title} to cart`}
+                  >
+                    <div className="absolute inset-0 flex h-full w-full items-center gap-x-3 px-5 pr-12 text-[14px] font-bold text-dm-text-primary">
+                      <BsBasket3Fill aria-hidden="true" />
+                      <span>ADD TO CART</span>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div
-          ref={footerRef}
-          className="w-full h-[57px] bg-surface-card flex px-2 justify-between items-center"
-        >
-          <h3 className="text-dm-text-primary text-xl font-semibold truncate">
-            {title}
-          </h3>
-          <span className="text-dm-text-primary text-xl font-semibold">
-            {price}
-          </span>
-        </div>
+          {/* Footer */}
+          <div
+            ref={footerRef}
+            className="flex h-[57px] w-full items-center justify-between bg-surface-card px-2"
+          >
+            <h3 className="truncate text-xl font-semibold text-dm-text-primary">
+              {title}
+            </h3>
+            <span className="text-xl font-semibold text-dm-text-primary">
+              {price}
+            </span>
+          </div>
         </div>
       </Link>
     </article>

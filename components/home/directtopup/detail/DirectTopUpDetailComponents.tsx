@@ -27,7 +27,7 @@ export function formatMoney(value: number) {
   return `$ ${value.toFixed(2)}`;
 }
 
-export function TopUpInput({ field }: { field: TopUpGameDetail["inputs"][number] }) {
+export function TopUpInput({ field, value, onChange }: { field: TopUpGameDetail["inputs"][number]; value: string; onChange: (value: string) => void }) {
   const Icon = field.icon === "globe" ? Globe2 : User;
 
   return (
@@ -36,6 +36,10 @@ export function TopUpInput({ field }: { field: TopUpGameDetail["inputs"][number]
       <span className="sr-only">{field.label}</span>
       <input
         type="text"
+        value={value}
+        onChange={event => onChange(event.target.value)}
+        maxLength={100}
+        required
         placeholder={field.placeholder}
         className="min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-dm-text-secondary"
       />
@@ -171,8 +175,8 @@ export function Sidebar({ activeSlug }: { activeSlug: string }) {
   }, [normalizedQuery]);
 
   return (
-    <aside className="max-h-[360px] max-w-full min-w-0 overflow-hidden rounded-xl bg-midnight-800 p-4 lg:sticky lg:top-28 lg:max-h-[calc(100vh-112px)]">
-      <label className="flex h-11 items-center gap-3 rounded-lg bg-midnight-700 px-4 text-dm-text-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_12px_24px_rgba(4,9,16,0.24)]">
+    <aside className="flex max-h-[360px] max-w-full min-w-0 flex-col overflow-hidden rounded-xl bg-midnight-800 p-4 xl:sticky xl:top-0 xl:max-h-[calc(100vh-128px)]">
+      <label className="flex h-11 shrink-0 items-center gap-3 rounded-lg bg-midnight-700 px-4 text-dm-text-secondary shadow-[inset_0_1px_0_rgba(255,255,255,0.025),0_12px_24px_rgba(4,9,16,0.24)]">
         <Search className="size-5 shrink-0" aria-hidden />
         <span className="sr-only">Find product</span>
         <input
@@ -183,7 +187,7 @@ export function Sidebar({ activeSlug }: { activeSlug: string }) {
         />
       </label>
 
-      <div className="mt-5 max-h-[280px] space-y-1 overflow-y-auto pr-1 [scrollbar-color:#46536a_transparent] [scrollbar-width:thin] lg:max-h-[680px] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#46536a] [&::-webkit-scrollbar-track]:bg-transparent">
+      <div className="mt-5 min-h-0 max-h-[280px] space-y-1 overflow-y-auto pr-1 [scrollbar-color:#46536a_transparent] [scrollbar-width:thin] xl:max-h-[680px] [&::-webkit-scrollbar]:w-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-[#46536a] [&::-webkit-scrollbar-track]:bg-transparent">
         {filteredGames.map((game) => {
           const isActive = activeSlug === game.slug;
           const content = (
@@ -234,7 +238,7 @@ export function Sidebar({ activeSlug }: { activeSlug: string }) {
   );
 }
 
-export function GameHero({ game }: { game: TopUpGameDetail }) {
+export function GameHero({ game, fields, onFieldChange, error }: { game: TopUpGameDetail; fields: Record<string, string>; onFieldChange: (id: string, value: string) => void; error: string | null }) {
   return (
     <section className="w-full max-w-full overflow-hidden rounded-xl bg-midnight-800">
       <div className="relative min-h-[170px] overflow-hidden">
@@ -267,8 +271,9 @@ export function GameHero({ game }: { game: TopUpGameDetail }) {
           {game.description}
         </p>
         {game.inputs.map((field) => (
-          <TopUpInput key={field.id} field={field} />
+          <TopUpInput key={field.id} field={field} value={fields[field.id] ?? ""} onChange={value => onFieldChange(field.id, value)} />
         ))}
+        {error && <p role="alert" className="text-sm text-red-300">{error}</p>}
         <button
           type="button"
           className="flex h-14 w-full items-center justify-between rounded-lg bg-midnight-650 px-5 text-left text-white"
@@ -348,7 +353,7 @@ export function CartSummary({
   const cashback = selectedPackage.price * 0.03;
 
   return (
-    <aside className="max-w-full min-w-0 rounded-xl bg-midnight-800 p-4 lg:sticky lg:top-28">
+    <aside className="max-w-full min-w-0 rounded-xl bg-midnight-800 p-4 xl:sticky xl:top-0">
       <h2 className="text-lg font-bold text-white">Cart total</h2>
       <dl className="mt-6 space-y-3 text-sm">
         <div className="flex justify-between gap-4 text-dm-text-secondary">

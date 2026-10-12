@@ -7,7 +7,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { LuClock3 } from "react-icons/lu";
 import { MdOutlineRemoveRedEye } from "react-icons/md";
 import { useTranslations } from "next-intl";
@@ -29,6 +29,8 @@ interface NewsItemProps {
   views?: number;
   /** Link to full article */
   href?: string;
+  /** Fill the available column on the news listing page. */
+  fluid?: boolean;
 }
 
 /* ============================================
@@ -61,22 +63,31 @@ export default function NewsItem({
   excerpt = DEFAULTS.excerpt,
   views = DEFAULTS.views,
   href,
+  fluid = false,
 }: NewsItemProps) {
   const t = useTranslations("home");
 
-  const cardClassName =
-    "bg-surface-card gap-y-2 flex flex-col w-fit rounded-sm p-5 transition-colors hover:bg-state-hover cursor-pointer focus-visible:ring-2 focus-visible:ring-dm-accent-green/70 focus-visible:outline-none";
+  const cardClassName = `bg-surface-card gap-y-2 flex min-w-0 flex-col ${fluid ? "w-full" : "w-fit"} rounded-sm p-5 transition-colors hover:bg-state-hover cursor-pointer focus-visible:ring-2 focus-visible:ring-dm-accent-green/70 focus-visible:outline-none`;
+  const textWidth = fluid
+    ? ""
+    : "max-w-[305px] 970:max-w-[253px] 1200:max-w-[320px] 1640:max-w-[376px] 1920:max-w-[335px]";
 
   const cardContent = (
     <>
       {/* Article Image */}
-      <div className="relative h-[174px] w-[305px] overflow-hidden rounded-lg 970:w-[253px] 1200:w-[320px] 1640:w-[376px] 1920:w-[335px]">
+      <div
+        className={`relative overflow-hidden rounded-lg ${fluid ? "aspect-[16/9] w-full" : "h-[174px] w-[305px] 970:w-[253px] 1200:w-[320px] 1640:w-[376px] 1920:w-[335px]"}`}
+      >
         <Image
           src={image}
           alt={title}
           fill
           className="object-cover"
-          sizes="(max-width: 970px) 305px, (max-width: 1200px) 253px, (max-width: 1640px) 320px, 376px"
+          sizes={
+            fluid
+              ? "(max-width: 800px) 100vw, (max-width: 1200px) 50vw, (max-width: 1920px) 33vw, 375px"
+              : "(max-width: 970px) 305px, (max-width: 1200px) 253px, (max-width: 1640px) 320px, 376px"
+          }
         />
       </div>
 
@@ -87,12 +98,14 @@ export default function NewsItem({
       </div>
 
       {/* Title */}
-      <h3 className="line-clamp-2 max-w-[305px] text-[16px] font-medium text-dm-text-primary 970:max-w-[253px] 1200:max-w-[320px] 1640:max-w-[376px] 1920:max-w-[335px]">
+      <h3
+        className={`line-clamp-2 text-[16px] font-medium text-dm-text-primary ${textWidth}`}
+      >
         {title}
       </h3>
 
       {/* Excerpt */}
-      <p className="line-clamp-3 max-w-[305px] text-[14px] text-dm-text-muted 970:max-w-[253px] 1200:max-w-[320px] 1640:max-w-[376px] 1920:max-w-[335px]">
+      <p className={`line-clamp-3 text-[14px] text-dm-text-muted ${textWidth}`}>
         {excerpt}
       </p>
 

@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import { NextRequest } from "next/server";
 import { POST } from "./route";
 
 // Mock Supabase Client
@@ -24,7 +25,7 @@ describe("POST /api/auth/signup", () => {
   });
 
   it("should reject if validation fails", async () => {
-    const request = new Request("http://localhost/api/auth/signup", {
+    const request = new NextRequest("http://localhost/api/auth/signup", {
       method: "POST",
       body: JSON.stringify({
         email: "not-email", // invalid
@@ -44,7 +45,7 @@ describe("POST /api/auth/signup", () => {
   it("should return 500 if service role key is missing or default", async () => {
     process.env.SUPABASE_SERVICE_ROLE_KEY = "your-service-role-key-here";
     
-    const request = new Request("http://localhost/api/auth/signup", {
+    const request = new NextRequest("http://localhost/api/auth/signup", {
       method: "POST",
       body: JSON.stringify({
         email: "test@example.com",
@@ -63,7 +64,7 @@ describe("POST /api/auth/signup", () => {
       error: null,
     });
 
-    const request = new Request("http://localhost/api/auth/signup", {
+    const request = new NextRequest("http://localhost/api/auth/signup", {
       method: "POST",
       body: JSON.stringify({
         email: "test@example.com",
@@ -90,7 +91,7 @@ describe("POST /api/auth/signup", () => {
       error: { message: "Email has already been registered" },
     });
 
-    const request = new Request("http://localhost/api/auth/signup", {
+    const request = new NextRequest("http://localhost/api/auth/signup", {
       method: "POST",
       body: JSON.stringify({
         email: "duplicate@example.com",

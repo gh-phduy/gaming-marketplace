@@ -1,6 +1,8 @@
 "use client";
 
-import { type ChangeEvent, useEffect, useMemo, useState } from "react";
+import { type ChangeEvent, useEffect, useMemo, useState, useRef, useCallback } from "react";
+import { uploadListingImage } from "@/lib/listing-image-upload";
+import { normalizeListingCurrency } from "@/lib/seller-listing";
 import type { UserDashboardProfile } from "../_lib/dashboard.data";
 import {
   createSellerListing,
@@ -50,6 +52,12 @@ export const productTypeOptions = [
 
 export const platformOptions = [
   "Steam",
+  "PC",
+  "PS5",
+  "PS4",
+  "Xbox Series X/S",
+  "Xbox One",
+  "Nintendo Switch",
   "Xbox Live",
   "PlayStation Store",
   "Nintendo eShop",
@@ -70,6 +78,10 @@ export const imageOptions = [
 
 export type WorkspaceTab = "overview" | "products" | "create" | "inbox";
 
+function errorMessage(error: unknown, fallback: string) {
+  return error && typeof error === "object" && "message" in error && typeof error.message === "string" ? error.message : fallback;
+}
+
 /* ==========================================================================
    HELPER CONSTRUCTORS
    ========================================================================== */
@@ -87,7 +99,7 @@ export function createEmptyListingForm(currencySymbol: string): ListingFormState
     delivery: deliveryOptions[0],
     stock: "10",
     price: "9.99",
-    currency: currencySymbol,
+    currency: normalizeListingCurrency(currencySymbol),
     imageUrl: imageOptions[0].value,
     description: "",
   };
@@ -110,41 +122,46 @@ export function useSellerWorkspace(profile: UserDashboardProfile) {
   const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
   const [replyText, setReplyText] = useState("");
   const [formError, setFormError] = useState<string | null>(null);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const saving = useRef(false);
+  const uploading = useRef(false);
+  const syncRevision = useRef(0);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [form, setForm] = useState<ListingFormState>(() =>
-    createEmptyListingForm(profile.currency.symbol)
+    createEmptyListingForm(profile.currency.code)
   );
 
   // Sync current list catalog and conversations from marketplace store
-  const syncMarketplaceState = async () => {
-    try {
-      const nextListings = await readSellerListings(profile.id);
-      setListings(nextListings);
-    } catch (e) {
-      console.error("Failed to read seller listings:", e);
+  const syncMarketplaceState = useCallback(async () => {
+    const revision = ++syncRevision.current;
+    const [listingResult, conversationResult] = await Promise.allSettled([
+      readSellerListings(profile.id), getSellerConversations(profile.id),
+    ]);
+    if (revision !== syncRevision.current) return;
+    if (listingResult.status === "fulfilled") {
+      setListings(listingResult.value);
+      setWorkspaceError(null);
+    } else {
+      console.error("Failed to read seller listings:", listingResult.reason);
+      setWorkspaceError("Could not load your products. Please refresh and try again.");
     }
-    try {
-      const nextConversations = await getSellerConversations(profile.id);
+    if (conversationResult.status === "fulfilled") {
+      const nextConversations = conversationResult.value;
       setConversations(nextConversations);
-      setActiveConversationId((currentId) => {
-        if (
-          currentId &&
-          nextConversations.some((conversation) => conversation.id === currentId)
-        ) {
-          return currentId;
-        }
-        return nextConversations[0]?.id ?? null;
-      });
-    } catch (e) {
-      console.error("Failed to read seller conversations:", e);
+      setActiveConversationId(currentId => currentId && nextConversations.some(item => item.id === currentId)
+        ? currentId : nextConversations[0]?.id ?? null);
+    } else {
+      console.error("Failed to read seller conversations:", conversationResult.reason);
     }
-  };
+  }, [profile.id]);
 
   // Setup database listener subscriptions
   useEffect(() => {
     syncMarketplaceState();
     return subscribeSellerMarketplace(syncMarketplaceState, profile.id);
-  }, [profile.id]);
+  }, [profile.id, syncMarketplaceState]);
 
   // Navigate to inbox if location anchor hash changes
   useEffect(() => {
@@ -201,41 +218,30 @@ export function useSellerWorkspace(profile: UserDashboardProfile) {
     setToastMessage(message);
   };
 
-  // Convert uploaded image file to base64 DataURL representation
-  const handleUploadImage = (event: ChangeEvent<HTMLInputElement>) => {
+  // Store uploaded images in Supabase Storage; products store only the public URL.
+  const handleUploadImage = async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     event.target.value = "";
-    if (!file) return;
-
-    if (!file.type.startsWith("image/")) {
-      setFormError("Please upload an image file.");
-      return;
-    }
-
-    if (file.size > 2.5 * 1024 * 1024) {
-      setFormError("Image must be smaller than 2.5 MB.");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = () => {
-      if (typeof reader.result !== "string") {
-        setFormError("Could not read this image.");
-        return;
-      }
-      updateFormField("imageUrl", reader.result);
+    if (!file || uploading.current || saving.current) return;
+    uploading.current = true;
+    setIsUploading(true);
+    setFormError(null);
+    try {
+      const imageUrl = await uploadListingImage(file, profile.id);
+      updateFormField("imageUrl", imageUrl);
       setFormError(null);
       showToast("Image uploaded");
-    };
-
-    reader.onerror = () => {
-      setFormError("Could not read this image.");
-    };
-    reader.readAsDataURL(file);
+    } catch (error) {
+      setFormError(error instanceof Error ? error.message : "Could not upload this image.");
+    } finally {
+      uploading.current = false;
+      setIsUploading(false);
+    }
   };
 
   // Save or publish new listing offer details
   const handleSaveListing = async (status: SellerListingStatus) => {
+    if (saving.current || uploading.current) return;
     const title = form.title.trim();
     const price = Number(form.price);
     const stock = Number(form.stock);
@@ -255,8 +261,12 @@ export function useSellerWorkspace(profile: UserDashboardProfile) {
       return;
     }
 
+    saving.current = true;
+    syncRevision.current += 1;
+    setIsSaving(true);
+    setFormError(null);
     try {
-      await createSellerListing(
+      const created = await createSellerListing(
         {
           title,
           productType: form.productType,
@@ -275,35 +285,43 @@ export function useSellerWorkspace(profile: UserDashboardProfile) {
         profile.id
       );
 
-      setForm(createEmptyListingForm(profile.currency.symbol));
+      setListings(current => [created, ...current.filter(item => item.id !== created.id)]);
+      setForm(createEmptyListingForm(profile.currency.code));
       setFormError(null);
       setActiveTab("products");
       showToast(status === "published" ? "Product published" : "Draft saved");
     } catch (err) {
       console.error("Failed to create product:", err);
-      setFormError("Failed to save product to the database.");
+      setFormError(errorMessage(err, "Failed to save product to the database."));
+    } finally {
+      saving.current = false;
+      setIsSaving(false);
     }
   };
 
   // Toggle listing status between published and paused draft states
   const handleChangeStatus = async (listingId: string, status: SellerListingStatus) => {
+    syncRevision.current += 1;
     try {
-      await updateSellerListingStatus(listingId, status, profile.id);
+      const updated = await updateSellerListingStatus(listingId, status, profile.id);
+      setListings(current => current.map(item => item.id === updated.id ? updated : item));
       showToast(`Listing moved to ${status}`);
     } catch (err) {
       console.error("Failed to update status:", err);
-      showToast("Failed to update status");
+      showToast(errorMessage(err, "Failed to update status"));
     }
   };
 
   // Delete product offer from database
   const handleDeleteListing = async (listingId: string) => {
+    syncRevision.current += 1;
     try {
       await deleteSellerListing(listingId, profile.id);
+      setListings(current => current.filter(item => item.id !== listingId));
       showToast("Listing deleted");
     } catch (err) {
       console.error("Failed to delete listing:", err);
-      showToast("Failed to delete listing");
+      showToast(errorMessage(err, "Failed to delete listing"));
     }
   };
 
@@ -347,6 +365,9 @@ export function useSellerWorkspace(profile: UserDashboardProfile) {
     replyText,
     setReplyText,
     formError,
+    workspaceError,
+    isSaving,
+    isUploading,
     toastMessage,
     form,
     stats,

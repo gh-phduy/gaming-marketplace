@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   PaymentElement,
   useStripe,
@@ -37,6 +37,7 @@ export default function CheckoutForm({
 
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const submitting = useRef(false);
 
   /**
    * Submit transaction processing handler.
@@ -45,16 +46,21 @@ export default function CheckoutForm({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!stripe || !elements) {
+    if (!stripe || !elements || submitting.current) {
       return;
     }
 
+    submitting.current = true;
+    setIsLoading(true);
+    setMessage(null);
     try {
       // Trigger form validation and wallet collection IMMEDIATELY
       // to preserve the trusted user gesture required by mobile browsers
       const { error: submitError } = await elements.submit();
       if (submitError) {
         setMessage(submitError.message ?? t("unexpectedError"));
+        submitting.current = false;
+        setIsLoading(false);
         return;
       }
 
@@ -87,16 +93,22 @@ export default function CheckoutForm({
           setMessage(t("unexpectedError"));
         }
         setIsLoading(false);
+        submitting.current = false;
       } else if (paymentIntent) {
         // Fallback for when redirect: "if_required" resolves directly
         // Manually navigate the user to the success page with required params
         const status = paymentIntent.status === "succeeded" ? "succeeded" : paymentIntent.status;
         window.location.href = `/${locale}/checkout/success?payment_intent=${paymentIntent.id}&redirect_status=${status}`;
+      } else {
+        setMessage(t("unexpectedError"));
+        submitting.current = false;
+        setIsLoading(false);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Payment submission crashed:", err);
-      setMessage(err.message || t("unexpectedError"));
+      setMessage(err instanceof Error ? err.message : t("unexpectedError"));
       setIsLoading(false);
+      submitting.current = false;
     }
   };
 

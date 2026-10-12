@@ -1,7 +1,9 @@
 import { useState } from "react";
 import Image from "next/image";
-import { Monitor, ChevronLeft, ChevronRight } from "lucide-react";
-import { FaXbox } from "react-icons/fa6";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import PlatformBadges from "@/components/shared/PlatformBadges";
+import { getProductDetailImage } from "@/lib/product-detail-image";
+import { PRODUCT_GALLERY_CLASS } from "./product-layout";
 
 interface ProductGalleryProps {
   images?: string[];
@@ -15,6 +17,11 @@ export default function ProductGallery({
   platform = "Xbox Series X/S",
 }: ProductGalleryProps) {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState<string[]>([]);
+  const originalImage = images[activeIndex] ?? "/battlefield_6.jpg";
+  const detailImage = failedImages.includes(originalImage)
+    ? originalImage
+    : getProductDetailImage(originalImage);
 
   const handleNext = () => {
     setActiveIndex((prev) => (prev + 1) % images.length);
@@ -25,19 +32,22 @@ export default function ProductGallery({
   };
 
   return (
-    <div className="group relative aspect-video w-full overflow-hidden rounded-xl shadow-2xl sm:rounded-2xl lg:max-w-[780px]">
+    <div className={PRODUCT_GALLERY_CLASS}>
       {/* Background Image */}
       <div className="absolute inset-0">
         <Image
-          src={images[activeIndex]}
+          src={detailImage}
+          onError={() => {
+            if (detailImage !== originalImage)
+              setFailedImages((current) => [...current, originalImage]);
+          }}
           alt={name}
           fill
-          className="object-cover transition-all duration-500"
+          className="object-cover"
           priority
           sizes="(max-width: 640px) 100vw, (max-width: 1024px) 100vw, 780px"
         />
         {/* Gradient overlay for better text/UI visibility */}
-        <div className="absolute inset-0 bg-linear-to-b from-black/20 via-transparent to-black/60" />
       </div>
 
       {/* Navigation arrows (only if multiple images) */}
@@ -45,12 +55,14 @@ export default function ProductGallery({
         <>
           <button
             onClick={handlePrev}
+            aria-label="Previous product image"
             className="absolute top-1/2 left-4 z-10 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60"
           >
             <ChevronLeft size={24} />
           </button>
           <button
             onClick={handleNext}
+            aria-label="Next product image"
             className="absolute top-1/2 right-4 z-10 -translate-y-1/2 rounded-full bg-black/40 p-2 text-white opacity-0 transition-opacity group-hover:opacity-100 hover:bg-black/60"
           >
             <ChevronRight size={24} />
@@ -73,21 +85,15 @@ export default function ProductGallery({
       )}
 
       {/* Bottom Navigation Bar */}
-      <div className="absolute right-0 bottom-0 left-0 flex h-11 items-center justify-center gap-2 border-t border-white/8 bg-black/30 px-3 sm:h-[60px] sm:gap-3 sm:px-6">
-        <div className="flex items-center gap-2">
-          <button className="flex h-9 w-11 items-center justify-center rounded-lg bg-white/5 transition-all hover:bg-white/10 active:scale-90">
-            <Monitor className="h-4.5 w-4.5 text-gray-400" />
-          </button>
-
-          <div className="flex items-center gap-2 rounded-full border border-white/10 bg-white/8 p-1 pr-4">
-            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-[#107C10] shadow-[0_0_12px_rgba(16,124,16,0.3)]">
-              <FaXbox className="h-4 w-4 text-white" />
-            </div>
-            <span className="text-[14px] font-medium tracking-tight text-white">
-              {platform}
-            </span>
-          </div>
-        </div>
+      <div className="absolute right-0 bottom-0 left-0 flex h-11 items-center justify-center gap-2 bg-[#1d2430]/75 px-3 backdrop-blur-sm sm:h-[50px] sm:gap-3 sm:px-6">
+        <PlatformBadges
+          platform={platform}
+          showLabel
+          compactLabels
+          size={16}
+          className="justify-center gap-1.5 text-white sm:gap-3"
+          badgeClassName="rounded-full bg-white/10 px-2 py-1.5 sm:px-3"
+        />
       </div>
     </div>
   );

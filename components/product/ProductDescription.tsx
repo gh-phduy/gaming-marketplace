@@ -1,20 +1,23 @@
 import { MdKeyboardArrowDown } from "react-icons/md";
+import { PRODUCT_DESCRIPTION_CLASS } from "./product-layout";
 
-export default function ProductDescription() {
+export default function ProductDescription({
+  description,
+}: {
+  description?: string;
+}) {
   return (
-    <div className="flex w-full flex-col gap-y-2 rounded-lg bg-midnight-750 p-3 text-sm text-steel-500 sm:p-5 sm:text-base">
-      <span>
-        From Battlefield Studios, the titans who turned digital battlefields
-        into sprawling sandboxes of destruction, comes the next generation of
-        combined-arms combat. For years, they have been the undisputed kings of
-        large-scale first-person shooters, and now they are channeling that
-        legacy into their most ambitious project ever. Prepare for the front
-        lines of Battlefield™ 6.
+    <div className={PRODUCT_DESCRIPTION_CLASS}>
+      <span className="line-clamp-3 whitespace-pre-wrap">
+        {description || "No description provided."}
       </span>
-      <div className="flex items-center gap-x-1 text-[#65c756]">
+      <a
+        href="#about-product"
+        className="flex items-center gap-x-1 text-[#65c756]"
+      >
         <span>Read more</span>
         <MdKeyboardArrowDown size={28} />
-      </div>
+      </a>
     </div>
   );
 }

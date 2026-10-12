@@ -5,6 +5,7 @@ export interface Seller {
   name: string;
   avatar: string;
   isOnline: boolean;
+  isVerified?: boolean;
   badge: string;
   tier: string;
   rating: number;
@@ -27,6 +28,7 @@ export interface Product {
   price: number;
   currency: string;
   images: string[];
+  description?: string;
 }
 
 export interface PurchaseCardProps {

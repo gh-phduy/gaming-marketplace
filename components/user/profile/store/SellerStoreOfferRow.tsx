@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Gamepad2,
   KeyRound,
-  Monitor,
   ShieldCheck,
   ShoppingCart,
   Star,
@@ -14,6 +13,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import type { SellerOfferItem } from "../../seller-profile.data";
 import { useTranslations } from "next-intl";
+import PlatformBadges from "@/components/shared/PlatformBadges";
 
 interface SellerStoreOfferRowProps {
   offer: SellerOfferItem;
@@ -72,8 +72,11 @@ export default function SellerStoreOfferRow({
           <div className="flex flex-wrap items-center gap-4 text-steel-500">
             <KeyRound className="h-4 w-4" />
             <ShieldCheck className="h-4 w-4" />
-            <Monitor className="h-4 w-4" />
-            <span className="text-sm">{offer.data.platform}</span>
+            <PlatformBadges
+              platform={offer.data.platform}
+              showLabel
+              compactLabels
+            />
           </div>
           <div className="flex items-center justify-between border-t border-midnight-700 pt-4">
             <div>
@@ -127,8 +130,11 @@ export default function SellerStoreOfferRow({
             <KeyRound className="h-4 w-4 lg:h-5 lg:w-5" />
             <ShieldCheck className="h-4 w-4 lg:h-5 lg:w-5" />
             <Gamepad2 className="h-4 w-4 lg:h-5 lg:w-5" />
-            <Monitor className="h-4 w-4 lg:h-5 lg:w-5" />
-            <span className="text-xs lg:text-sm">{offer.data.platform}</span>
+            <PlatformBadges
+              platform={offer.data.platform}
+              showLabel
+              compactLabels
+            />
           </div>
         </div>
 

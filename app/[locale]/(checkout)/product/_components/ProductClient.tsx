@@ -1,12 +1,7 @@
 "use client";
 
 import React, { useMemo } from "react";
-import {
-  List,
-  SlidersHorizontal,
-  X,
-  Ban,
-} from "lucide-react";
+import { List, SlidersHorizontal, X, Ban } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import {
@@ -27,6 +22,7 @@ import Pagination from "@/components/shared/Pagination";
 import { useProductDetail, FILTERS_COLLAPSED_HEIGHT } from "./useProductDetail";
 import { ProductSortDropdown } from "./ProductDetailComponents";
 import { useTranslations } from "next-intl";
+import { ALL_PRICES, getVisiblePriceRange } from "@/lib/price-filter";
 
 export default function ProductClient() {
   const t = useTranslations("product");
@@ -35,6 +31,12 @@ export default function ProductClient() {
 
   const {
     isLoading,
+    products,
+    priceProducts,
+    platformProducts,
+    priceCeiling,
+    priceRange,
+    setPriceRange,
     searchTerm,
     setSearchTerm,
     currentPage,
@@ -53,15 +55,28 @@ export default function ProductClient() {
     setSelectedPlatforms,
     resetProductFilters,
   } = useProductDetail();
+  const visiblePrice = getVisiblePriceRange(priceRange, priceCeiling);
+  const sidebarProps = {
+    products,
+    priceProducts,
+    platformProducts,
+    onFilterChange: () => setCurrentPage(1),
+  };
 
   function getSortLabelKey(value: string) {
     switch (value) {
-      case "newer": return "sortNewer";
-      case "older": return "sortOlder";
-      case "name-asc": return "sortNameAsc";
-      case "name-desc": return "sortNameDesc";
-      case "price-asc": return "sortPriceAsc";
-      case "price-desc": return "sortPriceDesc";
+      case "newer":
+        return "sortNewer";
+      case "older":
+        return "sortOlder";
+      case "name-asc":
+        return "sortNameAsc";
+      case "name-desc":
+        return "sortNameDesc";
+      case "price-asc":
+        return "sortPriceAsc";
+      case "price-desc":
+        return "sortPriceDesc";
       case "popular":
       default:
         return "sortPopular";
@@ -70,17 +85,28 @@ export default function ProductClient() {
 
   function translateFilterLabel(label: string, id: string) {
     switch (id) {
-      case "game-keys": return tNav("gameKeys");
-      case "console-games": return tNav("consoleGames");
-      case "pc-games": return tNav("pcGames");
-      case "mobile": return tNav("mobile");
-      case "game-currency": return tNav("gameCurrency");
-      case "game-accounts": return tNav("gameAccounts");
-      case "game-items": return tNav("gameItems");
-      case "power-leveling": return tNav("powerLeveling");
-      case "software": return tNav("software");
-      case "gift-cards": return tNav("giftCards");
-      case "game-cards": return tNav("gameCards");
+      case "game-keys":
+        return tNav("gameKeys");
+      case "console-games":
+        return tNav("consoleGames");
+      case "pc-games":
+        return tNav("pcGames");
+      case "mobile":
+        return tNav("mobile");
+      case "game-currency":
+        return tNav("gameCurrency");
+      case "game-accounts":
+        return tNav("gameAccounts");
+      case "game-items":
+        return tNav("gameItems");
+      case "power-leveling":
+        return tNav("powerLeveling");
+      case "software":
+        return tNav("software");
+      case "gift-cards":
+        return tNav("giftCards");
+      case "game-cards":
+        return tNav("gameCards");
       default:
         return label;
     }
@@ -88,7 +114,9 @@ export default function ProductClient() {
 
   const translatedPlatformLabel = useMemo(() => {
     if (!primarySelectedPlatform) return "";
-    const filterId = selectedPlatformFilters.find(f => f.label === primarySelectedPlatform)?.id || "";
+    const filterId =
+      selectedPlatformFilters.find((f) => f.label === primarySelectedPlatform)
+        ?.id || "";
     return translateFilterLabel(primarySelectedPlatform, filterId);
   }, [primarySelectedPlatform, selectedPlatformFilters, tNav]);
 
@@ -96,11 +124,11 @@ export default function ProductClient() {
     <div className="flex min-h-[calc(100vh-4rem)] w-full bg-[#0d1117] font-sans text-white">
       {/* Desktop Sidebar — hidden below lg */}
       <aside className="hidden lg:block">
-        <ProductSidebar />
+        <ProductSidebar {...sidebarProps} />
       </aside>
 
       {/* Main Content Area */}
-      <div className="w-full min-w-0 flex flex-col gap-6 bg-midnight-850 px-3 py-4 sm:gap-8 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
+      <div className="flex w-full min-w-0 flex-col gap-6 bg-midnight-850 px-3 py-4 sm:gap-8 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
         {/* Header Group (Breadcrumb + Title) */}
         <div className="flex flex-col gap-1.5 sm:gap-2">
           {/* Breadcrumb */}
@@ -167,7 +195,8 @@ export default function ProductClient() {
                     variant="outline"
                     className="h-10 w-full flex-1 border-[#30363d] bg-midnight-700 px-3 text-steel-300 sm:h-11 sm:w-auto sm:flex-initial lg:hidden"
                   >
-                    <SlidersHorizontal className="mr-2 h-5 w-5" /> {t("filters")}
+                    <SlidersHorizontal className="mr-2 h-5 w-5" />{" "}
+                    {t("filters")}
                   </Button>
                 }
               />
@@ -178,7 +207,7 @@ export default function ProductClient() {
                 <SheetHeader className="px-4 pt-4">
                   <SheetTitle className="text-white">{t("filters")}</SheetTitle>
                 </SheetHeader>
-                <ProductSidebar />
+                <ProductSidebar {...sidebarProps} />
               </SheetContent>
             </Sheet>
 
@@ -257,6 +286,23 @@ export default function ProductClient() {
                   />
                 </span>
               ))}
+              {(priceRange.min > 0 || Number.isFinite(priceRange.max)) && (
+                <span className="inline-flex items-center gap-1 rounded-full bg-midnight-500 px-2 py-1 text-xs font-medium text-steel-300 sm:text-sm">
+                  ${visiblePrice.min.toFixed(2)} - $
+                  {visiblePrice.max.toFixed(2)}
+                  <button
+                    type="button"
+                    aria-label="Clear price filter"
+                    onClick={() => {
+                      setPriceRange(ALL_PRICES);
+                      setCurrentPage(1);
+                    }}
+                    className="hover:text-white"
+                  >
+                    <IoCloseSharp />
+                  </button>
+                </span>
+              )}
             </div>
           </div>
           <div className="flex shrink-0 flex-col items-end gap-1">
@@ -296,13 +342,17 @@ export default function ProductClient() {
               ))}
             </div>
           ) : paginatedProducts.length === 0 ? (
-            <div className="flex w-full flex-col items-center justify-center rounded-2xl border border-[#30363d] bg-[#151c26]/50 px-6 py-24 text-center min-h-[400px]">
-              <Ban className="h-16 w-16 text-slate-500/80 mb-5 stroke-[1.2]" />
-              <h3 className="text-lg font-bold uppercase tracking-wider text-white mb-2">
-                {t.has("noProductsFound") ? t("noProductsFound") : "NO PRODUCTS FOUND"}
+            <div className="flex min-h-[400px] w-full flex-col items-center justify-center rounded-2xl border border-[#30363d] bg-[#151c26]/50 px-6 py-24 text-center">
+              <Ban className="mb-5 h-16 w-16 stroke-[1.2] text-slate-500/80" />
+              <h3 className="mb-2 text-lg font-bold tracking-wider text-white uppercase">
+                {t.has("noProductsFound")
+                  ? t("noProductsFound")
+                  : "NO PRODUCTS FOUND"}
               </h3>
-              <p className="text-sm text-slate-400 max-w-sm leading-relaxed">
-                {t.has("noProductsFoundDesc") ? t("noProductsFoundDesc") : "The product you were looking for was not found. Try refining your request."}
+              <p className="max-w-sm text-sm leading-relaxed text-slate-400">
+                {t.has("noProductsFoundDesc")
+                  ? t("noProductsFoundDesc")
+                  : "The product you were looking for was not found. Try refining your request."}
               </p>
             </div>
           ) : (

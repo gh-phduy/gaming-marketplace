@@ -1,5 +1,3 @@
-"use client";
-
 /**
  * Home Page
  *
@@ -21,10 +19,18 @@ import GamesSection from "@/components/shared/GamesSection";
 import FlashSaleSection from "@/components/home/FlashSaleSection";
 import PlatformsSection from "@/components/home/PlatformsSection";
 import LatestNewsSection from "@/components/home/LatestNewsSection";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
+import { getHomepageProducts } from "@/lib/homepage-products";
+import { getPopularSellers } from "@/lib/popular-sellers";
 
-export default function HomePage() {
-  const t = useTranslations("home");
+export const dynamic = "force-dynamic";
+
+export default async function HomePage() {
+  const [t, products, sellers] = await Promise.all([
+    getTranslations("home"),
+    getHomepageProducts(),
+    getPopularSellers(),
+  ]);
   return (
     <>
       <HomeScrollRestoration />
@@ -33,19 +39,19 @@ export default function HomePage() {
         className="mt-8 flex w-full flex-col items-center gap-y-16 pb-8"
       >
         {/* Popular Games Section */}
-        <PopularGamesSection />
+        <PopularGamesSection games={products.popular} />
 
         {/* Features Section */}
         <FeaturesSection />
 
         {/* Upcoming Games Section */}
-        <UpcomingGamesSection />
+        <UpcomingGamesSection games={products.upcoming} />
 
         {/* Category Grid Row 1 */}
         <CategoryGridRow1 />
 
         {/* Popular Sellers Section */}
-        <PopularSellersSection />
+        <PopularSellersSection sellers={sellers} />
 
         {/* Category Grid Row 2 */}
         <CategoryGridRow2 />
@@ -54,19 +60,19 @@ export default function HomePage() {
         <CategoryCarousel />
 
         {/* New on Difmark */}
-        <GamesSection title={t("newOnDifmark")} sectionType="new" />
+        <GamesSection title={t("newOnDifmark")} sectionType="new" games={products.new} />
 
         {/* Promo Banner */}
         <PromoBanner />
 
         {/* Weekly Chart */}
-        <GamesSection title={t("weeklyChart")} sectionType="weekly" />
+        <GamesSection title={t("weeklyChart")} sectionType="weekly" games={products.weekly} />
 
         {/* Flash Sale Section */}
         <FlashSaleSection />
 
         {/* Under $100 */}
-        <GamesSection title={t("under100")} sectionType="under" />
+        <GamesSection title={t("under100")} sectionType="under" games={products.under} />
 
         {/* Platforms Section */}
         <PlatformsSection />

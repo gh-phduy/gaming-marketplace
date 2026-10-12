@@ -3,11 +3,16 @@
 import NewsCard from "./NewsCard";
 import ProductCarousel from "../product/ProductCarousel";
 import SectionHeader from "../shared/SectionHeader";
-import { getNewsArticleHref, LATEST_NEWS } from "@/lib/constants";
-import { useTranslations } from "next-intl";
+import {
+  getNewsArticleHref,
+  LATEST_NEWS,
+  NEWS_ROUTE,
+} from "@/lib/constants/news";
+import { useLocale, useTranslations } from "next-intl";
 
 export default function LatestNewsSection() {
   const t = useTranslations("home");
+  const locale = useLocale();
 
   const newsCards = LATEST_NEWS.map((article) => (
     <NewsCard
@@ -30,7 +35,7 @@ export default function LatestNewsSection() {
         headingId="latest-news-heading"
         headingText={t("latestNews")}
         title={t("latestNewsTitle")}
-        viewAllHref="/news"
+        viewAllHref={`/${locale}${NEWS_ROUTE}`}
         viewAllAriaLabel={t("viewAllLatestNews")}
       />
       <div className="hidden justify-between 800:flex">

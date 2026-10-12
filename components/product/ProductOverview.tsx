@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter } from "@/i18n/routing";
 import ProductGallery from "./ProductGallery";
 import PurchaseCard from "./PurchaseCard";
 import { ProductApiResponse } from "@/types/api-product";
@@ -9,6 +9,7 @@ import { useCart } from "@/contexts/CartContext";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/lib/supabase";
 import { useTranslations } from "next-intl";
+import { PRODUCT_OVERVIEW_CLASS } from "./product-layout";
 
 interface ProductOverviewProps {
   data: ProductApiResponse;
@@ -46,8 +47,7 @@ export default function ProductOverview({ data }: ProductOverviewProps) {
 
   const handleChat = useCallback(async () => {
     if (!user) {
-      alert(t("pleaseSignInToChat"));
-      router.push("/login");
+      window.dispatchEvent(new CustomEvent("difmark:open-login"));
       return;
     }
 
@@ -99,7 +99,7 @@ export default function ProductOverview({ data }: ProductOverviewProps) {
               recipientAvatar: data.seller.avatar,
               listingTitle: data.data.name,
             },
-          })
+          }),
         );
       }
     } catch (err) {
@@ -109,7 +109,7 @@ export default function ProductOverview({ data }: ProductOverviewProps) {
   }, [data, user, router, t]);
 
   return (
-    <div className="flex w-full flex-col gap-5 lg:flex-row lg:gap-6">
+    <div className={PRODUCT_OVERVIEW_CLASS}>
       <ProductGallery
         images={data.data.images}
         name={data.data.name}

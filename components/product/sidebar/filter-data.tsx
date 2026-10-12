@@ -27,13 +27,33 @@ export interface FilterItem {
 
 export const PRODUCT_TYPE_FILTER_ITEMS: FilterSubItem[] = [
   { id: "game-keys", label: "Game Keys", count: 13933, icon: <BsKeyFill /> },
-  { id: "console-games", label: "Console Games", count: 11707, icon: <BsXbox /> },
+  {
+    id: "console-games",
+    label: "Console Games",
+    count: 11707,
+    icon: <BsXbox />,
+  },
   { id: "pc-games", label: "PC Games", count: 9668, icon: <MdComputer /> },
   { id: "mobile", label: "Mobile", count: 110, icon: <MdComputer /> },
-  { id: "game-currency", label: "Game Currency", count: 214, icon: <BsKeyFill /> },
-  { id: "game-accounts", label: "Game Accounts", count: 146, icon: <BsKeyFill /> },
+  {
+    id: "game-currency",
+    label: "Game Currency",
+    count: 214,
+    icon: <BsKeyFill />,
+  },
+  {
+    id: "game-accounts",
+    label: "Game Accounts",
+    count: 146,
+    icon: <BsKeyFill />,
+  },
   { id: "game-items", label: "Game Items", count: 143, icon: <BsKeyFill /> },
-  { id: "power-leveling", label: "Power Leveling", count: 141, icon: <BsKeyFill /> },
+  {
+    id: "power-leveling",
+    label: "Power Leveling",
+    count: 141,
+    icon: <BsKeyFill />,
+  },
   { id: "software", label: "Software", count: 973, icon: <FaWindows /> },
   { id: "gift-cards", label: "Gift Cards", count: 3541, icon: <BsKeyFill /> },
   { id: "game-cards", label: "Game Cards", count: 1261, icon: <BsKeyFill /> },
@@ -59,6 +79,12 @@ export const PRODUCT_TYPE_FILTER_ITEMS: FilterSubItem[] = [
 ];
 
 export const PLATFORM_FILTER_ITEMS: FilterSubItem[] = [
+  { id: "pc", label: "PC", icon: <MdComputer /> },
+  { id: "ps5", label: "PlayStation 5", icon: <span>PS5</span> },
+  { id: "ps4", label: "PlayStation 4", icon: <span>PS4</span> },
+  { id: "xbox-series-x", label: "Xbox Series X/S", icon: <BsXbox /> },
+  { id: "xbox-one", label: "Xbox One", icon: <BsXbox /> },
+  { id: "nintendo-switch", label: "Nintendo Switch", icon: <span>N</span> },
   { id: "steam", label: "Steam", count: 15205, icon: <SiSteam /> },
   {
     id: "official-website",
@@ -73,11 +99,26 @@ export const PLATFORM_FILTER_ITEMS: FilterSubItem[] = [
   { id: "rockstar", label: "Rockstar", count: 17, icon: <SiRockstargames /> },
   { id: "bethesda", label: "Bethesda", count: 6, icon: <span>B</span> },
   { id: "battle-net", label: "Battle.Net", count: 18, icon: <span>BN</span> },
-  { id: "playstation", label: "Playstation", count: 354, icon: <span>PS</span> },
-  { id: "nintendo", label: "Nintendo Switch", count: 243, icon: <span>N</span> },
+  {
+    id: "playstation",
+    label: "Playstation",
+    count: 354,
+    icon: <span>PS</span>,
+  },
+  {
+    id: "nintendo",
+    label: "Nintendo Switch",
+    count: 243,
+    icon: <span>N</span>,
+  },
   { id: "ios", label: "iOS", count: 54, icon: <span>iOS</span> },
   { id: "android", label: "Android", count: 56, icon: <span>AN</span> },
-  { id: "windows-store", label: "Windows Store", count: 277, icon: <FaWindows /> },
+  {
+    id: "windows-store",
+    label: "Windows Store",
+    count: 277,
+    icon: <FaWindows />,
+  },
   { id: "microsoft", label: "Microsoft", count: 42, icon: <FaWindows /> },
   { id: "xbox-live", label: "Xbox Live", count: 9, icon: <BsXbox /> },
   {

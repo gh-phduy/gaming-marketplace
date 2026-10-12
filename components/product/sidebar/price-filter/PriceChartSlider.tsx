@@ -1,11 +1,14 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useId, useMemo } from "react";
+import { Slider } from "@base-ui/react/slider";
+import { getPriceHistogram } from "@/lib/price-filter";
 
 interface PriceChartSliderProps {
   minPrice: number;
   maxPrice: number;
   sliderMax: number;
+  prices: number[];
   onPriceChange: (min: number, max: number) => void;
 }
 
@@ -13,116 +16,86 @@ export default function PriceChartSlider({
   minPrice,
   maxPrice,
   sliderMax,
+  prices,
   onPriceChange,
 }: PriceChartSliderProps) {
-  const sliderRef = useRef<HTMLDivElement>(null);
-  const [dragging, setDragging] = useState<"min" | "max" | null>(null);
-
-  // Calculate percentages for visual slider
-  const leftPercent = Math.min((minPrice / sliderMax) * 100, 100);
-  const rightPercent = Math.min((maxPrice / sliderMax) * 100, 100);
-  const widthPercent = Math.max(rightPercent - leftPercent, 0);
-
-  // Handle Dragging Logic
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      if (!dragging || !sliderRef.current) return;
-
-      const rect = sliderRef.current.getBoundingClientRect();
-      const offsetX = e.clientX - rect.left;
-      const percent = Math.min(Math.max(offsetX / rect.width, 0), 1);
-      let newValue = Math.round(percent * sliderMax);
-
-      if (dragging === "min") {
-        // Prevent crossing the max handle
-        newValue = Math.min(newValue, maxPrice - 1);
-        onPriceChange(Math.max(0, newValue), maxPrice);
-      } else {
-        // Prevent crossing the min handle
-        newValue = Math.max(newValue, minPrice + 1);
-        onPriceChange(minPrice, Math.min(sliderMax, newValue));
-      }
-    };
-
-    const handleMouseUp = () => {
-      setDragging(null);
-    };
-
-    if (dragging) {
-      document.addEventListener("mousemove", handleMouseMove);
-      document.addEventListener("mouseup", handleMouseUp);
-    }
-
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      document.removeEventListener("mouseup", handleMouseUp);
-    };
-  }, [dragging, minPrice, maxPrice, sliderMax, onPriceChange]);
-
+  const id = useId().replace(/:/g, "");
+  const chart = useMemo(
+    () => getPriceHistogram(prices, sliderMax),
+    [prices, sliderMax],
+  );
+  const left = (minPrice / sliderMax) * 100;
+  const width = ((maxPrice - minPrice) / sliderMax) * 100;
   return (
-    <div className="px-1">
-      {/* Market-style Area Chart with Visual Slider */}
-      <div className="relative h-16 w-full select-none">
-        {/* SVG Area Chart */}
-        <svg
-          viewBox="0 0 100 40"
-          className="absolute bottom-1.5 left-0 h-full w-full overflow-visible"
-          preserveAspectRatio="none"
-        >
-          <defs>
-            <linearGradient id="chartGradient" x1="0" x2="0" y1="0" y2="1">
-              <stop offset="0%" stopColor="#46ca43" stopOpacity="0.4" />
-              <stop offset="100%" stopColor="#46ca43" stopOpacity="0.1" />
-            </linearGradient>
-          </defs>
+    <div className="px-2" data-price-chart>
+      <svg
+        viewBox="0 0 100 48"
+        className="h-16 w-full"
+        preserveAspectRatio="none"
+        role="img"
+        aria-label="Product price distribution"
+      >
+        <defs>
+          <linearGradient id={id + "-fill"} x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stopColor="#65c756" stopOpacity="0.45" />
+            <stop offset="100%" stopColor="#65c756" stopOpacity="0.1" />
+          </linearGradient>
+          <clipPath id={id + "-selected"}>
+            <rect
+              data-price-selection
+              x={left}
+              y="0"
+              width={width}
+              height="48"
+            />
+          </clipPath>
+        </defs>
+        <path d={chart.area} fill="#465266" fillOpacity="0.35" />
+        <path
+          data-price-distribution
+          d={chart.line}
+          fill="none"
+          stroke="#89929f"
+          strokeWidth="1.5"
+          vectorEffect="non-scaling-stroke"
+        />
+        <g clipPath={"url(#" + id + "-selected)"}>
+          <path d={chart.area} fill={"url(#" + id + "-fill)"} />
           <path
-            d="M0 40 L0 5 Q 10 20, 30 25 T 50 28 T 80 27 L 100 27 L 100 40 Z"
-            fill="url(#chartGradient)"
-            stroke="none"
-          />
-          <path
-            d="M0 5 Q 10 20, 30 25 T 50 28 T 80 27 L 100 27"
+            d={chart.line}
             fill="none"
-            stroke="#5aca5a"
+            stroke="#65c756"
             strokeWidth="2"
+            vectorEffect="non-scaling-stroke"
           />
-        </svg>
-
-        {/* Slider Track Container */}
-        <div
-          ref={sliderRef}
-          className="absolute -bottom-1 left-0 h-1.5 w-full rounded-full bg-[#3e4654]"
-        >
-          {/* Active Green Track */}
-          <div
-            className="absolute inset-y-0 rounded-full bg-[#5aca5a]"
-            style={{
-              left: `${leftPercent}%`,
-              width: `${widthPercent}%`,
-            }}
-          ></div>
-
-          {/* Left Handle */}
-          <div
-            className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-grab rounded-full bg-[#5aca5a] shadow-md ring-2 ring-white transition-transform hover:scale-110 active:scale-95 active:cursor-grabbing"
-            style={{ left: `${leftPercent}%` }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              setDragging("min");
-            }}
-          ></div>
-
-          {/* Right Handle */}
-          <div
-            className="absolute top-1/2 -ml-2.5 h-5 w-5 -translate-y-1/2 cursor-grab rounded-full bg-[#5aca5a] shadow-md ring-2 ring-white transition-transform hover:scale-110 active:scale-95 active:cursor-grabbing"
-            style={{ left: `${rightPercent}%` }}
-            onMouseDown={(e) => {
-              e.stopPropagation();
-              setDragging("max");
-            }}
-          ></div>
-        </div>
-      </div>
+        </g>
+      </svg>
+      <Slider.Root
+        value={[minPrice, maxPrice]}
+        min={0}
+        max={sliderMax}
+        step={0.01}
+        largeStep={1}
+        thumbCollisionBehavior="none"
+        onValueChange={(values) => onPriceChange(values[0], values[1])}
+      >
+        <Slider.Control className="relative flex h-6 w-full touch-none items-center select-none">
+          <Slider.Track className="relative h-1.5 w-full rounded-full bg-[#465266]">
+            <Slider.Indicator className="absolute h-full rounded-full bg-[#65c756]" />
+            {[0, 1].map((index) => (
+              <Slider.Thumb
+                key={index}
+                index={index}
+                getAriaLabel={() =>
+                  index === 0 ? "Minimum price" : "Maximum price"
+                }
+                getAriaValueText={(_, value) => "$" + value.toFixed(2)}
+                className="block size-5 cursor-grab rounded-full bg-[#65c756] ring-2 ring-white focus-within:outline-2 focus-within:outline-offset-4 focus-within:outline-[#65c756] active:cursor-grabbing"
+              />
+            ))}
+          </Slider.Track>
+        </Slider.Control>
+      </Slider.Root>
     </div>
   );
 }

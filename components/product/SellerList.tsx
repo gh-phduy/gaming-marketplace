@@ -3,12 +3,16 @@ import SellerFilterBar from "./SellerFilterBar";
 import { SellerOffer } from "./SellerRow";
 import SellerListClient from "./SellerListClient";
 import { getTranslations } from "next-intl/server";
+import { listingCategories } from "@/lib/seller-listing";
 
-async function getSellers(sellerId?: string): Promise<SellerOffer[] | null> {
+async function getSellers(
+  productTitle?: string,
+): Promise<SellerOffer[] | null> {
   try {
     let query = supabase
       .from("products")
-      .select(`
+      .select(
+        `
         *,
         seller:users (
           id,
@@ -17,11 +21,12 @@ async function getSellers(sellerId?: string): Promise<SellerOffer[] | null> {
           rating,
           is_verified_seller
         )
-      `)
+      `,
+      )
       .eq("status", "published");
 
-    if (sellerId) {
-      query = query.eq("seller_id", sellerId);
+    if (productTitle) {
+      query = query.eq("title", productTitle);
     }
 
     const { data, error } = await query;
@@ -31,27 +36,33 @@ async function getSellers(sellerId?: string): Promise<SellerOffer[] | null> {
       return null;
     }
 
-    return (data || []).map((row: any): SellerOffer => ({
-      data: {
-        id: row.id,
-        type: row.category,
-        platform: row.platform || "PC",
-        edition: "Standard",
-        activationRegion: row.region,
-        price: Number(row.price),
-        currency: row.currency,
-        title: row.title || "Game Key",
-        image_url: row.image_url || "/cyberpunk_2077.jpg",
-      },
-      seller: {
-        id: row.seller?.id || "unknown",
-        name: row.seller?.display_name || "Unknown Seller",
-        avatar: row.seller?.avatar_url || "/avt1.png",
-        isOnline: true,
-        tier: "Pro",
-        rating: Number(row.seller?.rating || 5),
-      },
-    }));
+    return (data || []).map(
+      (row: any): SellerOffer => ({
+        data: {
+          id: row.id,
+          type:
+            Object.keys(listingCategories).find(
+              (label) => listingCategories[label] === row.category,
+            ) || row.category,
+          platform: row.platform || "PC",
+          edition: row.edition || "Standard",
+          activationRegion: row.region,
+          price: Number(row.price),
+          currency: row.currency,
+          title: row.title || "Game Key",
+          image_url: row.image_url || "/cyberpunk_2077.jpg",
+        },
+        seller: {
+          id: row.seller?.id || "unknown",
+          name: row.seller?.display_name || "Unknown Seller",
+          avatar: row.seller?.avatar_url || "/avt1.png",
+          isOnline: false,
+          isVerified: Boolean(row.seller?.is_verified_seller),
+          tier: row.seller?.is_verified_seller ? "Verified Seller" : "Seller",
+          rating: Number(row.seller?.rating ?? 0),
+        },
+      }),
+    );
   } catch (error) {
     console.error("Error fetching sellers:", error);
     return null;
@@ -59,11 +70,11 @@ async function getSellers(sellerId?: string): Promise<SellerOffer[] | null> {
 }
 
 interface SellerListProps {
-  sellerId?: string;
+  productTitle?: string;
 }
 
-export default async function SellerList({ sellerId }: SellerListProps) {
-  const products = await getSellers(sellerId);
+export default async function SellerList({ productTitle }: SellerListProps) {
+  const products = await getSellers(productTitle);
   const t = await getTranslations("product");
 
   if (products === null) {
@@ -79,4 +90,3 @@ export default async function SellerList({ sellerId }: SellerListProps) {
 
   return <SellerListClient initialOffers={products} />;
 }
-

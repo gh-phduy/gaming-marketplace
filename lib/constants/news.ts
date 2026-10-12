@@ -243,8 +243,10 @@ export const NEWS_ARTICLES: NewsArticle[] = [
 
 export const LATEST_NEWS = NEWS_ARTICLES.slice(0, 4);
 
+export const NEWS_ROUTE = "/lastestnews";
+
 export function getNewsArticleHref(slug: string) {
-  return `/${slug}`;
+  return `${NEWS_ROUTE}/${encodeURIComponent(slug)}`;
 }
 
 export function getNewsArticleBySlug(slug: string) {

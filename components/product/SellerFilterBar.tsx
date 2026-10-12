@@ -1,71 +1,135 @@
 "use client";
 
-import FilterDropdown, { FilterOption } from "./FilterDropdown";
-import ResetFilterButton from "./ResetFilterButton";
-import { HiOutlineMapPin } from "react-icons/hi2";
-import { FaMedal } from "react-icons/fa6";
-import { RiGlobalLine } from "react-icons/ri";
-import { MdSort } from "react-icons/md";
-
 import { useTranslations } from "next-intl";
+import {
+  Award,
+  Gamepad2,
+  MapPin,
+  ArrowDownWideNarrow,
+  ChevronDown,
+  X,
+} from "lucide-react";
+import type { SellerOffer } from "./SellerRow";
+import { SELLER_FILTER_CLASS } from "./product-layout";
+import { getProductPlatforms } from "@/lib/platforms";
 
-export default function SellerFilterBar() {
+export type OfferFilters = {
+  edition: string;
+  platform: string;
+  region: string;
+  sort: string;
+};
+export const DEFAULT_OFFER_FILTERS: OfferFilters = {
+  edition: "all",
+  platform: "all",
+  region: "all",
+  sort: "price_asc",
+};
+
+export default function SellerFilterBar({
+  offers = [],
+  filters = DEFAULT_OFFER_FILTERS,
+  onChange,
+  onReset,
+}: {
+  offers?: SellerOffer[];
+  filters?: OfferFilters;
+  onChange?: (field: keyof OfferFilters, value: string) => void;
+  onReset?: () => void;
+}) {
   const t = useTranslations("product");
-
-  const REGION_OPTIONS: FilterOption[] = [
-    { id: "all", label: t("allRegions") },
-    { id: "au", label: t("australia"), count: 1, flagCode: "au" },
-    { id: "ca", label: t("canada"), count: 1, flagCode: "ca" },
-    { id: "eu", label: t("europe"), count: 4, flagCode: "eu" },
-    { id: "global", label: t("global"), count: 5, flagCode: "un" },
-    { id: "gb", label: t("unitedKingdom"), count: 1, flagCode: "gb" },
-    { id: "us", label: t("unitedStates"), count: 1, flagCode: "us" },
-  ];
-
-  const PLATFORM_OPTIONS: FilterOption[] = [
-    { id: "all", label: t("allPlatforms") },
-    { id: "steam", label: "Steam" },
-    { id: "xbox", label: "Xbox" },
-    { id: "ps5", label: "PlayStation 5" },
-    { id: "epic", label: "Epic Games" },
-  ];
-
-  const EDITION_OPTIONS: FilterOption[] = [
-    { id: "all", label: t("allEditions") },
-    { id: "standard", label: t("standardEdition") },
-    { id: "deluxe", label: t("deluxeEdition") },
-    { id: "ultimate", label: t("ultimateEdition") },
-  ];
-
-  const SORT_OPTIONS: FilterOption[] = [
-    { id: "price_asc", label: t("priceLowToHigh") },
-    { id: "price_desc", label: t("priceHighToLow") },
-    { id: "rating", label: t("sellerRating") },
+  const unique = (field: "edition" | "platform" | "activationRegion") =>
+    Array.from(
+      new Set(
+        offers.flatMap((offer) =>
+          field === "platform"
+            ? getProductPlatforms(offer.data.platform)
+            : [offer.data[field]],
+        ),
+      ),
+    )
+      .sort()
+      .map((value) => ({ value, label: value }));
+  const fields = [
+    {
+      name: "edition" as const,
+      icon: Award,
+      label: t("allEditions"),
+      options: [
+        { value: "all", label: t("allEditions") },
+        ...unique("edition"),
+      ],
+    },
+    {
+      name: "platform" as const,
+      icon: Gamepad2,
+      label: t("allPlatforms"),
+      options: [
+        { value: "all", label: t("allPlatforms") },
+        ...unique("platform"),
+      ],
+    },
+    {
+      name: "region" as const,
+      icon: MapPin,
+      label: t("allRegions"),
+      options: [
+        { value: "all", label: t("allRegions") },
+        ...unique("activationRegion"),
+      ],
+    },
+    {
+      name: "sort" as const,
+      icon: ArrowDownWideNarrow,
+      label: t("price"),
+      options: [
+        { value: "price_asc", label: t("priceLowToHigh") },
+        { value: "price_desc", label: t("priceHighToLow") },
+        { value: "rating", label: t("sellerRating") },
+      ],
+    },
   ];
   return (
-    <div className="mb-4 flex w-full flex-col gap-3 sm:mb-6 sm:flex-row sm:flex-wrap sm:items-center sm:gap-3 lg:flex-nowrap lg:justify-between lg:gap-x-4">
-      <FilterDropdown
-        options={REGION_OPTIONS}
-        headerIcon={<HiOutlineMapPin size={18} />}
-        width="w-full sm:w-[calc(50%-6px)] lg:w-[366px]"
-      />
-      <FilterDropdown
-        options={PLATFORM_OPTIONS}
-        headerIcon={<RiGlobalLine size={18} />}
-        width="w-full sm:w-[calc(50%-6px)] lg:w-[366px]"
-      />
-      <FilterDropdown
-        options={EDITION_OPTIONS}
-        headerIcon={<FaMedal size={18} />}
-        width="w-full sm:w-[calc(50%-6px)] lg:w-[366px]"
-      />
-      <FilterDropdown
-        options={SORT_OPTIONS}
-        headerIcon={<MdSort size={20} />}
-        width="w-full sm:w-[calc(50%-6px)] lg:w-[280px]"
-        defaultValue="price_asc"
-      />
-      <ResetFilterButton />
+    <div className={SELLER_FILTER_CLASS}>
+      {fields.map(({ name, icon: Icon, label, options }) => (
+        <label
+          key={name}
+          className="focus-within:ring-forest-400 relative flex h-[54px] min-w-0 items-center rounded-xl bg-[#242c38] text-gray-200 transition-colors focus-within:ring-2 hover:bg-[#2d3745]"
+        >
+          <Icon
+            aria-hidden="true"
+            className="pointer-events-none absolute left-4 h-4.5 w-4.5"
+          />
+          <select
+            aria-label={label}
+            value={filters[name]}
+            onChange={(event) => onChange?.(name, event.target.value)}
+            className="h-full w-full cursor-pointer appearance-none truncate rounded-xl bg-transparent pr-10 pl-12 text-sm outline-none"
+          >
+            {options.map((option) => (
+              <option
+                key={option.value}
+                value={option.value}
+                className="bg-[#242c38]"
+              >
+                {option.label}
+              </option>
+            ))}
+          </select>
+          <ChevronDown
+            aria-hidden="true"
+            className="pointer-events-none absolute right-4 h-4 w-4 text-gray-400"
+          />
+        </label>
+      ))}
+      <button
+        type="button"
+        aria-label="Reset offer filters"
+        onClick={onReset}
+        className="focus-visible:outline-forest-400 flex h-[54px] w-[54px] items-center justify-center rounded-xl bg-[#242c38] text-gray-400 transition-colors hover:bg-[#2d3745] hover:text-white focus-visible:outline-2"
+      >
+        <X className="h-5 w-5" />
+      </button>
     </div>
   );
 }

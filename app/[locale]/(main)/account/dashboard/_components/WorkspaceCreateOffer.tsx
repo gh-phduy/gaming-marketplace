@@ -27,6 +27,8 @@ import { useTranslations } from "next-intl";
 interface WorkspaceCreateOfferProps {
   form: ListingFormState;
   formError: string | null;
+  isSaving: boolean;
+  isUploading: boolean;
   updateFormField: (field: keyof ListingFormState, value: string) => void;
   handleUploadImage: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleSaveListing: (status: "draft" | "published") => void;
@@ -45,6 +47,8 @@ interface WorkspaceCreateOfferProps {
 export function WorkspaceCreateOffer({
   form,
   formError,
+  isSaving,
+  isUploading,
   updateFormField,
   handleUploadImage,
   handleSaveListing,
@@ -65,6 +69,7 @@ export function WorkspaceCreateOffer({
             </span>
             <input
               value={form.title}
+              maxLength={200}
               onChange={(event) =>
                 updateFormField("title", event.target.value)
               }
@@ -120,6 +125,7 @@ export function WorkspaceCreateOffer({
             </span>
             <input
               value={form.edition}
+              maxLength={100}
               onChange={(event) =>
                 updateFormField("edition", event.target.value)
               }
@@ -188,13 +194,15 @@ export function WorkspaceCreateOffer({
                   {t("uploadImage")}
                   <input
                     type="file"
-                    accept="image/*"
+                    accept="image/jpeg,image/png,image/webp,image/gif"
+                    disabled={isUploading || isSaving}
                     onChange={handleUploadImage}
                     className="sr-only"
                   />
                 </label>
                 <button
                   type="button"
+                  disabled={isUploading || isSaving}
                   onClick={() =>
                     updateFormField("imageUrl", imageOptions[0].value)
                   }
@@ -215,6 +223,7 @@ export function WorkspaceCreateOffer({
             <div className="grid grid-cols-[74px_1fr] gap-2">
               <input
                 value={form.currency}
+                aria-label="Currency"
                 onChange={(event) =>
                   updateFormField("currency", event.target.value)
                 }
@@ -222,6 +231,7 @@ export function WorkspaceCreateOffer({
               />
               <input
                 value={form.price}
+                aria-label={t("price")}
                 type="number"
                 min="0"
                 step="0.01"
@@ -268,7 +278,7 @@ export function WorkspaceCreateOffer({
 
         {/* Error notice banner */}
         {formError ? (
-          <p className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
+          <p role="alert" className="mt-4 rounded-lg border border-red-500/20 bg-red-500/10 px-3 py-2 text-sm text-red-300">
             {formError}
           </p>
         ) : null}
@@ -277,6 +287,7 @@ export function WorkspaceCreateOffer({
         <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:justify-end">
           <button
             type="button"
+            disabled={isSaving || isUploading}
             onClick={() => handleSaveListing("draft")}
             className={`${cyberGhostButtonClass} h-11 px-5 text-sm`}
           >
@@ -285,11 +296,12 @@ export function WorkspaceCreateOffer({
           </button>
           <button
             type="button"
+            disabled={isSaving || isUploading}
             onClick={() => handleSaveListing("published")}
             className={`${cyberPrimaryButtonClass} h-11 px-5 text-sm`}
           >
             <CheckCircle2 className="h-4 w-4" />
-            {t("publishNow")}
+            {isSaving ? "Saving…" : isUploading ? "Uploading image…" : t("publishNow")}
           </button>
         </div>
       </div>

@@ -6,6 +6,7 @@ import SellerStoreFilters from "./store/SellerStoreFilters";
 import SellerStoreOfferRow from "./store/SellerStoreOfferRow";
 import SellerStoreFooter from "./store/SellerStoreFooter";
 import { useTranslations } from "next-intl";
+import { getProductPlatforms, matchesPlatformFilter } from "@/lib/platforms";
 
 interface SellerStorePanelProps {
   profile: SellerProfile;
@@ -30,10 +31,9 @@ export default function SellerStorePanel({
     const platforms = new Set<string>();
 
     profile.offers.forEach((offer) => {
-      const value = offer.data.platform?.trim();
-      if (value) {
-        platforms.add(value);
-      }
+      getProductPlatforms(offer.data.platform).forEach((value) =>
+        platforms.add(value),
+      );
     });
 
     return Array.from(platforms).sort((a, b) => a.localeCompare(b));
@@ -44,7 +44,8 @@ export default function SellerStorePanel({
 
     const base = profile.offers.filter((offer) => {
       const matchesCategory =
-        category === "all" || offer.data.platform.toLowerCase() === category;
+        category === "all" ||
+        matchesPlatformFilter(offer.data.platform, category);
 
       if (!matchesCategory) {
         return false;

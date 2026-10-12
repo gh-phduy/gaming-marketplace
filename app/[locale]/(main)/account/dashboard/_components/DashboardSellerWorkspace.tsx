@@ -72,6 +72,9 @@ export default function DashboardSellerWorkspace({
     replyText,
     setReplyText,
     formError,
+    workspaceError,
+    isSaving,
+    isUploading,
     toastMessage,
     form,
     stats,
@@ -89,6 +92,7 @@ export default function DashboardSellerWorkspace({
       id="seller-workspace"
       className="relative rounded-xl bg-midnight-800 text-white shadow-2xl shadow-black/20"
     >
+      {workspaceError && <p role="alert" className="px-6 pt-4 text-sm text-red-300">{workspaceError}</p>}
       {/* Workspace top navigation bar */}
       <div className="relative z-10 border-b border-midnight-700/50 bg-midnight-850/20 px-6 py-5">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -209,6 +213,8 @@ export default function DashboardSellerWorkspace({
             <WorkspaceCreateOffer
               form={form}
               formError={formError}
+              isSaving={isSaving}
+              isUploading={isUploading}
               updateFormField={updateFormField}
               handleUploadImage={handleUploadImage}
               handleSaveListing={handleSaveListing}

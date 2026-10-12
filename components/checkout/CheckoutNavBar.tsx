@@ -5,6 +5,7 @@ import Image from "next/image";
 import { usePathname, useSearchParams } from "next/navigation";
 import { CreditCard, ShoppingCart, CheckCircle2, XCircle } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { getCheckoutProgress, useCheckoutPaymentStatus } from "./CheckoutPaymentStatus";
 
 /* ==========================================================================
    MAIN COMPONENT: CheckoutNavBar
@@ -14,7 +15,7 @@ import { useTranslations } from "next-intl";
  * CheckoutNavBar Component
  *
  * Renders the top progress bar for checkout flows.
- * Uses query parameters and url path patterns to determine if the payment
+ * Uses the server-verified result and url path patterns to determine if the payment
  * is completed, failed, or processing, updating progress bars and steps.
  */
 export default function CheckoutNavBar() {
@@ -22,11 +23,8 @@ export default function CheckoutNavBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   
-  // Extract Stripe redirect status from query params
-  const redirectStatus = searchParams.get("redirect_status");
-  const isSuccessPage = pathname?.startsWith("/checkout/success");
-  const isCompleted = isSuccessPage && redirectStatus === "succeeded";
-  const isFailed = isSuccessPage && redirectStatus !== "succeeded";
+  const { result } = useCheckoutPaymentStatus();
+  const { isCompleted, isFailed } = getCheckoutProgress(pathname, searchParams.get("payment_intent"), result);
   const isAfterCheckout = isCompleted || isFailed;
 
   // Active step styling classes based on checkout state

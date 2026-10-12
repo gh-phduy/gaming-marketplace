@@ -3,14 +3,13 @@
 import { Separator } from "@base-ui/react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { CheckCircle2, CreditCard, ShoppingCart, XCircle } from "lucide-react";
+import { getCheckoutProgress, useCheckoutPaymentStatus } from "@/components/checkout/CheckoutPaymentStatus";
 
 export default function CheckoutNavSection() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const redirectStatus = searchParams.get("redirect_status");
-  const isSuccessPage = pathname?.includes("/checkout/success");
-  const isCompleted = isSuccessPage && redirectStatus === "succeeded";
-  const isFailed = isSuccessPage && redirectStatus !== "succeeded";
+  const { result } = useCheckoutPaymentStatus();
+  const { isCompleted, isFailed } = getCheckoutProgress(pathname, searchParams.get("payment_intent"), result);
   const isAfterCheckout = isCompleted || isFailed;
 
   const checkoutStepClass = isAfterCheckout ? "text-[#46ca43]" : "text-white";

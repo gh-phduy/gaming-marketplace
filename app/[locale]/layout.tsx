@@ -14,8 +14,8 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-import { NextIntlClientProvider } from 'next-intl';
-import { getMessages } from 'next-intl/server';
+import { hasLocale, NextIntlClientProvider } from 'next-intl';
+import { getMessages, setRequestLocale } from 'next-intl/server';
 import { notFound } from 'next/navigation';
 import { routing } from '@/i18n/routing';
 
@@ -25,15 +25,17 @@ export default async function RootLayout(props: Readonly<{
 }>) {
   const { locale } = await props.params;
   const { children } = props;
-  // Ensure that the incoming `locale` is valid
-  // (Assuming you create routing.ts with locales, or use config.ts)
-  // For now, we will just use getMessages which will throw if invalid or fall back
-  const messages = await getMessages();
+  if (!hasLocale(routing.locales, locale)) {
+    notFound();
+  }
+  // Keep inherited next-intl configuration independent of request headers.
+  setRequestLocale(locale);
+  const messages = await getMessages({ locale });
 
   return (
     <html lang={locale} className="dark overflow-x-hidden">
       <body className="flex min-h-screen flex-col overflow-x-hidden bg-midnight-850 text-dm-text-primary antialiased">
-        <NextIntlClientProvider messages={messages}>
+        <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
             {/* Skip to main content link for accessibility */}
             <a href="#main-content" className="skip-link">

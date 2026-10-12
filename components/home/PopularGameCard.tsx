@@ -11,7 +11,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
-import { FaDesktop, FaXbox, FaPlaystation } from "react-icons/fa";
+import PlatformBadges from "@/components/shared/PlatformBadges";
 
 /* ============================================
    TYPES
@@ -78,7 +78,8 @@ export default function PopularGameItem({
 
   useEffect(() => {
     const checkIsMobile = () => {
-      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)")
+        .matches;
       const isSmallScreen = window.innerWidth <= 800;
       setIsMobile(isTouch || isSmallScreen);
     };
@@ -195,15 +196,6 @@ export default function PopularGameItem({
     timelineRef.current?.reverse();
   }, []);
 
-  const renderPlatformIcon = () => {
-    const p = platform?.toLowerCase();
-    if (p === "pc") return <FaDesktop size={14} className="text-white" />;
-    if (p === "xbox") return <FaXbox size={14} className="text-white" />;
-    if (p === "playstation")
-      return <FaPlaystation size={14} className="text-white" />;
-    return <FaDesktop size={14} className="text-white" />;
-  };
-
   return (
     <article
       className="relative mx-auto h-[300px] w-[252px] select-none 800:w-full"
@@ -253,7 +245,11 @@ export default function PopularGameItem({
               <div className="relative flex h-[40px] w-full items-center justify-between gap-x-2 bg-black/40 px-4 backdrop-blur-md">
                 {/* Platform Icons */}
                 <div className="flex items-center gap-x-2">
-                  {renderPlatformIcon()}
+                  <PlatformBadges
+                    platform={platform}
+                    size={14}
+                    className="text-white"
+                  />
                 </div>
 
                 {/* Price */}
@@ -270,7 +266,7 @@ export default function PopularGameItem({
             className="flex h-[57px] w-full items-center bg-surface-card px-4"
           >
             <h3 className="truncate text-[14px] font-medium text-white">
-              {title} ({platform?.toUpperCase()})
+              {title}
             </h3>
           </div>
         </div>

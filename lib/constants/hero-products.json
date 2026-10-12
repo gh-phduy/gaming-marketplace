@@ -1,0 +1,6 @@
+[
+  { "id": "40000000-0000-4000-8000-000000000001", "slug": "marathon", "title": "Marathon", "platform": "Xbox Series X/S", "filename": "marathon-xbox-x_icon-1200-600_10.jpg", "price": 39.99 },
+  { "id": "40000000-0000-4000-8000-000000000002", "slug": "resident-evil", "title": "Resident Evil Requiem", "platform": "PC", "filename": "resident-evil-requiem-pc_icon-1200-600_2.jpg", "price": 39.99 },
+  { "id": "40000000-0000-4000-8000-000000000003", "slug": "reanimal", "title": "Reanimal", "platform": "PS5", "filename": "reanimal-ps5_icon-1200-600_3.jpg", "price": 39.99 },
+  { "id": "40000000-0000-4000-8000-000000000004", "slug": "arc-raiders", "title": "ARC Raiders", "platform": "Xbox Series X/S", "filename": "arc-raiders-xbox-series_icon-1200-600_1.jpg", "price": 39.99 }
+]

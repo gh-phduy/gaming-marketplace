@@ -1,41 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import ProductCarousel from "../product/ProductCarousel";
 import GameCard from "./GameCard";
-import GameCardSkeleton from "./GameCardSkeleton";
-import { CanvasTextImage } from "./TextImageCanvas";
-import { supabase } from "@/lib/supabase";
-import Link from "next/link";
-import { cn } from "@/lib/utils";
 import SectionHeader from "./SectionHeader";
 import { useTranslations } from "next-intl";
-
-/* ============================================
-   TYPES
-   ============================================ */
+import type { HomepageGame } from "@/lib/homepage-products";
 
 interface GamesProps {
-  /** Section title displayed above the game grid */
   title: string;
-  /** Section type identifier to fetch correct data */
   sectionType: "new" | "weekly" | "under";
+  games: HomepageGame[];
 }
 
-/* ============================================
-   CONSTANTS
-   ============================================ */
-
-/** Number of items to display per column */
-const ITEMS_PER_COLUMN = 2;
-
-/* ============================================
-   SUB-COMPONENTS
-   ============================================ */
-
-/**
- * Column of game items
- */
 interface GameColumnProps {
   className?: string;
   children: React.ReactNode;
@@ -45,63 +21,8 @@ function GameColumn({ className = "", children }: GameColumnProps) {
   return <div className={className}>{children}</div>;
 }
 
-async function getGamesBySection(sectionType: string) {
-  let folderKeyword = "";
-  
-  if (sectionType === "new") {
-    folderKeyword = "new-on-difmark";
-  } else if (sectionType === "weekly") {
-    folderKeyword = "weekly-chart";
-  } else if (sectionType === "under") {
-    folderKeyword = "under-10";
-  }
-
-  if (!folderKeyword) return [];
-
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select(`
-        *,
-        seller:users (
-          id,
-          display_name,
-          avatar_url,
-          rating,
-          is_verified_seller
-        )
-      `)
-      .ilike("image_url", `%/${folderKeyword}/%`)
-      .eq("status", "published")
-      .limit(8);
-
-    if (error) {
-      console.error(`Error fetching games for section ${sectionType}:`, error.message);
-      return [];
-    }
-    return data || [];
-  } catch (error) {
-    console.error(`Error fetching games for section ${sectionType}:`, error);
-    return [];
-  }
-}
-
-/* ============================================
-   MAIN COMPONENT
-   =========================================== */
-
-export default function Games({ title, sectionType }: GamesProps) {
+export default function Games({ title, sectionType, games }: GamesProps) {
   const t = useTranslations("home");
-  const [games, setGames] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    setIsLoading(true);
-    getGamesBySection(sectionType).then((data) => {
-      setGames(data);
-      setIsLoading(false);
-    });
-  }, [sectionType]);
 
   // Helper to render a column of up to 2 games with custom breakpoint visibility
   const renderColumn = (colIndex: number) => {
@@ -123,58 +44,24 @@ export default function Games({ title, sectionType }: GamesProps) {
             key={game.id}
             id={game.id}
             title={game.title}
+            platform={game.platform}
             price={`${game.currency}${Number(game.price).toFixed(2)}`}
             coverImage={game.image_url}
             previewVideo={game.video_url || undefined}
             sellerName={game.seller?.display_name || "Unknown Seller"}
             sellerAvatar={game.seller?.avatar_url || "/avt1.png"}
-            sellerRank={game.seller?.rating >= 4.9 ? "🦄 Legendary" : "⭐ Verified"}
+            sellerRank={
+              (game.seller?.rating ?? 0) >= 4.9 ? "🦄 Legendary" : "⭐ Verified"
+            }
           />
         ))}
       </GameColumn>
     );
   };
 
-  if (isLoading) {
-    return (
-      <section className="w-full 800:px-0 px-8 responsive">
-        {/* Title Skeleton */}
-        <div className="h-[24px] w-[220px] bg-midnight-800 animate-pulse rounded -translate-x-[22px]" />
-        
-        {/* Grid Skeleton (Desktop >= 800px) */}
-        <div className="mt-10 hidden 800:grid grid-cols-1 990:grid-cols-3 1920:grid-cols-4 gap-4">
-          {[...Array(4)].map((_, colIdx) => {
-            let visibilityClass = "";
-            if (colIdx === 1 || colIdx === 2) {
-              visibilityClass = "hidden 990:block";
-            } else if (colIdx === 3) {
-              visibilityClass = "hidden 1920:block";
-            }
-            return (
-              <div key={colIdx} className={cn("space-y-4", visibilityClass)}>
-                <GameCardSkeleton />
-                <GameCardSkeleton />
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Carousel Skeleton (Mobile/Tablet < 800px) */}
-        <div className="mt-10 flex gap-4 overflow-hidden 800:hidden px-4">
-          <div className="min-w-[252px] opacity-50">
-            <GameCardSkeleton />
-          </div>
-          <div className="min-w-[252px] opacity-30">
-            <GameCardSkeleton />
-          </div>
-        </div>
-      </section>
-    );
-  }
-
   return (
     <section
-      className="w-full 800:px-0 px-8 responsive"
+      className="w-full responsive px-8 800:px-0"
       aria-labelledby={`games-section-${title.toLowerCase().replace(/\s+/g, "-")}`}
     >
       <SectionHeader
@@ -187,15 +74,15 @@ export default function Games({ title, sectionType }: GamesProps) {
           sectionType === "new"
             ? "/product?sort=newer"
             : sectionType === "weekly"
-            ? "/product?sort=popular"
-            : "/product"
+              ? "/product?sort=popular"
+              : "/product"
         }
         viewAllAriaLabel={`View all ${title.toLowerCase()}`}
       />
 
       {/* Desktop Grid */}
       <div
-        className="mt-10 hidden 800:grid grid-cols-1 990:grid-cols-3 1920:grid-cols-4 gap-4"
+        className="mt-10 hidden grid-cols-1 gap-4 800:grid 990:grid-cols-3 1920:grid-cols-4"
         role="list"
         aria-label={`${title} games`}
       >
@@ -213,12 +100,17 @@ export default function Games({ title, sectionType }: GamesProps) {
               key={game.id}
               id={game.id}
               title={game.title}
+              platform={game.platform}
               price={`${game.currency}${Number(game.price).toFixed(2)}`}
               coverImage={game.image_url}
               previewVideo={game.video_url || undefined}
               sellerName={game.seller?.display_name || "Unknown Seller"}
               sellerAvatar={game.seller?.avatar_url || "/avt1.png"}
-              sellerRank={game.seller?.rating >= 4.9 ? "🦄 Legendary" : "⭐ Verified"}
+              sellerRank={
+                (game.seller?.rating ?? 0) >= 4.9
+                  ? "🦄 Legendary"
+                  : "⭐ Verified"
+              }
             />
           ))}
         </ProductCarousel>

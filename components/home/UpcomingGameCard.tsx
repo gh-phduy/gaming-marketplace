@@ -11,7 +11,7 @@ import { useRef, useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { gsap } from "gsap";
-import { IoMdDesktop } from "react-icons/io";
+import PlatformBadges from "@/components/shared/PlatformBadges";
 import { useTranslations } from "next-intl";
 
 /* ============================================
@@ -31,7 +31,7 @@ interface UpcomingGameItemProps {
   /** Preview video path */
   previewVideo?: string;
   /** Platform icon */
-  platform?: "pc" | "xbox" | "playstation";
+  platform?: string;
 }
 
 /* ============================================
@@ -41,7 +41,6 @@ interface UpcomingGameItemProps {
 const DEFAULTS = {
   title: "Deliver At All Costs",
   price: "$38.30",
-  releaseDate: "28 Aug 2025",
   coverImage: "/product2.jpg",
   previewVideo: "/video/product2.webm",
   platform: "pc" as const,
@@ -68,9 +67,10 @@ export default function UpcomingGameItem({
   id = "1",
   title = DEFAULTS.title,
   price = DEFAULTS.price,
-  releaseDate = DEFAULTS.releaseDate,
+  releaseDate,
   coverImage = DEFAULTS.coverImage,
   previewVideo = DEFAULTS.previewVideo,
+  platform = DEFAULTS.platform,
 }: UpcomingGameItemProps) {
   const t = useTranslations("home");
   // State
@@ -80,7 +80,8 @@ export default function UpcomingGameItem({
 
   useEffect(() => {
     const checkIsMobile = () => {
-      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)")
+        .matches;
       const isSmallScreen = window.innerWidth <= 800;
       setIsMobile(isTouch || isSmallScreen);
     };
@@ -113,7 +114,7 @@ export default function UpcomingGameItem({
           duration: ANIMATION.containerExpand,
           ease: "power2.out",
         },
-        0
+        0,
       )
       .to(
         imageRef.current,
@@ -122,7 +123,7 @@ export default function UpcomingGameItem({
           duration: ANIMATION.imageFade,
           ease: "power2.out",
         },
-        0
+        0,
       )
       .to(
         videoRef.current,
@@ -131,7 +132,7 @@ export default function UpcomingGameItem({
           duration: ANIMATION.videoFade,
           ease: "power2.out",
         },
-        0.1
+        0.1,
       )
       .to(
         footerRef.current,
@@ -140,7 +141,7 @@ export default function UpcomingGameItem({
           duration: ANIMATION.footerColor,
           ease: "power2.out",
         },
-        0.3
+        0.3,
       );
 
     return () => {
@@ -157,7 +158,9 @@ export default function UpcomingGameItem({
 
   // Event handlers
   const handleMouseEnter = useCallback(() => {
-    const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
+    const hasMouse = window.matchMedia(
+      "(hover: hover) and (pointer: fine)",
+    ).matches;
     if (!hasMouse) return;
 
     isHoveredRef.current = true;
@@ -193,78 +196,86 @@ export default function UpcomingGameItem({
 
   return (
     <article
-      className="relative w-[252px] 800:w-full h-[300px] mx-auto select-none"
+      className="relative mx-auto h-[300px] w-[252px] select-none 800:w-full"
       role="listitem"
     >
       <Link href={`/buy-cheap?id=${id}`} className="block h-full w-full">
         <div
           ref={containerRef}
-          className="w-full cursor-pointer absolute top-1/2 group -translate-y-1/2 left-1/2 -translate-x-1/2 h-[275px] rounded-lg overflow-hidden bg-surface-base flex flex-col"
+          className="group absolute top-1/2 left-1/2 flex h-[275px] w-full -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col overflow-hidden rounded-lg bg-surface-base"
           onMouseEnter={handleMouseEnter}
           onMouseLeave={handleMouseLeave}
           tabIndex={0}
           onFocus={handleMouseEnter}
           onBlur={handleMouseLeave}
-          aria-label={`${title} - ${t("releaseLabel")} ${releaseDate} - ${price}`}
+          aria-label={[
+            title,
+            releaseDate && `${t("releaseLabel")} ${releaseDate}`,
+            price,
+          ]
+            .filter(Boolean)
+            .join(" - ")}
         >
-        {/* Media Container */}
-        <div className="relative flex-1">
-          {/* Release Date Badge */}
-          <div
-            className="absolute z-20 px-2 py-[10px] bg-[#95740080] flex justify-center items-center pointer-events-none"
-            aria-label={`${t("releaseDateLabel")} ${releaseDate}`}
-          >
-            <span className="text-dm-accent-yellow text-[12px]">
-              {t("releaseLabel")} {releaseDate}
-            </span>
-          </div>
+          {/* Media Container */}
+          <div className="relative flex-1">
+            {/* Release Date Badge */}
+            {releaseDate && (
+              <div
+                className="pointer-events-none absolute z-20 flex items-center justify-center bg-[#95740080] px-2 py-[10px]"
+                aria-label={`${t("releaseDateLabel")} ${releaseDate}`}
+              >
+                <span className="text-[12px] text-dm-accent-yellow">
+                  {t("releaseLabel")} {releaseDate}
+                </span>
+              </div>
+            )}
 
-          {/* Cover Image */}
-          <div ref={imageRef} className="absolute inset-0 w-full h-full">
-            <Image
-              src={coverImage}
-              alt={title}
-              fill
-              className="object-cover"
-              sizes="(max-width: 800px) 252px, 100%"
-            />
-          </div>
+            {/* Cover Image */}
+            <div ref={imageRef} className="absolute inset-0 h-full w-full">
+              <Image
+                src={coverImage}
+                alt={title}
+                fill
+                className="object-cover"
+                sizes="(max-width: 800px) 252px, 100%"
+              />
+            </div>
 
-          {/* Preview Video */}
-          {!isMobile && (
-            <video
-              ref={videoRef}
-              className="absolute inset-0 h-full w-full object-cover opacity-0"
-              src={videoSrc}
-              muted
-              loop
-              playsInline
-              preload="none"
-              onCanPlay={handleCanPlay}
-              aria-hidden="true"
-            />
-          )}
+            {/* Preview Video */}
+            {!isMobile && (
+              <video
+                ref={videoRef}
+                className="absolute inset-0 h-full w-full object-cover opacity-0"
+                src={videoSrc}
+                muted
+                loop
+                playsInline
+                preload="none"
+                onCanPlay={handleCanPlay}
+                aria-hidden="true"
+              />
+            )}
 
-          {/* Price Overlay */}
-          <div className="absolute bottom-0 w-full">
-            <div className="w-full text-dm-text-primary relative gap-x-2 backdrop-blur-xs bg-surface-card/30 h-[65px] justify-between flex items-center px-4">
-              <IoMdDesktop size={20} aria-label={t("pcPlatform")} />
-              <span className="text-xl font-semibold">{price}</span>
+            {/* Price Overlay */}
+            <div className="absolute bottom-0 w-full">
+              <div className="relative flex h-[65px] w-full items-center justify-between gap-x-2 bg-surface-card/30 px-4 text-dm-text-primary backdrop-blur-xs">
+                <PlatformBadges platform={platform} size={18} />
+                <span className="shrink-0 text-xl font-semibold">{price}</span>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Footer */}
-        <div
-          ref={footerRef}
-          className="w-full h-[57px] bg-surface-card flex px-2 justify-between items-center"
-        >
-          <h3 className="text-dm-text-primary text-xl font-semibold truncate">
-            {title}
-          </h3>
+          {/* Footer */}
+          <div
+            ref={footerRef}
+            className="flex h-[57px] w-full items-center justify-between bg-surface-card px-2"
+          >
+            <h3 className="truncate text-xl font-semibold text-dm-text-primary">
+              {title}
+            </h3>
+          </div>
         </div>
-      </div>
-    </Link>
-  </article>
+      </Link>
+    </article>
   );
 }

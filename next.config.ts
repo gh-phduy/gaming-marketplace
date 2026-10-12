@@ -9,6 +9,11 @@ const nextConfig: NextConfig = {
      ============================================ */
 
 
+  // Keep workspace resolution local when parent directories have lockfiles.
+  turbopack: {
+    root: __dirname,
+  },
+
   // Image optimization
   images: {
     formats: ["image/avif", "image/webp"],
@@ -36,7 +41,7 @@ const nextConfig: NextConfig = {
       // Allow loading images from Supabase Storage (game assets, product images, avatars)
       {
         protocol: "https",
-        hostname: "qqrmbooglxuxbikrnpnh.supabase.co",
+        hostname: "pcbxvswjcjdmelwznarp.supabase.co",
         port: "",
         pathname: "/storage/v1/object/public/**",
       },

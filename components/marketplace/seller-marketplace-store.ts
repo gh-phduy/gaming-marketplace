@@ -1,6 +1,7 @@
 "use client";
 
 import { supabase } from "@/lib/supabase";
+import { listingCategories, sellerListingSchema } from "@/lib/seller-listing";
 
 export type SellerListingStatus = "draft" | "published" | "paused";
 
@@ -208,11 +209,11 @@ const mapDbProductToListing = (row: any): SellerListing => {
   return {
     id: row.id,
     title: row.title,
-    productType: row.category,
+    productType: Object.keys(listingCategories).find(label => listingCategories[label] === row.category) || row.category,
     platform: row.platform || "PC",
-    edition: "Standard",
+    edition: row.edition || "Standard",
     activationRegion: row.region,
-    delivery: "Instant",
+    delivery: row.delivery || "Instant",
     stock: row.stock,
     price: Number(row.price),
     currency: row.currency,
@@ -237,7 +238,7 @@ export async function readSellerListings(accountId?: string | null): Promise<Sel
 
   if (error) {
     console.error("Error reading products from Supabase:", error);
-    return [];
+    throw error;
   }
 
   return (data || []).map(mapDbProductToListing);
@@ -251,11 +252,20 @@ export function saveSellerListings(
   dispatchSellerMarketplaceChange();
 }
 
+async function requireSellerAccount(accountId?: string | null) {
+  const { data, error } = await supabase.auth.getUser();
+  if (error || !data.user || data.user.id !== accountId) throw new Error("Please sign in again before changing products.");
+}
+
 export async function createSellerListing(
   input: SellerListingInput,
   accountId?: string | null,
 ) {
   if (!accountId) throw new Error("Account ID is required to create a listing.");
+  const parsed = sellerListingSchema.safeParse(input);
+  if (!parsed.success) throw new Error(parsed.error.issues[0]?.message || "Invalid product details.");
+  await requireSellerAccount(accountId);
+  input = parsed.data;
 
   const { data, error } = await supabase
     .from("products")
@@ -265,12 +275,15 @@ export async function createSellerListing(
       description: input.description,
       price: input.price,
       currency: input.currency,
-      category: input.productType,
+      category: listingCategories[input.productType] || input.productType,
       platform: input.platform,
       region: input.activationRegion,
+      edition: input.edition,
+      delivery: input.delivery,
       stock: input.stock,
       image_url: input.imageUrl || null,
       status: input.status,
+      is_new: input.status === "published",
     })
     .select()
     .single();
@@ -289,13 +302,18 @@ export async function updateSellerListingStatus(
   status: SellerListingStatus,
   accountId?: string | null,
 ) {
-  const { error } = await supabase
+  await requireSellerAccount(accountId);
+  const { data, error } = await supabase
     .from("products")
     .update({
       status,
+      is_new: status === "published",
       updated_at: new Date().toISOString(),
     })
-    .eq("id", listingId);
+    .eq("id", listingId)
+    .eq("seller_id", accountId!)
+    .select()
+    .single();
 
   if (error) {
     console.error("Error updating product status in Supabase:", error);
@@ -303,16 +321,21 @@ export async function updateSellerListingStatus(
   }
 
   dispatchSellerMarketplaceChange();
+  return mapDbProductToListing(data);
 }
 
 export async function deleteSellerListing(
   listingId: string,
   accountId?: string | null,
 ) {
+  await requireSellerAccount(accountId);
   const { error } = await supabase
     .from("products")
     .delete()
-    .eq("id", listingId);
+    .eq("id", listingId)
+    .eq("seller_id", accountId!)
+    .select("id")
+    .single();
 
   if (error) {
     console.error("Error deleting product from Supabase:", error);
@@ -534,28 +557,7 @@ export async function sendSellerConversationMessage(
 
   if (msgError) throw msgError;
 
-  const updatePayload: any = {
-    updated_at: new Date().toISOString(),
-  };
-
-  const { data: currentConv } = await supabase
-    .from("conversations")
-    .select("unread_for_seller, unread_for_buyer")
-    .eq("id", conversationId)
-    .single();
-
-  if (currentConv) {
-    if (message.senderRole === "seller") {
-      updatePayload.unread_for_buyer = (currentConv.unread_for_buyer || 0) + 1;
-    } else {
-      updatePayload.unread_for_seller = (currentConv.unread_for_seller || 0) + 1;
-    }
-  }
-
-  await supabase
-    .from("conversations")
-    .update(updatePayload)
-    .eq("id", conversationId);
+  // The messages INSERT trigger updates unread counts atomically for both chat UIs.
 
   dispatchSellerMarketplaceChange();
 

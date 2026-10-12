@@ -17,6 +17,9 @@ export function DirectTopUpDetailClient({ game }: { game: TopUpGameDetail }) {
     selectedPackage,
     setSelectedPackageId,
     handleCheckout,
+    fields,
+    setField,
+    error,
   } = useDirectTopUp(game);
 
   return (
@@ -24,11 +27,11 @@ export function DirectTopUpDetailClient({ game }: { game: TopUpGameDetail }) {
       id="main-content"
       className="w-full bg-[#141b24] px-4 pt-9 pb-14 text-dm-text-primary sm:px-6 lg:px-8"
     >
-      <div className="mx-auto grid w-full max-w-[1590px] min-w-0 grid-cols-1 gap-7 lg:grid-cols-[374px_minmax(0,782px)_376px] lg:items-start">
+      <div className="mx-auto grid w-full max-w-[1590px] min-w-0 grid-cols-1 items-start gap-7 xl:grid-cols-[minmax(0,1fr)_minmax(0,2.1fr)_minmax(0,1fr)]">
         <Sidebar activeSlug={game.slug} />
 
         <div className="min-w-0 space-y-5">
-          <GameHero game={game} />
+          <GameHero game={game} fields={fields} onFieldChange={setField} error={error} />
           <PackageGrid
             game={game}
             selectedPackageId={selectedPackage.id}

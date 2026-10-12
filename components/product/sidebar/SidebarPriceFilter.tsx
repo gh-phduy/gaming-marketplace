@@ -1,49 +1,53 @@
+import { useMemo } from "react";
 import { useProductFilter } from "@/contexts/ProductFilterContext";
+import { getPricePresets, getVisiblePriceRange } from "@/lib/price-filter";
 import PriceChartSlider from "./price-filter/PriceChartSlider";
 import PriceInputs from "./price-filter/PriceInputs";
 import PriceRangeList from "./price-filter/PriceRangeRadioList";
 import { useTranslations } from "next-intl";
 
-const SLIDER_MAX = 1450;
-
-const PRICE_RANGES = [
-  { min: 0, max: 6, label: "$ 0 - $ 6", count: 14727 },
-  { min: 6, max: 30, label: "$ 6 - $ 30", count: 28663 },
-  { min: 30, max: 120, label: "$ 30 - $ 120", count: 6387 },
-  { min: 120, max: 400, label: "$ 120 - $ 400", count: 196 },
-];
-
-export default function SidebarPriceFilter() {
+export default function SidebarPriceFilter({
+  prices,
+  ceiling,
+  onFilterChange,
+}: {
+  prices: number[];
+  ceiling: number;
+  onFilterChange?: () => void;
+}) {
   const t = useTranslations("product");
   const { priceRange, setPriceRange } = useProductFilter();
-
-  const handlePriceChange = (min: number, max: number) => {
-    setPriceRange({ min, max });
-  };
-
+  const range = getVisiblePriceRange(priceRange, ceiling);
+  const presets = useMemo(
+    () => getPricePresets(prices, ceiling),
+    [prices, ceiling],
+  );
+  function change(min: number, max: number) {
+    setPriceRange({ min, max: max === ceiling ? Infinity : max });
+    onFilterChange?.();
+  }
   return (
-    <div className="w-full space-y-5">
+    <section className="w-full space-y-4" aria-label={t("price")}>
       <h3 className="text-xl font-bold text-white">{t("price")}</h3>
-
       <PriceChartSlider
-        minPrice={priceRange.min}
-        maxPrice={priceRange.max}
-        sliderMax={SLIDER_MAX}
-        onPriceChange={handlePriceChange}
+        minPrice={range.min}
+        maxPrice={range.max}
+        sliderMax={ceiling}
+        prices={prices}
+        onPriceChange={change}
       />
-
       <PriceInputs
-        min={priceRange.min}
-        max={priceRange.max}
-        onChange={handlePriceChange}
+        min={range.min}
+        max={range.max}
+        ceiling={ceiling}
+        onChange={change}
       />
-
       <PriceRangeList
-        ranges={PRICE_RANGES}
-        minPrice={priceRange.min}
-        maxPrice={priceRange.max}
-        onRangeSelect={handlePriceChange}
+        ranges={presets}
+        minPrice={range.min}
+        maxPrice={range.max}
+        onRangeSelect={change}
       />
-    </div>
+    </section>
   );
 }

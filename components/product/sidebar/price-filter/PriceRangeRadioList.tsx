@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import { useId } from "react";
 
 interface PriceRange {
   min: number;
@@ -22,8 +23,9 @@ export default function PriceRangeList({
   maxPrice,
   onRangeSelect,
 }: PriceRangeListProps) {
+  const name = useId();
   return (
-    <div className="space-y-1 pt-2">
+    <div className="space-y-1 pt-2" role="radiogroup" aria-label="Price ranges">
       {ranges.map((item, index) => {
         const isChecked = minPrice === item.min && maxPrice === item.max;
         return (
@@ -35,10 +37,10 @@ export default function PriceRangeList({
               <div className="relative flex items-center justify-center">
                 <input
                   type="radio"
-                  name="price_range"
+                  name={name}
                   checked={isChecked}
                   onChange={() => onRangeSelect(item.min, item.max)}
-                  className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border border-gray-500 bg-transparent transition-all checked:border-4 checked:border-[#58a6ff]"
+                  className="peer h-5 w-5 cursor-pointer appearance-none rounded-full border border-gray-500 bg-transparent transition-all checked:border-4 checked:border-[#65c756] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#65c756]"
                 />
               </div>
               <span
@@ -52,7 +54,7 @@ export default function PriceRangeList({
                 {item.label}
               </span>
             </div>
-            <span className="text-xs font-medium text-gray-600">
+            <span className="text-xs font-medium text-gray-400">
               {item.count.toLocaleString().replace(/,/g, " ")}
             </span>
           </label>

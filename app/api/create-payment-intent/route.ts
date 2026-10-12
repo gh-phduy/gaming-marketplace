@@ -1,24 +1,15 @@
 import { NextResponse } from "next/server";
-import Stripe from "stripe";
+import { authenticatePaymentRequest, createCheckoutPayment, paymentErrorResponse } from "@/lib/payments/server";
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
   try {
-    const { amount } = await request.json();
-
-    const paymentIntent = await stripe.paymentIntents.create({
-      amount: amount || 100, // Default to $1.00 if no amount provided, for testing
-      currency: "usd",
-      automatic_payment_methods: { enabled: true },
+    const { client, user } = await authenticatePaymentRequest(request);
+    return NextResponse.json(await createCheckoutPayment(client, user.id, await request.json()), {
+      headers: { "Cache-Control": "no-store" },
     });
-
-    return NextResponse.json({ clientSecret: paymentIntent.client_secret });
   } catch (error) {
-    console.error("Internal Error:", error);
-    return NextResponse.json(
-      { error: `Internal Server Error: ${error}` },
-      { status: 500 },
-    );
+    return paymentErrorResponse(error);
   }
 }

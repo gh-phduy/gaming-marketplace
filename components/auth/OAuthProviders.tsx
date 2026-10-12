@@ -1,10 +1,14 @@
+"use client";
+
+import { useState } from "react";
 import { FcGoogle } from "react-icons/fc";
 import { FaFacebook, FaTwitch, FaMicrosoft } from "react-icons/fa";
 import { MdEmail } from "react-icons/md";
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase";
 import SocialButton from "./SocialButton";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { parseError } from "./auth-utils";
 
 interface OAuthProvidersProps {
   onEmailClick: () => void;
@@ -17,20 +21,26 @@ interface OAuthProvidersProps {
  */
 export default function OAuthProviders({ onEmailClick, onShowToast }: OAuthProvidersProps) {
   const t = useTranslations("auth");
+  const tCommon = useTranslations("common");
+  const locale = useLocale();
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
   
   // Handles Google OAuth sign-in flow
   const handleGoogleSignIn = async () => {
+    if (isGoogleLoading) return;
+    setIsGoogleLoading(true);
     try {
       const { error } = await supabase.auth.signInWithOAuth({
         provider: "google",
         options: { 
-          // Redirect to the origin URL after a successful sign-in
-          redirectTo: `${window.location.origin}/` 
+          redirectTo: `${window.location.origin}/${locale}`
         },
       });
       if (error) throw error;
     } catch (err) {
       console.error("Google sign in error:", err);
+      onShowToast(parseError(err, "Unable to sign in with Google. Please try again."), "warning");
+      setIsGoogleLoading(false);
     }
   };
 
@@ -57,9 +67,11 @@ export default function OAuthProviders({ onEmailClick, onShowToast }: OAuthProvi
         variant="default"
         className="mb-8 flex h-14 w-full cursor-pointer items-center justify-center gap-3 rounded-xl bg-white text-base font-bold text-black transition-all hover:bg-gray-200"
         onClick={handleGoogleSignIn}
+        disabled={isGoogleLoading}
+        aria-busy={isGoogleLoading}
       >
         <FcGoogle className="h-6 w-6" />
-        <span>Log in with Google</span>
+        <span>{isGoogleLoading ? tCommon("loading") : "Log in with Google"}</span>
       </Button>
 
       {/* Separator line */}
