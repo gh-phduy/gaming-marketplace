@@ -38,7 +38,10 @@
   "exclude": [
     "node_modules",
     "supabase",
-    "backend"
+    "backend",
+    ".open-next",
+    ".wrangler",
+    "cloudflare-env.d.ts"
   ],
   "typeRoots": [
     "./src/typings",

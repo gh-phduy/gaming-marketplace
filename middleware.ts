@@ -1,6 +1,8 @@
 import createMiddleware from 'next-intl/middleware';
 import { locales, defaultLocale } from './i18n/config';
 
+// OpenNext supports Edge middleware. Keep this convention while deploying to
+// Workers: Next.js proxy runs in Node and duplicates the server runtime bundle.
 export default createMiddleware({
   // A list of all locales that are supported
   locales,
