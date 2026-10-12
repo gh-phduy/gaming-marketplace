@@ -23,7 +23,12 @@ export function getStripe() {
   const key = process.env.STRIPE_SECRET_KEY;
   // The demo catalog has no real fulfillment system. Refuse live charges.
   if (!key?.startsWith("sk_test_")) throw new PaymentError("Stripe test mode is not configured.", 503);
-  return new Stripe(key);
+  return new Stripe(key, {
+    // Workers supports fetch natively; Node's HTTP transport can hang here.
+    httpClient: Stripe.createFetchHttpClient(),
+    timeout: 20_000,
+    maxNetworkRetries: 1,
+  });
 }
 
 function supabaseConfig() {

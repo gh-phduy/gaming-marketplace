@@ -8,7 +8,15 @@ export async function paymentRequest<T>(path: string, body: unknown, signal?: Ab
     headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
     body: JSON.stringify(body),
   });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || "Payment service unavailable. Please try again.");
+  // A proxy or Worker failure can return HTML instead of the API's JSON body.
+  const result = await response.json().catch(() => null);
+  if (!response.ok) {
+    throw new Error(typeof result?.error === "string"
+      ? result.error
+      : `Payment service unavailable (HTTP ${response.status}). Please try again.`);
+  }
+  if (!result || typeof result !== "object") {
+    throw new Error("Payment service returned an unexpected response. Please try again.");
+  }
   return result as T;
 }

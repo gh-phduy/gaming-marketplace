@@ -3,8 +3,11 @@ import type Stripe from "stripe";
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { authenticatePaymentRequest, createCheckoutPayment, readPaidLines, recordPaidOrder, verifyCheckoutPayment } from "./server";
 
-const mocks = vi.hoisted(() => ({ create: vi.fn(), retrieve: vi.fn(), db: vi.fn(), auth: vi.fn(), rows: vi.fn() }));
-vi.mock("stripe", () => ({ default: class { paymentIntents = { create: mocks.create, retrieve: mocks.retrieve }; } }));
+const mocks = vi.hoisted(() => ({ create: vi.fn(), retrieve: vi.fn(), db: vi.fn(), auth: vi.fn(), rows: vi.fn(), fetchClient: {} }));
+vi.mock("stripe", () => ({ default: class {
+  static createFetchHttpClient() { return mocks.fetchClient; }
+  paymentIntents = { create: mocks.create, retrieve: mocks.retrieve };
+} }));
 vi.mock("@supabase/supabase-js", () => ({ createClient: () => ({ auth: { getUser: mocks.auth }, from: mocks.db }) }));
 const product = "10000000-0000-4000-8000-000000000001";
 const buyer = "20000000-0000-4000-8000-000000000001";
