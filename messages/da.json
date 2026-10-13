@@ -107,6 +107,9 @@
     "logout": "Log ud"
   },
   "auth": {
+    "signupSuccessTitle": "Kontoen er oprettet",
+    "checkEmailTitle": "Tjek din e-mail",
+    "checkEmailDescription": "Vi har sendt et bekræftelseslink til {email}. Bekræft din konto og kom tilbage for at logge ind. Tjek også spammappen.",
     "welcomeBack": "Velkommen tilbage",
     "loginSubtitle": "Log ind for at få adgang til din konto",
     "email": "E-mail",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Stripe Test betalingstilstand",
     "useCard": "Brug kort:",
     "expiryCvcZip": "Udløb: enhver fremtidig dato (f.eks. 29/12) | CVC: 123 | ZIP: alle tal",
+    "useTestCard": "Brug testkort",
+    "testCardReady": "Testkort valgt. Tryk Betal for at fortsætte uden at indtaste kortoplysninger.",
+    "enterCardManually": "Indtast kort manuelt",
     "processingDots": "Behandler...",
     "pay": "Betale",
     "completed": "Udført",
@@ -396,6 +402,7 @@
     "loading": "Indlæser..."
   },
   "user": {
+    "productRemovedFromCart": "Produkt fjernet fra indkøbskurven",
     "noProductsMatchFilters": "Ingen produkter matcher dine filtre.",
     "productAddedToCart": "Produkt tilføjet til kurv",
     "profiles": "profiler",

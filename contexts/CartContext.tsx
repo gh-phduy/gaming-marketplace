@@ -9,6 +9,9 @@ import {
   useCallback,
   useState,
 } from "react";
+import CartNotification, {
+  type CartNotice,
+} from "@/components/shared/CartNotification";
 
 const CART_ITEMS_STORAGE_KEY = "cart_items";
 
@@ -91,6 +94,8 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cartItems, setCartItems] = useState<CartItem[]>([]);
   const [hasHydratedCart, setHasHydratedCart] = useState(false);
+  const [notification, setNotification] = useState<CartNotice | null>(null);
+  const dismissNotification = useCallback(() => setNotification(null), []);
 
   useEffect(() => {
     setCartItems(readCartItemsFromStorage());
@@ -129,6 +134,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       writeCartItemsToStorage(nextCartItems);
       return nextCartItems;
     });
+    setNotification({ type: "added", name: item.name });
   };
 
   const incrementItem = (itemId: string) => {
@@ -142,6 +148,8 @@ export function CartProvider({ children }: { children: ReactNode }) {
   };
 
   const decrementItem = (itemId: string) => {
+    const item = cartItems.find((item) => item.id === itemId);
+    if (!item) return;
     setCartItems((prev) => {
       const nextCartItems = prev
         .map((item) =>
@@ -151,14 +159,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
       writeCartItemsToStorage(nextCartItems);
       return nextCartItems;
     });
+    if (item.quantity === 1) {
+      setNotification({ type: "removed", name: item.name });
+    }
   };
 
   const removeItem = (itemId: string) => {
+    const item = cartItems.find((item) => item.id === itemId);
+    if (!item) return;
     setCartItems((prev) => {
       const nextCartItems = prev.filter((item) => item.id !== itemId);
       writeCartItemsToStorage(nextCartItems);
       return nextCartItems;
     });
+    setNotification({ type: "removed", name: item.name });
   };
 
   const resetCart = useCallback(() => {
@@ -179,7 +193,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     [cartItems, cartCount],
   );
 
-  return <CartContext.Provider value={value}>{children}</CartContext.Provider>;
+  return (
+    <CartContext.Provider value={value}>
+      {children}
+      <CartNotification
+        notification={notification}
+        onDismiss={dismissNotification}
+      />
+    </CartContext.Provider>
+  );
 }
 
 export function useCart() {

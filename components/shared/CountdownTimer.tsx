@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 /* ============================================
@@ -63,7 +63,7 @@ function TimeBlock({ value, label }: TimeBlockProps) {
       </div>
 
       {/* Label */}
-      <div className="absolute text-[10px] 1000:text-[12px] 1300:text-sm text-dm-text-secondary bottom-0 bg-surface-overlay flex items-center justify-center w-full h-[16px] 1000:h-[18px] 1300:h-[20px]">
+      <div className="absolute text-[10px] 1000:text-[12px] 1300:text-sm text-white bottom-0 bg-surface-overlay flex items-center justify-center w-full h-[16px] 1000:h-[18px] 1300:h-[20px]">
         <span>{label}</span>
       </div>
     </div>

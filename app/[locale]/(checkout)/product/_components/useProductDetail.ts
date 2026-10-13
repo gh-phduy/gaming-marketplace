@@ -69,7 +69,7 @@ const mapDbProductToClientProduct = (row: any): Product => {
 const fetchListingProducts = async ({
   signal,
 }: { signal?: AbortSignal } = {}): Promise<Product[]> => {
-  let query = supabase.from("products").select("*").eq("status", "published");
+  let query = supabase.from("products").select("id,title,price,image_url,platform,category,region").eq("status", "published");
 
   if (signal) {
     query = query.abortSignal(signal);

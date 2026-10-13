@@ -1,25 +1,45 @@
-import { dirname } from "path";
-import { fileURLToPath } from "url";
-import { FlatCompat } from "@eslint/eslintrc";
+import { defineConfig, globalIgnores } from "eslint/config";
+import nextVitals from "eslint-config-next/core-web-vitals";
+import nextTypescript from "eslint-config-next/typescript";
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
-
-const compat = new FlatCompat({
-  baseDirectory: __dirname,
-});
-
-const eslintConfig = [
-  ...compat.extends("next/core-web-vitals", "next/typescript"),
+export default defineConfig([
+  ...nextVitals,
+  ...nextTypescript,
+  globalIgnores([
+    ".next/**", ".open-next/**", ".wrangler/**", ".cloudflare/**",
+    ".codex-artifacts/**", "coverage/**", "out/**", "build/**", "scratch/**",
+    "next-env.d.ts", "cloudflare-env.d.ts",
+  ]),
   {
+    files: ["**/*.{ts,tsx}"],
     rules: {
-      // Temporarily allow img elements during migration
-      // TODO: Remove after all images are migrated to next/image
-      "@next/next/no-img-element": "warn",
-      // Accessibility rules
-      "jsx-a11y/alt-text": "warn",
+      // Existing untyped adapters and test fixtures remain visible as migration debt.
+      "@typescript-eslint/no-explicit-any": "warn",
     },
   },
-];
-
-export default eslintConfig;
+  {
+    files: ["**/*.{jsx,tsx}"],
+    rules: {
+      "@next/next/no-img-element": "warn",
+      "jsx-a11y/alt-text": "warn",
+      // React Compiler is not enabled. Keep its migration diagnostics visible,
+      // while rules-of-hooks and exhaustive-deps retain the Next.js defaults.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/refs": "warn",
+    },
+  },
+  {
+    files: ["**/*.ts"],
+    rules: {
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+      "react-hooks/refs": "warn",
+    },
+  },
+  {
+    files: ["supabase/**/*.cjs"],
+    // These provisioning/validation tools deliberately use Node CommonJS.
+    rules: { "@typescript-eslint/no-require-imports": "off" },
+  },
+]);

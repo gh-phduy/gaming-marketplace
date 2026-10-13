@@ -26,9 +26,11 @@ import {
 export default function CheckoutForm({
   amount,
   orderItems,
+  clientSecret,
 }: {
   amount: number;
   orderItems: CheckoutOrderItem[];
+  clientSecret: string;
 }) {
   const t = useTranslations("checkout");
   const locale = useLocale();
@@ -37,6 +39,10 @@ export default function CheckoutForm({
 
   const [message, setMessage] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [useTestCard, setUseTestCard] = useState(false);
+  const isTestMode =
+    process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY?.startsWith("pk_test_") === true;
+  const testCardSelected = isTestMode && useTestCard;
   const submitting = useRef(false);
 
   /**
@@ -56,12 +62,14 @@ export default function CheckoutForm({
     try {
       // Trigger form validation and wallet collection IMMEDIATELY
       // to preserve the trusted user gesture required by mobile browsers
-      const { error: submitError } = await elements.submit();
-      if (submitError) {
-        setMessage(submitError.message ?? t("unexpectedError"));
-        submitting.current = false;
-        setIsLoading(false);
-        return;
+      if (!testCardSelected) {
+        const { error: submitError } = await elements.submit();
+        if (submitError) {
+          setMessage(submitError.message ?? t("unexpectedError"));
+          submitting.current = false;
+          setIsLoading(false);
+          return;
+        }
       }
 
       setIsLoading(true);
@@ -77,13 +85,17 @@ export default function CheckoutForm({
       });
 
       // Request payment validation and redirection
-      const { error, paymentIntent } = await stripe.confirmPayment({
-        elements,
-        confirmParams: {
-          return_url: `${window.location.origin}/${locale}/checkout/success`,
-        },
-        redirect: "if_required",
-      });
+      const { error, paymentIntent } = testCardSelected
+        ? await stripe.confirmCardPayment(clientSecret, {
+            payment_method: "pm_card_visa",
+          })
+        : await stripe.confirmPayment({
+            elements,
+            confirmParams: {
+              return_url: `${window.location.origin}/${locale}/checkout/success`,
+            },
+            redirect: "if_required",
+          });
 
       if (error) {
         // Capture and translate Stripe processing issues
@@ -115,7 +127,7 @@ export default function CheckoutForm({
   return (
     <form id="payment-form" onSubmit={handleSubmit} className="space-y-6">
       {/* Stripe Test Mode Info Callout for Recruiters/Testers */}
-      <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm text-yellow-300 flex flex-col gap-y-1">
+      {isTestMode && <div className="rounded-lg border border-yellow-500/20 bg-yellow-500/10 p-4 text-sm text-yellow-300 flex flex-col gap-y-1">
         <span className="font-semibold flex items-center gap-x-1">
           {t("stripeTestPaymentMode")}
         </span>
@@ -125,10 +137,25 @@ export default function CheckoutForm({
         <p className="text-gray-400 text-xs">
           {t("expiryCvcZip")}
         </p>
-      </div>
+        {!testCardSelected && <Button type="button" variant="outline" disabled={isLoading || !stripe || !elements}
+          onClick={() => { setUseTestCard(true); setMessage(null); }}
+          className="mt-3 self-start border-yellow-500/40 bg-transparent text-yellow-200 hover:bg-yellow-500/15 hover:text-yellow-100">
+          {t("useTestCard")}
+        </Button>}
+      </div>}
 
       {/* Stripe Payment Element (Loads dynamic input tabs per country/intent settings) */}
-      <PaymentElement id="payment-element" options={{ layout: "tabs" }} />
+      {testCardSelected ? <div className="rounded-lg border border-green-500/30 bg-green-500/10 p-4">
+        <div className="flex items-center justify-between gap-3">
+          <span className="text-sm font-semibold text-white">Visa <span className="ml-2 font-mono text-gray-300">•••• 4242</span></span>
+          <span className="rounded bg-green-500/15 px-2 py-1 text-xs font-semibold text-green-300">TEST</span>
+        </div>
+        <p role="status" className="mt-2 text-sm text-green-200">{t("testCardReady")}</p>
+        <button type="button" disabled={isLoading} onClick={() => { setUseTestCard(false); setMessage(null); }}
+          className="mt-3 cursor-pointer text-sm text-gray-300 underline underline-offset-4 hover:text-white disabled:cursor-wait disabled:opacity-50">
+          {t("enterCardManually")}
+        </button>
+      </div> : <PaymentElement id="payment-element" options={{ layout: "tabs" }} />}
       
       {/* Submit Button Trigger */}
       <Button
@@ -151,6 +178,7 @@ export default function CheckoutForm({
       {message && (
         <div
           id="payment-message"
+          role="alert"
           className="p-4 text-center text-sm text-red-500"
         >
           {message}

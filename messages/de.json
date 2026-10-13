@@ -107,6 +107,9 @@
     "logout": "Abmelden"
   },
   "auth": {
+    "signupSuccessTitle": "Konto erfolgreich erstellt",
+    "checkEmailTitle": "Prüfe deine E-Mails",
+    "checkEmailDescription": "Wir haben einen Bestätigungslink an {email} gesendet. Bestätige dein Konto über die E-Mail und kehre dann zur Anmeldung zurück. Prüfe auch deinen Spamordner.",
     "welcomeBack": "Willkommen zurück",
     "loginSubtitle": "Melden Sie sich an, um auf Ihr Konto zuzugreifen",
     "email": "E-Mail",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Stripe-Test-Zahlungsmodus",
     "useCard": "Karte verwenden:",
     "expiryCvcZip": "Ablauf: jedes zukünftige Datum (z. B. 29.12.) | CVC: 123 | PLZ: beliebige Zahlen",
+    "useTestCard": "Testkarte verwenden",
+    "testCardReady": "Testkarte ausgewählt. Klicke auf Bezahlen, um ohne Karteneingabe fortzufahren.",
+    "enterCardManually": "Karte manuell eingeben",
     "processingDots": "Verarbeitung...",
     "pay": "Zahlen",
     "completed": "Abgeschlossen",
@@ -396,6 +402,7 @@
     "loading": "Wird geladen..."
   },
   "user": {
+    "productRemovedFromCart": "Produkt aus dem Warenkorb entfernt",
     "noProductsMatchFilters": "Keine Produkte entsprechen Ihren Filtern.",
     "productAddedToCart": "Produkt zum Warenkorb hinzugefügt",
     "profiles": "Profile",

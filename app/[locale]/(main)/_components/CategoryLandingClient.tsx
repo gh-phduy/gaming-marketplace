@@ -342,7 +342,7 @@ export function CategoryLandingClient({
             role="status"
             className="mt-7 flex min-h-36 items-center justify-center rounded-lg border border-white/[0.04] bg-[#222c3b]/70 px-6 text-center text-dm-text-muted"
           >
-            No categories found for "{searchQuery.trim()}".
+            No categories found for &quot;{searchQuery.trim()}&quot;.
           </div>
         )}
 

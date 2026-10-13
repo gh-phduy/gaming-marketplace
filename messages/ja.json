@@ -107,6 +107,9 @@
     "logout": "ログアウト"
   },
   "auth": {
+    "signupSuccessTitle": "アカウントを作成しました",
+    "checkEmailTitle": "メールを確認してください",
+    "checkEmailDescription": "{email} に確認リンクを送信しました。メールからアカウントを確認し、このページに戻ってログインしてください。メールが見つからない場合は迷惑メールフォルダーも確認してください。",
     "welcomeBack": "おかえりなさい",
     "loginSubtitle": "アカウントにアクセスするにはログインしてください",
     "email": "メールアドレス",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Stripe テスト支払いモード",
     "useCard": "使用カード:",
     "expiryCvcZip": "有効期限: 将来の日付 (例: 12/29) | CVC: 123 | ZIP: 任意の数字",
+    "useTestCard": "テストカードを使用",
+    "testCardReady": "テストカードを選択しました。カード情報を入力せずに、支払いボタンで続行できます。",
+    "enterCardManually": "カード情報を手入力",
     "processingDots": "処理中...",
     "pay": "支払う",
     "completed": "完了",
@@ -396,6 +402,7 @@
     "loading": "読み込み中..."
   },
   "user": {
+    "productRemovedFromCart": "商品をカートから削除しました",
     "noProductsMatchFilters": "フィルターに一致する製品はありません。",
     "productAddedToCart": "製品がカートに追加されました",
     "profiles": "プロフィール",

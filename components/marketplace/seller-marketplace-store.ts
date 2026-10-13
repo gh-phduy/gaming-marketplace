@@ -436,13 +436,15 @@ export async function getOrCreateSellerConversation({
   buyerId: string;
   listingTitle?: string;
 }): Promise<SellerConversation> {
-  let { data: conversation, error } = await supabase
+  const conversationResult = await supabase
     .from("conversations")
     .select("*")
     .eq("seller_id", sellerId)
     .eq("buyer_id", buyerId)
     .eq("listing_title", listingTitle)
     .maybeSingle();
+  const { error } = conversationResult;
+  let { data: conversation } = conversationResult;
 
   if (error) {
     console.error("Error fetching conversation:", error);

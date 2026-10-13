@@ -38,15 +38,22 @@ export interface ActiveConversation {
  * including loading existing threads, resetting unread badges, and listening
  * for postgres insert changes via Supabase realtime channels.
  */
-export function useFloatingChat() {
+export function useFloatingChat(initialConversation?: ActiveConversation) {
   const { user } = useAuth();
-  const [isOpen, setIsOpen] = useState(false);
-  const [activeConversation, setActiveConversation] = useState<ActiveConversation | null>(null);
+  const [isOpen, setIsOpen] = useState(Boolean(initialConversation));
+  const [activeConversation, setActiveConversation] = useState<ActiveConversation | null>(initialConversation ?? null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (initialConversation) {
+      setActiveConversation(initialConversation);
+      setIsOpen(true);
+    }
+  }, [initialConversation]);
 
   // Hook 1: Listen for custom trigger events to launch chat overlays
   useEffect(() => {

@@ -4,8 +4,6 @@
  * Desktop grid for first 2 category cards (Game Currency, Game Points)
  */
 
-"use client";
-
 import { CategoryCard } from "../shared/CategoryCard";
 import { useTranslations } from "next-intl";
 

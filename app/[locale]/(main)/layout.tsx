@@ -1,7 +1,8 @@
 import Footer from "@/components/layout/Footer";
 import NavBar from "@/components/layout/NavBar";
 import { AppProviders } from "@/contexts/AppProviders";
-import FloatingChatWidget from "@/components/chat/FloatingChatWidget";
+import LazyFloatingChat from "@/components/chat/LazyFloatingChat";
+import MarketplaceHero from "@/components/layout/MarketplaceHero";
 
 export default function MainLayout({
   children,
@@ -13,9 +14,10 @@ export default function MainLayout({
       <AppProviders>
         <NavBar />
         <div className="flex flex-1 flex-col items-center pt-16 w-full overflow-x-hidden">
+          <MarketplaceHero />
           {children}
         </div>
-        <FloatingChatWidget />
+        <LazyFloatingChat />
         <Footer />
       </AppProviders>
     </>

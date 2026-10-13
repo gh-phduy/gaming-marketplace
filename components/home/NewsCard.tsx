@@ -92,7 +92,7 @@ export default function NewsItem({
       </div>
 
       {/* Time Ago */}
-      <div className="flex items-center gap-x-1 text-[12px] text-dm-text-disabled">
+      <div className="flex items-center gap-x-1 text-[12px] text-dm-text-secondary">
         <LuClock3 size={16} aria-hidden="true" />
         <time>{timeAgo}</time>
       </div>
@@ -121,7 +121,7 @@ export default function NewsItem({
 
   if (href) {
     return (
-      <Link href={href} className={cardClassName}>
+      <Link prefetch={false} href={href} className={cardClassName}>
         {cardContent}
       </Link>
     );

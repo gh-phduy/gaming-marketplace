@@ -121,7 +121,7 @@ export default function ProductClient() {
   }, [primarySelectedPlatform, selectedPlatformFilters, tNav]);
 
   return (
-    <div className="flex min-h-[calc(100vh-4rem)] w-full bg-[#0d1117] font-sans text-white">
+    <main id="main-content" className="flex min-h-[calc(100vh-4rem)] w-full bg-[#0d1117] font-sans text-white">
       {/* Desktop Sidebar — hidden below lg */}
       <aside className="hidden lg:block">
         <ProductSidebar {...sidebarProps} />
@@ -344,11 +344,11 @@ export default function ProductClient() {
           ) : paginatedProducts.length === 0 ? (
             <div className="flex min-h-[400px] w-full flex-col items-center justify-center rounded-2xl border border-[#30363d] bg-[#151c26]/50 px-6 py-24 text-center">
               <Ban className="mb-5 h-16 w-16 stroke-[1.2] text-slate-500/80" />
-              <h3 className="mb-2 text-lg font-bold tracking-wider text-white uppercase">
+              <h2 className="mb-2 text-lg font-bold tracking-wider text-white uppercase">
                 {t.has("noProductsFound")
                   ? t("noProductsFound")
                   : "NO PRODUCTS FOUND"}
-              </h3>
+              </h2>
               <p className="max-w-sm text-sm leading-relaxed text-slate-400">
                 {t.has("noProductsFoundDesc")
                   ? t("noProductsFoundDesc")
@@ -357,7 +357,7 @@ export default function ProductClient() {
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4">
-              {paginatedProducts.map((product) => (
+              {paginatedProducts.map((product, index) => (
                 <ProductGridItem
                   key={product.id}
                   id={product.id}
@@ -365,6 +365,7 @@ export default function ProductClient() {
                   price={product.price}
                   image={product.image}
                   platform={product.platform}
+                  eager={index < 2}
                 />
               ))}
             </div>
@@ -381,6 +382,6 @@ export default function ProductClient() {
           />
         )}
       </div>
-    </div>
+    </main>
   );
 }

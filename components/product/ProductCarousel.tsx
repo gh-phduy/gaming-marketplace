@@ -1,11 +1,10 @@
 "use client";
 
-import { useEffect, useState, ReactElement } from "react";
+import { ReactElement } from "react";
 import {
   Carousel,
   CarouselContent,
   CarouselItem,
-  CarouselApi,
 } from "@/components/ui/carousel";
 
 interface CarouselProductProps {
@@ -17,30 +16,13 @@ export default function CarouselProduct({
   children,
   className = "",
 }: CarouselProductProps) {
-  const [api, setApi] = useState<CarouselApi>();
-  const [current, setCurrent] = useState(0);
-
   // Sử dụng children.length thay vì items cố định
   const itemsLength = children.length;
-
-  useEffect(() => {
-    if (!api) return;
-
-    // Set initial position to center
-    const centerIndex = Math.floor(itemsLength / 2);
-    api.scrollTo(centerIndex);
-    setCurrent(centerIndex);
-
-    // Listen for selection changes (khi snap xong)
-    api.on("select", () => {
-      setCurrent(api.selectedScrollSnap());
-    });
-  }, [api, itemsLength]);
 
   return (
     <div className={`relative overflow-visible ${className}`}>
       <Carousel
-        setApi={setApi}
+        deferUntilVisible
         opts={{
           align: "center",
           loop: true,

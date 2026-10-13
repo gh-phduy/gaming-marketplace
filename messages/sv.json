@@ -107,6 +107,9 @@
     "logout": "Logga ut"
   },
   "auth": {
+    "signupSuccessTitle": "Kontot har skapats",
+    "checkEmailTitle": "Kontrollera din e-post",
+    "checkEmailDescription": "Vi har skickat en bekräftelselänk till {email}. Bekräfta ditt konto och kom tillbaka för att logga in. Kontrollera även skräpposten.",
     "welcomeBack": "Välkommen tillbaka",
     "loginSubtitle": "Logga in för att komma åt ditt konto",
     "email": "E-post",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Stripe Test Payment Mode",
     "useCard": "Använd kort:",
     "expiryCvcZip": "Förfallodatum: alla framtida datum (t.ex. 29/12) | CVC: 123 | ZIP: valfria nummer",
+    "useTestCard": "Använd testkort",
+    "testCardReady": "Testkort valt. Tryck på Betala för att fortsätta utan att ange kortuppgifter.",
+    "enterCardManually": "Ange kort manuellt",
     "processingDots": "Bearbetar...",
     "pay": "Betala",
     "completed": "Slutförd",
@@ -396,6 +402,7 @@
     "loading": "Laddar..."
   },
   "user": {
+    "productRemovedFromCart": "Produkten har tagits bort från kundvagnen",
     "noProductsMatchFilters": "Inga produkter matchar dina filter.",
     "productAddedToCart": "Produkten har lagts till i varukorgen",
     "profiles": "profiler",

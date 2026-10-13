@@ -107,6 +107,9 @@
     "logout": "登出"
   },
   "auth": {
+    "signupSuccessTitle": "账户创建成功",
+    "checkEmailTitle": "请检查您的邮箱",
+    "checkEmailDescription": "我们已向 {email} 发送确认链接。请打开邮件验证账户，然后返回此处登录。如果未找到邮件，请检查垃圾邮件文件夹。",
     "welcomeBack": "欢迎回来",
     "loginSubtitle": "登录以访问您的账户",
     "email": "电子邮件",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Stripe 测试支付模式",
     "useCard": "使用卡：",
     "expiryCvcZip": "到期日：任何未来日期（例如 12/29）| CVC：123 |邮政编码：任何数字",
+    "useTestCard": "使用测试卡",
+    "testCardReady": "已选择测试卡。点击支付即可继续，无需输入卡片信息。",
+    "enterCardManually": "手动输入卡片信息",
     "processingDots": "正在处理...",
     "pay": "支付",
     "completed": "完全的",
@@ -396,6 +402,7 @@
     "loading": "加载中..."
   },
   "user": {
+    "productRemovedFromCart": "商品已从购物车移除",
     "noProductsMatchFilters": "没有产品符合您的筛选条件。",
     "productAddedToCart": "产品已添加到购物车",
     "profiles": "简介",

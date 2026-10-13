@@ -3,6 +3,10 @@ import { describe, it, expect, vi } from "vitest";
 import SectionHeader from "../SectionHeader";
 import React from "react";
 
+vi.mock("@/i18n/routing", () => ({
+  Link: ({ prefetch, ...props }: any) => <a {...props} />,
+}));
+
 // Mock the CanvasTextImage component since we just want to test the SectionHeader composition
 vi.mock("../TextImageCanvas", () => ({
   CanvasTextImage: ({ text, className }: { text: string; className?: string }) => (

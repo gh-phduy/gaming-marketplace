@@ -2,7 +2,7 @@
  * Direct Top Up Page
  *
  * Trang top up trực tiếp game và dịch vụ số
- * HeroCarousel được render bởi (with-hero)/layout.tsx
+ * Hero được render bởi MarketplaceHero trong layout chung.
  */
 
 import { DirectTopUpClient } from "@/components/home/directtopup/DirectTopUpClient";

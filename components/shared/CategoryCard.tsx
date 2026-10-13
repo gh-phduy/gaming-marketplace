@@ -4,8 +4,10 @@
  * Reusable card for displaying category/product type with hover effects
  */
 
+"use client";
+
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { HOME_CATEGORY_SCROLL_KEY } from "../home/home-scroll-restoration";
 
 /* ============================================
@@ -46,9 +48,9 @@ export function CategoryCard({ data }: CategoryCardProps) {
 
     return (
         <Link
+            prefetch={false}
             href={data.href}
             className="inline-block relative group"
-            aria-label={`Browse ${data.title}`}
             onClick={rememberHomeScrollPosition}
         >
             <div className="w-[345px] h-[210px] 1000:w-[455px] 1000:h-[259px] 1200:w-[555px] 1200:h-[300px] 1640:w-[640px] 1640:h-[355px] 1920:w-[780px] rounded-md overflow-hidden relative">

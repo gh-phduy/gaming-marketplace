@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
+import { getImageProps } from "next/image";
 import { Link } from "@/i18n/routing";
 import type { CarouselApi } from "@/components/ui/carousel";
 import {
@@ -22,24 +22,8 @@ import { useHeroCarouselSelection } from "./hooks";
  */
 export function HeroSlides({ activeTab }: HeroSlidesProps) {
   const [api, setApi] = useState<CarouselApi>();
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const { current, scrollTo } = useHeroCarouselSelection(api);
   const slides = activeTab === "digital" ? HERO_SLIDES : HERO_SLIDES_TOPUP;
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(max-width: 699px)");
-
-    const updateViewport = () => {
-      setIsMobileViewport(mediaQuery.matches);
-    };
-
-    updateViewport();
-    mediaQuery.addEventListener("change", updateViewport);
-
-    return () => {
-      mediaQuery.removeEventListener("change", updateViewport);
-    };
-  }, []);
 
   useEffect(() => {
     if (!api) return;
@@ -67,37 +51,59 @@ export function HeroSlides({ activeTab }: HeroSlidesProps) {
       >
         <CarouselContent className="h-full">
           {slides.map((slide, index) => {
-            const imageSrc = isMobileViewport
-              ? slide.image
-                  .replace(
-                    /\/hero-slide-(\d+)\.webp$/,
-                    "/hero-slide-mobile-$1.webp",
-                  )
-                  .replace(
-                    /\/hero-slide-tab-(\d+)\.webp$/,
-                    "/hero-slide-tab-mobile-$1.webp",
-                  )
-              : slide.image;
+            const mobileImage = slide.image
+              .replace(
+                /\/hero-slide-(\d+)\.webp$/,
+                "/hero-slide-mobile-$1.webp",
+              )
+              .replace(
+                /\/hero-slide-tab-(\d+)\.webp$/,
+                "/hero-slide-tab-mobile-$1.webp",
+              );
+            const common = {
+              alt: slide.alt || slide.id,
+              fill: true,
+              className: "pointer-events-none object-cover",
+              fetchPriority:
+                index === 0 ? ("high" as const) : ("auto" as const),
+              loading: index === 0 ? ("eager" as const) : ("lazy" as const),
+            };
+            const { props: desktop } = getImageProps({
+              ...common,
+              src: slide.image,
+              sizes:
+                "(min-width: 1920px) 1050px, (min-width: 1640px) 863px, (min-width: 1200px) 760px, (min-width: 1100px) 610px, 96vw",
+            });
+            const { props: mobile } = getImageProps({
+              ...common,
+              src: mobileImage,
+              sizes: "100vw",
+            });
 
             const slideContent = (
               <div className="relative h-full w-full">
-                <Image
-                  src={imageSrc}
-                  alt={slide.alt || slide.id}
-                  fill
-                  sizes="(max-width: 699px) 100vw, (max-width: 1199px) 96vw, (min-width: 1920px) 1050px, (min-width: 1640px) 863px, (min-width: 1200px) 760px, 100vw"
-                  className="pointer-events-none object-cover"
-                  priority={index === 0}
-                  fetchPriority={index === 0 ? "high" : "auto"}
-                  loading={index === 0 ? "eager" : "lazy"}
-                />
+                <picture>
+                  <source
+                    media="(max-width: 699px)"
+                    srcSet={mobile.srcSet}
+                    sizes={mobile.sizes}
+                  />
+                  {/* The browser chooses the right art direction before hydration. */}
+                  { }
+                  <img {...desktop} alt={common.alt} />
+                </picture>
               </div>
             );
 
             return (
               <CarouselItem key={slide.id} className="h-full">
                 {slide.link ? (
-                  <Link href={slide.link} className="block h-full w-full" aria-label={`View ${slide.alt || slide.id}`}>
+                  <Link
+                    prefetch={false}
+                    href={slide.link}
+                    className="block h-full w-full"
+                    aria-label={`View ${slide.alt || slide.id}`}
+                  >
                     {slideContent}
                   </Link>
                 ) : (
@@ -114,14 +120,20 @@ export function HeroSlides({ activeTab }: HeroSlidesProps) {
             <button
               key={index}
               onClick={() => scrollTo(index)}
-              className={cn(
-                "h-1 rounded-full transition-all duration-300 min-[500px]:h-1.5",
-                current === index
-                  ? "w-5 bg-forest-500"
-                  : "w-1.5 bg-white/30 hover:bg-white/60 min-[500px]:w-2",
-              )}
+              className="flex h-6 min-w-6 items-center justify-center rounded-full focus-visible:outline-2 focus-visible:outline-white"
               aria-label={`Go to slide ${index + 1}`}
-            />
+              aria-current={current === index ? "true" : undefined}
+            >
+              <span
+                aria-hidden="true"
+                className={cn(
+                  "h-1 rounded-full transition-all duration-300 min-[500px]:h-1.5",
+                  current === index
+                    ? "w-5 bg-forest-500"
+                    : "w-1.5 bg-white/30 hover:bg-white/60 min-[500px]:w-2",
+                )}
+              />
+            </button>
           ))}
         </div>
       </Carousel>

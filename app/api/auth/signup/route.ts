@@ -1,17 +1,24 @@
 import { createClient } from "@supabase/supabase-js";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { defaultLocale, locales } from "@/i18n/config";
+import confirmationCopy from "@/supabase/email-templates/confirmation-copy.json";
 
 /* ==========================================================================
    SERVER-SIDE SIGNUP ROUTE
-   Uses the service role key to create users directly via Admin API,
-   bypassing Supabase's email-sending flow entirely (no SMTP needed).
+   Uses Supabase's public signup flow and honors its email confirmation policy.
    ========================================================================== */
 
 const signupSchema = z.object({
-  email: z.string().email(),
+  email: z.string().trim().email().max(255).toLowerCase(),
   password: z.string().min(6),
-  username: z.string().min(3),
+  username: z
+    .string()
+    .trim()
+    .min(3)
+    .max(20)
+    .regex(/^[a-zA-Z0-9_]+$/),
+  locale: z.enum(locales).default(defaultLocale),
 });
 
 export async function POST(req: NextRequest) {
@@ -24,58 +31,73 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: message }, { status: 400 });
     }
 
-    const { email, password, username } = parsed.data;
+    const { email, password, username, locale } = parsed.data;
 
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
-    if (!serviceKey || serviceKey === "your-service-role-key-here") {
-      console.error("❌ SUPABASE_SERVICE_ROLE_KEY is not set or is still the placeholder in .env.local!");
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+    const publicKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    if (!url || !publicKey) {
       return NextResponse.json(
-        { error: "Server configuration error. Please check SUPABASE_SERVICE_ROLE_KEY in .env.local." },
-        { status: 500 }
+        { error: "Email registration is unavailable. Please try again later." },
+        { status: 500 },
       );
     }
 
-    // Use service role key — this runs server-side only, never exposed to client
-    const supabaseAdmin = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      serviceKey,
-      { auth: { autoRefreshToken: false, persistSession: false } }
-    );
+    const client = createClient(url, publicKey, {
+      auth: {
+        autoRefreshToken: false,
+        persistSession: false,
+        detectSessionInUrl: false,
+      },
+    });
 
-    // Create user with email_confirm: true → no email is sent at all
-    const { data, error } = await supabaseAdmin.auth.admin.createUser({
+    const { data, error } = await client.auth.signUp({
       email,
       password,
-      email_confirm: true, // ← mark as confirmed immediately, skip all emails
-      user_metadata: {
-        display_name: username,
-        username: username,
-        full_name: username,
-        avatar_url: "/avt-placeholder.jpg",
+      options: {
+        emailRedirectTo: new URL(`/${locale}`, req.nextUrl.origin).toString(),
+        data: {
+          locale,
+          confirmation_subject: confirmationCopy[locale].subject,
+          display_name: username,
+          username: username,
+          full_name: username,
+          avatar_url: "/avt-placeholder.jpg",
+        },
       },
     });
 
     if (error) {
-      console.error("❌ Supabase Admin createUser error:", error);
       const errMsg = error.message || JSON.stringify(error);
-      
+
       // Handle duplicate email gracefully
-      if (errMsg.toLowerCase().includes("already been registered") ||
-          errMsg.toLowerCase().includes("already exists")) {
+      if (
+        errMsg.toLowerCase().includes("already been registered") ||
+        errMsg.toLowerCase().includes("already exists")
+      ) {
         return NextResponse.json(
-          { error: "An account with this email already exists. Please log in instead." },
-          { status: 409 }
+          {
+            error:
+              "An account with this email already exists. Please log in instead.",
+          },
+          { status: 409 },
         );
       }
-      return NextResponse.json({ error: errMsg }, { status: 400 });
+      return NextResponse.json(
+        { error: errMsg },
+        { status: error.status === 429 ? 429 : 400 },
+      );
     }
 
-    return NextResponse.json({ userId: data.user?.id }, { status: 201 });
-  } catch (err: any) { // eslint-disable-line @typescript-eslint/no-explicit-any
+    return NextResponse.json(
+      { requiresEmailConfirmation: !data.session },
+      { status: 201 },
+    );
+  } catch (err: any) {
+
     console.error("❌ Signup route crash:", err);
     return NextResponse.json(
       { error: err?.message || "Server error. Please try again." },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

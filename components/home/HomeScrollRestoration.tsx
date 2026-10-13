@@ -79,7 +79,7 @@ export default function HomeScrollRestoration() {
     let stableFrames = 0;
     let frameId = 0;
     let fadeTimer = 0;
-    let removeTimer = 0;
+    const removeTimer = 0;
 
     const restoreScroll = () => {
       window.scrollTo({ top: scrollY, left: 0, behavior: "auto" });

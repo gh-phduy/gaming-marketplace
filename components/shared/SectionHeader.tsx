@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { IoIosArrowForward } from "react-icons/io";
 import { CanvasTextImage } from "./TextImageCanvas";
 
@@ -38,6 +38,7 @@ export default function SectionHeader({
       />
 
       <Link
+        prefetch={false}
         href={viewAllHref}
         className="flex items-center justify-center gap-1 md:gap-2 text-xs md:text-sm text-[#C0C3C9] transition-colors hover:text-white"
         aria-label={viewAllAriaLabel || `View all ${headingText.toLowerCase()}`}

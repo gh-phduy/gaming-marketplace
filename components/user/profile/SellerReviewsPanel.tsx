@@ -19,7 +19,7 @@ function RatingStars({ rating }: { rating: number }) {
           className={`h-4 w-4 ${
             index < rating
               ? "fill-amber-400 text-amber-400"
-              : "fill-transparent text-steel-600"
+              : "text-steel-600 fill-transparent"
           }`}
         />
       ))}
@@ -106,18 +106,21 @@ export default function SellerReviewsPanel({
   onNotify,
 }: SellerReviewsPanelProps) {
   const t = useTranslations("user");
+  const home = useTranslations("home");
 
-  const positiveCount = profile.reviews.filter(
-    (review) => review.sentiment === "positive",
-  ).length;
+  const positiveCount =
+    profile.totalFeedbacks > 0
+      ? Math.round((profile.totalFeedbacks * profile.positiveFeedbacks) / 100)
+      : profile.reviews.filter((review) => review.sentiment === "positive")
+          .length;
 
   return (
     <section className="space-y-4">
       <div className="grid gap-3 md:grid-cols-3">
         <div className="rounded-lg border border-midnight-700 bg-midnight-800 p-4">
-          <p className="text-sm text-steel-500">{t("rating")}</p>
+          <p className="text-sm text-steel-500">{home("rating")}</p>
           <p className="mt-2 text-3xl font-bold text-white">
-            {profile.rating.toFixed(1)}
+            {profile.rating.toFixed(2)}
           </p>
         </div>
         <div className="rounded-lg border border-midnight-700 bg-midnight-800 p-4">
@@ -127,7 +130,7 @@ export default function SellerReviewsPanel({
           </p>
         </div>
         <div className="rounded-lg border border-midnight-700 bg-midnight-800 p-4">
-          <p className="text-sm text-steel-500">{t("totalFeedbacks")}</p>
+          <p className="text-sm text-steel-500">{t("totalReviews")}</p>
           <p className="mt-2 text-3xl font-bold text-white">
             {profile.totalFeedbacks.toLocaleString("en-US")}
           </p>

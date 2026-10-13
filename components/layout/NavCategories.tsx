@@ -8,7 +8,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { IoIosArrowForward } from "react-icons/io";
 import { IoKey, IoPhonePortraitOutline } from "react-icons/io5";
 import { IconType } from "react-icons";

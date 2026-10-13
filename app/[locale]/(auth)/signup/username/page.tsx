@@ -23,7 +23,7 @@ function decodeJwt(token: string): GooglePayload | null {
     const parts = token.split(".");
     if (parts.length < 2) return null;
     
-    let base64Url = parts[1];
+    const base64Url = parts[1];
     let base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
     
     // Add padding if missing

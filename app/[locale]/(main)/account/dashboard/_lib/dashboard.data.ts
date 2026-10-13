@@ -49,7 +49,7 @@ export interface OrderSummary {
   id: string;
   productName: string;
   date: string;
-  status: "completed" | "pending" | "processing" | "cancelled";
+  status: "completed" | "pending" | "processing" | "cancelled" | "failed" | "refunded";
   amount: number;
   currencySymbol: string;
 }

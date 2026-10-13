@@ -91,7 +91,7 @@ export default function SellerProfileClient({
         <SellerProfileTabs activeTab={activeTab} onChangeTab={setActiveTab} />
 
         {activeTab === "store" ? (
-          <SellerStorePanel profile={profile} onNotify={showToast} />
+          <SellerStorePanel profile={profile} />
         ) : null}
         {activeTab === "reviews" ? (
           <SellerReviewsPanel profile={profile} onNotify={showToast} />

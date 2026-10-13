@@ -1,122 +1,161 @@
-<div align="center">
-  <h1>🎮 Difmark Digital Marketplace Clone</h1>
-  <p>A modern, high-performance C2C/B2C E-commerce platform for digital gaming assets.</p>
-  
-  [![Next.js](https://img.shields.io/badge/Next.js-15-black?style=for-the-badge&logo=next.js)](https://nextjs.org/)
-  [![React](https://img.shields.io/badge/React-19-blue?style=for-the-badge&logo=react)](https://react.dev/)
-  [![Supabase](https://img.shields.io/badge/Supabase-Database-green?style=for-the-badge&logo=supabase)](https://supabase.com/)
-  [![Stripe](https://img.shields.io/badge/Stripe-Payments-indigo?style=for-the-badge&logo=stripe)](https://stripe.com/)
-  [![Vitest](https://img.shields.io/badge/Vitest-Testing-yellow?style=for-the-badge&logo=vitest)](https://vitest.dev/)
-</div>
+# Digital Gaming Marketplace
 
----
+A portfolio marketplace inspired by Difmark, built with Next.js 16, React 19,
+TypeScript and Supabase. It covers product discovery, Stripe test checkout,
+seller listing management and buyer–seller messaging.
 
-## 📝 Overview
+This is a demonstration project. Catalog entries, seller activity and some
+profile panels use sample data. No game keys are delivered or seller payouts
+processed. Third-party artwork and branding belong to their respective owners;
+this project is not affiliated with Difmark.
 
-**Difmark Digital Marketplace** is a robust and scalable e-commerce platform tailored specifically for the trading of digital gaming products (Game Keys, Accounts, In-game Items, and Top-up services). Built with the latest frontend ecosystem (Next.js 15 App Router, React 19), it delivers a seamless, highly interactive user experience while ensuring secure transactions and reliable data management.
+## Features and current scope
 
-🚀 **Live Demo:** [Insert Vercel Link Here]
+| Area | Implemented | Limits |
+| --- | --- | --- |
+| Catalog | Supabase-backed sections, search, filtering and sorting | Demo inventory and platform compatibility |
+| Buyer flow | Cart, Stripe test checkout, server-side verification, order recording and buyer order history | USD test checkout; no real fulfillment |
+| Seller workspace | Create listings with price/stock/images and change listing status | Editing saved listings is not implemented; analytics and reputation include seeded demo counters |
+| Messaging | Buyer–seller conversations and Supabase Realtime messages | Requires configured Auth, database policies and Realtime |
+| Seller directory | Search, filters, sorting, profiles and store views | Review summaries/excerpts are seeded; no complete post-purchase review workflow |
+| Interface | Responsive grids/carousels, edge fades, shared Hero transitions and hover previews | Preview playback depends on viewport, input device and visibility |
+| Localization | Locale routing and message files for 19 languages via next-intl | Translation coverage is being refined; currency selection is not live FX conversion |
 
-## ✨ Key Features
+KYC, administrator permissions, seller payouts and cashback are not implemented
+end-to-end. Screens and labels suggesting those features are prototype UI.
 
-This project includes a comprehensive suite of features designed to provide a complete C2C marketplace experience:
+## Technical approach
 
-### 🛍️ For Buyers
-- **Intuitive Discovery:** Advanced filtering, sorting, and search capabilities across multiple platforms (PC, PS5, Xbox, Mobile), genres, and regions.
-- **Product Categories:** Support for Game Keys, Gift Cards, Direct Top-ups, Accounts, and Power Leveling services.
-- **Seamless Checkout Flow:** Secure, blazing-fast, and multi-step payment processing seamlessly integrated with **Stripe**.
-- **Real-time Order Tracking:** Instant updates on order statuses and delivery times.
-- **Interactive UI/UX:** Engaging animations powered by **GSAP** and **Framer Motion**, ensuring a modern, premium gaming aesthetic.
-- **Internationalization (i18n):** Multi-language and multi-currency support for a global user base.
+- **Next.js 16 App Router:** server-rendered catalog reads, interactive client
+  components, API route handlers and locale-based routes.
+- **React 19 + TypeScript:** strict type checking, Context providers for session
+  and cart state.
+- **Supabase:** PostgreSQL, Auth, Storage and Realtime. The schema includes RLS
+  and column-level access restrictions.
+- **Stripe:** test-mode checkout with server-side verification and deterministic
+  order identifiers for retry handling.
+- **Tailwind CSS 4:** responsive styling with Base UI/Radix primitives.
+- **Vitest + Testing Library:** unit and component/integration tests for auth,
+  cart behavior, catalog queries, seller listings, chat and payments.
+- **Deployment:** OpenNext and Wrangler configuration for Cloudflare Workers.
 
-### 💼 For Sellers
-- **Dedicated Seller Workspace:** A comprehensive, responsive dashboard to manage stores, track sales analytics, and monitor performance.
-- **Offer Management:** Flexible listing creation with customizable attributes (price, quantity, regional restrictions, delivery speed).
-- **Direct Messaging:** Real-time inbox and chat system allowing sellers to communicate directly with buyers.
-- **Financial Analytics:** Track gross sales, view next payout calculations, and monitor store health.
-- **Reputation System:** Built-in review and rating mechanism, along with a Seller Level progression system (Novice, Expert, Master, Legend) complete with Cashback rewards.
-
-### 🛡️ Admin & Security
-- **Role-Based Access:** Distinct roles for Buyers, Sellers, and Administrators.
-- **Secure Authentication:** Passwordless login, social logins, and secure session management via Supabase Auth.
-- **KYC Verification System:** Banner prompts and flows for seller identity verification.
-
-## 🏗️ Architecture & Tech Stack
-
-This project leverages a modern, server-side rendered (SSR) architecture optimized for SEO and performance:
-
-- **Framework:** Next.js 15 (App Router, Server Components, Server Actions)
-- **UI/Styling:** Tailwind CSS, Radix UI (Headless primitives for accessibility), Lucide Icons
-- **State Management:** Zustand (Global Client State), React Query (Async Server State)
-- **Database & Auth:** Supabase (PostgreSQL, Row Level Security, Real-time Auth)
-- **Payment Gateway:** Stripe
-- **Code Quality:** ESLint, Prettier, TypeScript
-
-## 🚀 Getting Started
-
-### Prerequisites
-- Node.js (v18 or higher)
-- npm (v9 or higher)
-- A Supabase project
-- A Stripe account
-
-### Installation
-
-1. **Clone the repository:**
-   ```bash
-   git clone https://github.com/your-username/difmark-rft.git
-   cd difmark-rft
-   ```
-
-2. **Install dependencies:**
-   ```bash
-   npm install
-   ```
-
-3. **Environment Setup:**
-   Create a `.env.local` file in the root directory and configure your API keys:
-   ```env
-   # Supabase Configuration
-   NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-   NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
-   SUPABASE_SERVICE_ROLE_KEY=your_supabase_service_role
-   
-   # Stripe Configuration
-   NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=your_stripe_publishable_key
-   STRIPE_SECRET_KEY=your_stripe_secret_key
-   ```
-
-4. **Run the development server:**
-   ```bash
-   npm run dev
-   ```
-   Navigate to [http://localhost:3000](http://localhost:3000) in your browser.
-
-## 🧪 Quality Assurance & Testing
-
-Reliability is paramount for an e-commerce platform. This project employs a comprehensive **Testing Trophy** strategy:
-
-- **Robust Test Cases** covering Unit, Integration, UI Component, and End-to-End Page flows.
-- **Tools:** Vitest, React Testing Library, User-Event.
-- **Coverage:** Automated V8 coverage reporting ensures critical paths (Auth, Payments, State) are thoroughly tested.
-- **CI/CD:** GitHub Actions workflows are configured to automatically run the test suite on every Push/Pull Request.
-
-**Run the test suite locally:**
-```bash
-# Run all tests
-npm run test
-
-# Generate coverage report
-npm run test:coverage
+```text
+app/
+  [locale]/
+    (auth)/                 Login and signup
+    (main)/
+      layout.tsx            Shared navigation, Hero slot, footer and providers
+      page.tsx              Homepage
+      direct-top-up/        Top-up index and game detail routes
+      account/              Account and seller dashboard
+      user/                 Seller directory and profiles
+    (checkout)/             Product and checkout routes
+  api/                      Auth, listing and payment handlers
+components/                 UI and feature components
+contexts/                   Auth and cart providers
+hooks/                      Preview, visibility and interaction hooks
+lib/                        Catalog queries, validation and payment logic
+i18n/ + messages/           Locale routing and translations
+supabase/                   Schema, guides and explicit seed scripts
+.github/workflows/ci.yml    Automated quality checks
 ```
 
-## 🌐 Deployment
+`MarketplaceHero` stays mounted in the shared main layout between the homepage
+and top-up route. This preserves the tab indicator transition and carousel state;
+other routes do not render the Hero.
 
-This project is optimized for deployment on **Vercel**. 
-1. Push your code to GitHub.
-2. Import the repository into your Vercel dashboard.
-3. Add the environment variables (`.env.local` contents) to Vercel's Environment settings.
-4. Deploy!
+## Run locally
 
-## 📜 License & Disclaimer
-Developed as a portfolio project for educational and demonstration purposes. UI/UX inspired by leading digital marketplaces like Difmark.
+Use **Node.js 24** (see `.nvmrc`) and npm. Next.js requires Node 20.9 or newer;
+Node 24 matches this project's CI and local validation environment.
+
+```sh
+git clone https://github.com/gh-phduy/gaming-marketplace.git
+cd gaming-marketplace
+npm ci
+```
+
+Copy [.env.example](.env.example) to `.env.local` and supply your own Supabase
+project values and Stripe **test** keys. Public Supabase/Stripe keys are embedded
+in browser bundles; service-role and Stripe secrets stay server-side.
+
+1. Apply [supabase/setup.sql](supabase/setup.sql) in the Supabase SQL Editor.
+   Follow [supabase/README.md](supabase/README.md) for schema, RLS and Realtime.
+2. Configure Auth redirect URLs and email confirmation for your origin. See
+   [supabase/auth-redirect-urls.txt](supabase/auth-redirect-urls.txt).
+3. Follow the prerequisites in [supabase/seed-demo.sql](supabase/seed-demo.sql)
+   and [supabase/homepage-sections.sql](supabase/homepage-sections.sql) to prepare
+   sample catalog data. Seller/asset provisioning is described in
+   [supabase/seller-setup.md](supabase/seller-setup.md).
+4. Follow [supabase/payment-setup.md](supabase/payment-setup.md) to configure
+   Stripe test checkout and the `/api/payments/webhook` signing secret.
+
+```sh
+npm run dev
+```
+
+Open [http://localhost:3000/en](http://localhost:3000/en). Database-dependent
+screens require the configured schema and data; the environment template is
+not a working backend. Seed commands write to your configured project and must
+be run intentionally, not as part of installation or CI.
+
+For a production Next.js server:
+
+```sh
+npm run build:next
+npm start
+```
+
+No public demo URL is listed yet. Add a tested hosted URL after deployment and
+the main buyer/seller flows have been verified.
+
+## Quality checks
+
+```sh
+npm run lint
+npm run typecheck
+npm test
+npm run build:next
+```
+
+`typecheck` generates Next.js route types before `tsc --noEmit`, so it works in
+a fresh checkout. `npm run test:coverage` generates a V8 coverage report; there
+is no enforced coverage threshold or browser E2E suite configured.
+
+ESLint uses the native Next.js flat configs. Lint errors fail the check.
+Existing `any`, unused-variable, image/accessibility and React Compiler migration
+findings remain visible as warnings. React Compiler is not enabled; these
+warnings are technical debt, not a claim that every lint finding is fixed.
+CommonJS imports are permitted in the Node provisioning scripts.
+
+[CI](.github/workflows/ci.yml) runs on pushes and pull requests, or manually.
+It installs from `package-lock.json`, runs lint, route/type checks, the full
+Vitest suite and a production **Next.js** build on Ubuntu with Node 24.
+Public placeholders let CI run without Supabase/Stripe secrets. It runs no
+database seeds or deployments. Check the Actions tab after pushing to see the
+first actual GitHub run; local checks do not prove hosted CI has passed.
+
+## Cloudflare deployment
+
+The configured deployment target is Cloudflare Workers:
+
+```sh
+npm run build
+npm run check:cloudflare
+npm run preview
+```
+
+`build` produces the OpenNext Worker bundle; `build:next` produces the Next.js
+application. CI checks the latter. Worker packaging and Wrangler validation
+remain separate deployment checks.
+
+See [CLOUDFLARE.md](CLOUDFLARE.md) for build variables, runtime secrets and
+deployment instructions. Deploy explicitly with `npm run deploy` after
+configuring your own Cloudflare account and project.
+
+## Follow-up work
+
+- Replace demo review metadata with a review table and post-purchase review flow.
+- Finish translation coverage and remove remaining lint warnings.
+- Add browser E2E tests for navigation, checkout and listing management.
+- Verify hosted flows before publishing a demo link.

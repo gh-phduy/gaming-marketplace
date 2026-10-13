@@ -107,6 +107,9 @@
     "logout": "Cerrar sesión"
   },
   "auth": {
+    "signupSuccessTitle": "Cuenta creada correctamente",
+    "checkEmailTitle": "Revisa tu correo",
+    "checkEmailDescription": "Enviamos un enlace de confirmación a {email}. Confirma tu cuenta y vuelve para iniciar sesión. Revisa también la carpeta de spam.",
     "welcomeBack": "Bienvenido de nuevo",
     "loginSubtitle": "Inicia sesión para acceder a tu cuenta",
     "email": "Correo electrónico",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Modo de pago de prueba de rayas",
     "useCard": "Usar tarjeta:",
     "expiryCvcZip": "Vencimiento: cualquier fecha futura (por ejemplo, 29/12) | CVC: 123 | Código postal: cualquier número",
+    "useTestCard": "Usar tarjeta de prueba",
+    "testCardReady": "Tarjeta de prueba seleccionada. Pulsa Pagar para continuar sin introducir los datos de la tarjeta.",
+    "enterCardManually": "Introducir tarjeta manualmente",
     "processingDots": "Procesando...",
     "pay": "Pagar",
     "completed": "Completado",
@@ -396,6 +402,7 @@
     "loading": "Cargando..."
   },
   "user": {
+    "productRemovedFromCart": "Producto eliminado del carrito",
     "noProductsMatchFilters": "Ningún producto coincide con tus filtros.",
     "productAddedToCart": "Producto añadido al carrito",
     "profiles": "perfiles",

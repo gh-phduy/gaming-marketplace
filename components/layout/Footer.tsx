@@ -8,9 +8,7 @@
  * - Legal disclaimers
  */
 
-"use client";
-
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useTranslations } from "next-intl";
 
 // Social Icons
@@ -125,6 +123,7 @@ function FooterSection({ title, links }: FooterSectionProps) {
           {links.map((link) => (
             <li key={link.href}>
               <Link
+                prefetch={false}
                 href={link.href}
                 className="text-[14px] text-dm-text-secondary hover:text-dm-text-primary transition-colors"
               >
@@ -292,7 +291,7 @@ export default function Footer() {
             {t("acceptingMoreThan300PaymentMethods")}
             <br />
             {t("technicalPlatformProvidedBy")}&nbsp;
-            <Link href="/" className="hover:underline">
+            <Link prefetch={false} href="/" className="hover:underline">
               {t("difmark")}
             </Link>
             &nbsp;2025

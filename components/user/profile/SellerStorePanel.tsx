@@ -10,15 +10,11 @@ import { getProductPlatforms, matchesPlatformFilter } from "@/lib/platforms";
 
 interface SellerStorePanelProps {
   profile: SellerProfile;
-  onNotify: (message: string) => void;
 }
 
 type StoreViewMode = "list" | "grid";
 
-export default function SellerStorePanel({
-  profile,
-  onNotify,
-}: SellerStorePanelProps) {
+export default function SellerStorePanel({ profile }: SellerStorePanelProps) {
   const t = useTranslations("user");
   const [searchTerm, setSearchTerm] = useState("");
   const [category, setCategory] = useState("all");
@@ -134,7 +130,6 @@ export default function SellerStorePanel({
             key={offer.data.id}
             offer={offer}
             viewMode={viewMode}
-            onAddedToCart={() => onNotify(t("productAddedToCart"))}
           />
         ))}
       </div>

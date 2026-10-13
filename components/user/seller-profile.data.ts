@@ -1,5 +1,6 @@
 import { normalizeSellerRouteKey } from "./seller-profile.route";
 import { supabase } from "@/lib/supabase";
+import { withStoredSellerActivity } from "@/lib/seller-activity.server";
 
 export interface SellerOfferItem {
   data: {
@@ -775,7 +776,7 @@ export async function getSellerProfile(
         }
       }));
 
-      return {
+      const profile: SellerProfile = {
         id: userData.id,
         name: userData.display_name,
         avatar: userData.avatar_url || "/avt1.png",
@@ -802,6 +803,7 @@ export async function getSellerProfile(
         followersList: [],
         followingList: [],
       };
+      return (await withStoredSellerActivity([profile]))[0];
     }
   } catch (e) {
     console.error(`Error querying Supabase for seller profile ${sellerRouteKey}:`, e);
@@ -909,7 +911,7 @@ export async function getTrustedSellers(): Promise<SellerProfile[]> {
       // Rank the directory by published offer count, as on the homepage.
       profiles.sort((a, b) => b.offerCount - a.offerCount || a.id.localeCompare(b.id));
 
-      return profiles;
+      return withStoredSellerActivity(profiles);
     }
   } catch (error) {
     console.error("Failed to get trusted sellers dynamically:", error);

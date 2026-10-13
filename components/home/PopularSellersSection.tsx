@@ -1,9 +1,9 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useCallback, useEffect, useState } from "react";
 import { Trophy } from "lucide-react";
-import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import {
   Carousel,
@@ -56,20 +56,20 @@ function SellerItem({
 
   return (
     <Link
+      prefetch={false}
       href={getSellerProfilePath(id)}
       className="block w-[252px] cursor-pointer overflow-hidden rounded-lg transition-all duration-300 hover:shadow-lg hover:shadow-white/10 hover:brightness-125"
-      aria-label={`View ${profileName} profile`}
     >
       {/* Seller Identity & Rating Header */}
       <div className="flex h-[90px] w-full items-center bg-[#212937] px-4">
-        <div className="relative overflow-visible">
-          <Avatar>
-            <AvatarImage
-              className="h-[50px] w-[50px] object-cover"
-              src={avatar}
-              alt={`${profileName} profile picture`}
-            />
-          </Avatar>
+        <div className="relative h-[50px] w-[50px] shrink-0">
+          <Image
+            className="rounded-full object-cover"
+            src={avatar}
+            alt={`${profileName} profile picture`}
+            fill
+            sizes="50px"
+          />
           {verified ? (
             <span
               className="absolute -right-1 -bottom-1 z-10 flex h-5 w-5 items-center justify-center rounded-full border-2 border-[#212937] bg-green-500"
@@ -100,7 +100,7 @@ function SellerItem({
             role="group"
             aria-label={`${t("rating")}: ${rating} ${t("outOf5Stars")}`}
           >
-            <span className="text-[14px] text-[#888A8D]">{rating}/5</span>
+            <span className="text-[14px] text-[#a0a4ac]">{rating}/5</span>
             {Array.from({ length: 5 }, (_, index) => (
               <ImStarFull
                 key={index}
@@ -131,7 +131,11 @@ function SellerItem({
    MAIN COMPONENT: PopularSellers Carousel Section
    ========================================================================== */
 
-export default function PopularSellers({ sellers }: { sellers: PopularSeller[] }) {
+export default function PopularSellers({
+  sellers,
+}: {
+  sellers: PopularSeller[];
+}) {
   const t = useTranslations("home");
   const [api, setApi] = useState<CarouselApi>();
   const [canScrollPrev, setCanScrollPrev] = useState(false);
@@ -182,9 +186,12 @@ export default function PopularSellers({ sellers }: { sellers: PopularSeller[] }
         viewAllAriaLabel={t("viewAllPopularSellers")}
       />
 
-      {sellers.length === 0 && <p className="py-6 text-sm text-slate-400">No sellers available.</p>}
+      {sellers.length === 0 && (
+        <p className="py-6 text-sm text-slate-400">No sellers available.</p>
+      )}
       <div className="relative">
         <Carousel
+          deferUntilVisible
           setApi={setApi}
           opts={{
             align: "start",
@@ -217,10 +224,18 @@ export default function PopularSellers({ sellers }: { sellers: PopularSeller[] }
           >
             <CarouselContent className="-ml-2 md:-ml-4">
               {sellers.map((seller) => (
-                <CarouselItem key={seller.id} className="basis-auto pl-2 md:pl-4">
-                  <SellerItem id={seller.id} productCount={seller.productCount}
-                    avatar={seller.avatar_url || "/avt-placeholder.jpg"} name={seller.display_name}
-                    rating={seller.rating.toFixed(1)} verified={seller.is_verified_seller} />
+                <CarouselItem
+                  key={seller.id}
+                  className="basis-auto pl-2 md:pl-4"
+                >
+                  <SellerItem
+                    id={seller.id}
+                    productCount={seller.productCount}
+                    avatar={seller.avatar_url || "/avt-placeholder.jpg"}
+                    name={seller.display_name}
+                    rating={seller.rating.toFixed(2)}
+                    verified={seller.is_verified_seller}
+                  />
                 </CarouselItem>
               ))}
             </CarouselContent>
@@ -260,4 +275,3 @@ export default function PopularSellers({ sellers }: { sellers: PopularSeller[] }
     </section>
   );
 }
-

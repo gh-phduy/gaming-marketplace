@@ -2,6 +2,7 @@
 
 import React from "react";
 import { useFloatingChat } from "./useFloatingChat";
+import type { ActiveConversation } from "./useFloatingChat";
 import { ChatHeader } from "./ChatHeader";
 import { MessageList } from "./MessageList";
 import { ChatInput } from "./ChatInput";
@@ -16,7 +17,7 @@ import { ChatInput } from "./ChatInput";
  * Renders the floating chat room overlay at the bottom-right corner.
  * Coordinates input fields, header bars, and scrolling logs using the `useFloatingChat` hook.
  */
-export default function FloatingChatWidget() {
+export default function FloatingChatWidget({ initialConversation }: { initialConversation?: ActiveConversation }) {
   const {
     isOpen,
     setIsOpen,
@@ -29,7 +30,7 @@ export default function FloatingChatWidget() {
     messagesEndRef,
     handleSendMessage,
     currentUser,
-  } = useFloatingChat();
+  } = useFloatingChat(initialConversation);
 
   // Hidden when there is no active chat session triggered
   if (!isOpen || !activeConversation) return null;

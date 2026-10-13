@@ -108,6 +108,7 @@ export default function FlashSaleSection() {
           src="/bg-time-sale.webp"
           alt=""
           fill
+          sizes="100vw"
           className="object-cover z-0"
           aria-hidden="true"
           priority={false}

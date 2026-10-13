@@ -1,25 +1,10 @@
 "use client";
 
-import dynamic from "next/dynamic";
-import Link from "next/link";
-import { usePathname } from "@/i18n/routing";
+import { Link, usePathname } from "@/i18n/routing";
 import Image from "next/image";
-import { useEffect, useState } from "react";
 import { ROUTES } from "@/lib/constants";
-
-function NavSectionFallback() {
-  return <div className="hidden h-10 flex-1 770:block" aria-hidden="true" />;
-}
-
-const CheckoutNavSection = dynamic(() => import("./nav/CheckoutNavSection"), {
-  ssr: false,
-  loading: NavSectionFallback,
-});
-
-const MainNavSection = dynamic(() => import("./nav/MainNavSection"), {
-  ssr: false,
-  loading: NavSectionFallback,
-});
+import CheckoutNavSection from "./nav/CheckoutNavSection";
+import MainNavSection from "./nav/MainNavSection";
 
 /* ============================================
    MAIN COMPONENT 
@@ -40,33 +25,8 @@ const MainNavSection = dynamic(() => import("./nav/MainNavSection"), {
  */
 export default function NavBar() {
   const pathname = usePathname();
-  const [isNavInteractive, setIsNavInteractive] = useState(false);
   const isCheckoutPage = pathname?.startsWith("/checkout");
   const isProductPage = pathname?.startsWith("/product");
-
-  useEffect(() => {
-    let idleCallbackId: number | undefined;
-    let timeoutId: ReturnType<typeof setTimeout> | undefined;
-
-    const enableInteractivity = () => setIsNavInteractive(true);
-
-    if (typeof window.requestIdleCallback === "function") {
-      idleCallbackId = window.requestIdleCallback(enableInteractivity, {
-        timeout: 2000,
-      });
-    } else {
-      timeoutId = globalThis.setTimeout(enableInteractivity, 1200);
-    }
-
-    return () => {
-      if (idleCallbackId !== undefined && "cancelIdleCallback" in window) {
-        window.cancelIdleCallback(idleCallbackId);
-      }
-      if (timeoutId !== undefined) {
-        globalThis.clearTimeout(timeoutId);
-      }
-    };
-  }, []);
 
   return (
     <nav
@@ -79,28 +39,23 @@ export default function NavBar() {
         className={`flex w-full translate-y-0 justify-center gap-x-3 bg-brand/80 shadow-2xl backdrop-blur-xl transition-all duration-700 ease-out`}
       >
         <div
-          className={`flex h-16 w-full items-center justify-between gap-x-4 px-4 770:justify-center 800:px-8 800:gap-x-6 ${isProductPage ? "md:px-12" : "responsive-nav"}`}
+          className={`flex h-16 w-full items-center justify-between gap-x-4 px-4 770:justify-center 800:gap-x-6 800:px-8 ${isProductPage ? "md:px-12" : "responsive-nav"}`}
         >
           {/* Logo - Hide on mobile during checkout to save space */}
-          <Link href={ROUTES.HOME} className={`shrink-0 relative block h-[30px] w-[130px] ${isCheckoutPage ? "hidden md:block" : ""}`}>
+          <Link
+            href={ROUTES.HOME}
+            className={`relative block h-[30px] w-[130px] shrink-0 ${isCheckoutPage ? "hidden md:block" : ""}`}
+          >
             <Image
               src="/Difmark-logo.png"
               alt="Difmark - Digital Game Marketplace"
               fill
-              priority
+              sizes="130px"
               className="object-contain"
             />
           </Link>
 
-          {isNavInteractive ? (
-            isCheckoutPage ? (
-              <CheckoutNavSection />
-            ) : (
-              <MainNavSection />
-            )
-          ) : (
-            <NavSectionFallback />
-          )}
+          {isCheckoutPage ? <CheckoutNavSection /> : <MainNavSection />}
         </div>
       </div>
     </nav>

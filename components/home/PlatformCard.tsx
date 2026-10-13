@@ -74,6 +74,7 @@ export default function PlatformItem({
 
   return (
     <Link
+      prefetch={false}
       href={href}
       className="group relative block responsive-platforms-item-bg cursor-pointer select-none focus-visible:ring-2 focus-visible:ring-dm-accent-green/70 focus-visible:outline-none"
       onMouseEnter={handleMouseEnter}
@@ -87,7 +88,7 @@ export default function PlatformItem({
         className="absolute inset-0 z-20 opacity-0 transition-all duration-1000 ease-linear group-hover:opacity-100"
         aria-hidden="true"
       >
-        <Image src={hoverImage} alt="" fill className="object-cover" />
+        <Image src={hoverImage} alt="" fill sizes="(max-width: 800px) 252px, 33vw" className="object-cover" />
       </div>
 
       {/* Background */}
@@ -96,6 +97,7 @@ export default function PlatformItem({
           src={bgImage}
           alt=""
           fill
+          sizes="(max-width: 800px) 252px, 33vw"
           className="object-cover"
           aria-hidden="true"
         />

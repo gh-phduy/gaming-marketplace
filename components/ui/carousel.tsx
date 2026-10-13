@@ -8,6 +8,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useNearViewport } from "@/hooks/useNearViewport";
 
 type CarouselApi = UseEmblaCarouselType[1];
 type UseCarouselParameters = Parameters<typeof useEmblaCarousel>;
@@ -19,6 +20,7 @@ type CarouselProps = {
   plugins?: CarouselPlugin;
   orientation?: "horizontal" | "vertical";
   setApi?: (api: CarouselApi) => void;
+  deferUntilVisible?: boolean;
 };
 
 type CarouselContextProps = {
@@ -52,15 +54,26 @@ const Carousel = React.forwardRef<
       opts,
       setApi,
       plugins,
+      deferUntilVisible = false,
       className,
       children,
       ...props
     },
     ref,
   ) => {
+    const { ref: visibilityRef, ready } = useNearViewport(deferUntilVisible);
+    const attach = React.useCallback(
+      (node: HTMLDivElement | null) => {
+        visibilityRef.current = node;
+        if (typeof ref === "function") ref(node);
+        else if (ref) ref.current = node;
+      },
+      [ref, visibilityRef],
+    );
     const [carouselRef, api] = useEmblaCarousel(
       {
         ...opts,
+        active: ready && opts?.active !== false,
         axis: orientation === "horizontal" ? "x" : "y",
       },
       plugins,
@@ -117,6 +130,7 @@ const Carousel = React.forwardRef<
 
       return () => {
         api?.off("select", onSelect);
+        api?.off("reInit", onSelect);
       };
     }, [api, onSelect]);
 
@@ -135,7 +149,7 @@ const Carousel = React.forwardRef<
         }}
       >
         <div
-          ref={ref}
+          ref={attach}
           onKeyDownCapture={handleKeyDown}
           className={cn("relative", className)}
           role="region"

@@ -8,11 +8,10 @@ import {
   LATEST_NEWS,
   NEWS_ROUTE,
 } from "@/lib/constants/news";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 export default function LatestNewsSection() {
   const t = useTranslations("home");
-  const locale = useLocale();
 
   const newsCards = LATEST_NEWS.map((article) => (
     <NewsCard
@@ -35,7 +34,7 @@ export default function LatestNewsSection() {
         headingId="latest-news-heading"
         headingText={t("latestNews")}
         title={t("latestNewsTitle")}
-        viewAllHref={`/${locale}${NEWS_ROUTE}`}
+        viewAllHref={NEWS_ROUTE}
         viewAllAriaLabel={t("viewAllLatestNews")}
       />
       <div className="hidden justify-between 800:flex">

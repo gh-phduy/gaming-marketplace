@@ -1,6 +1,5 @@
 import type { Metadata, Viewport } from "next";
 import { CartProvider } from "@/contexts/CartContext";
-import { Analytics } from "@vercel/analytics/react";
 import "../globals.css";
 
 export const metadata: Metadata = {
@@ -33,7 +32,9 @@ export default async function RootLayout(props: Readonly<{
   const messages = await getMessages({ locale });
 
   return (
-    <html lang={locale} className="dark overflow-x-hidden">
+    // Browser extensions can add root classes (e.g. mdl-js) before hydration.
+    // This escape hatch applies only to <html> attributes, not its descendants.
+    <html lang={locale} className="dark overflow-x-hidden" suppressHydrationWarning>
       <body className="flex min-h-screen flex-col overflow-x-hidden bg-midnight-850 text-dm-text-primary antialiased">
         <NextIntlClientProvider locale={locale} messages={messages}>
           <CartProvider>
@@ -43,7 +44,6 @@ export default async function RootLayout(props: Readonly<{
             </a>
 
             {children}
-            <Analytics />
           </CartProvider>
         </NextIntlClientProvider>
       </body>

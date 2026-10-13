@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { Monitor, Package, CreditCard, Gamepad2 } from "lucide-react";
 import {
   HERO_CATEGORIES,
@@ -100,6 +100,7 @@ function HeroCategoryTileCard({
 
   return (
     <Link
+      prefetch={false}
       key={category.id}
       href={category.link}
       className={config.cardClassName}

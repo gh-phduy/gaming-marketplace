@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
+import AccountAvatar from "./AccountAvatar";
 import { Check, X } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
@@ -68,15 +68,12 @@ export default function UserMenu({ user }: UserMenuProps) {
     <>
       <Sheet open={isOpen} onOpenChange={setIsOpen}>
         {/* Drawer Trigger Button (User Avatar) */}
-        <SheetTrigger className="flex items-center gap-2 outline-hidden">
-          <div className="hover:ring-brand-primary relative h-9 w-9 cursor-pointer overflow-hidden rounded-full ring-2 ring-brand-light transition-all">
-            <Image
-              src={user.picture}
-              alt={user.name}
-              fill
-              className="object-cover"
-            />
-          </div>
+        <SheetTrigger
+          aria-label={user.name}
+          title={user.name}
+          className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-full focus-visible:ring-2 focus-visible:ring-state-focus focus-visible:outline-none"
+        >
+          <AccountAvatar src={user.picture} name={user.name} />
         </SheetTrigger>
 
         {/* Sidebar Content Panel */}
@@ -100,7 +97,7 @@ export default function UserMenu({ user }: UserMenuProps) {
             </div>
 
             {/* Core Navigation Links Menu */}
-            <UserMenuContent t={t} />
+            <UserMenuContent t={t} onNavigate={() => setIsOpen(false)} />
 
             {/* Footer Action Bar */}
             <UserMenuFooter onLogout={handleLogout} logoutText={t("logout")} />
@@ -109,7 +106,7 @@ export default function UserMenu({ user }: UserMenuProps) {
       </Sheet>
 
       {toastMessage && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 sm:left-auto sm:translate-x-0 sm:right-6 z-[999] flex w-[calc(100%-2rem)] max-w-[360px] sm:w-80 items-center justify-between gap-3 rounded-xl border border-[#46ca43]/30 bg-[#161b26]/95 px-4 py-3 text-sm text-white shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-top-4 duration-300">
+        <div className="animate-in fade-in slide-in-from-top-4 fixed top-6 left-1/2 z-[999] flex w-[calc(100%-2rem)] max-w-[360px] -translate-x-1/2 items-center justify-between gap-3 rounded-xl border border-[#46ca43]/30 bg-[#161b26]/95 px-4 py-3 text-sm text-white shadow-2xl backdrop-blur-md duration-300 sm:right-6 sm:left-auto sm:w-80 sm:translate-x-0">
           <span className="inline-flex items-center gap-3">
             <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#46ca43]/20 text-[#46ca43]">
               <Check className="h-4 w-4" />
@@ -118,7 +115,7 @@ export default function UserMenu({ user }: UserMenuProps) {
           </span>
           <button
             type="button"
-            className="text-gray-400 hover:text-white transition-colors"
+            className="text-gray-400 transition-colors hover:text-white"
             onClick={() => setToastMessage(null)}
             aria-label="Dismiss notification"
           >
@@ -129,4 +126,3 @@ export default function UserMenu({ user }: UserMenuProps) {
     </>
   );
 }
-

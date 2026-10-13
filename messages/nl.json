@@ -107,6 +107,9 @@
     "logout": "Uitloggen"
   },
   "auth": {
+    "signupSuccessTitle": "Account aangemaakt",
+    "checkEmailTitle": "Controleer je e-mail",
+    "checkEmailDescription": "We hebben een bevestigingslink naar {email} gestuurd. Bevestig je account en kom terug om in te loggen. Controleer ook je spammap.",
     "welcomeBack": "Welkom terug",
     "loginSubtitle": "Log in om toegang te krijgen tot je account",
     "email": "E-mail",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Streeptest-betalingsmodus",
     "useCard": "Gebruik kaart:",
     "expiryCvcZip": "Vervaldatum: elke toekomstige datum (bijvoorbeeld 29/12) | CVC: 123 | ZIP: elk nummer",
+    "useTestCard": "Testkaart gebruiken",
+    "testCardReady": "Testkaart geselecteerd. Klik op Betalen om door te gaan zonder kaartgegevens in te voeren.",
+    "enterCardManually": "Kaart handmatig invoeren",
     "processingDots": "Verwerken...",
     "pay": "Betalen",
     "completed": "Voltooid",
@@ -396,6 +402,7 @@
     "loading": "Bezig met laden..."
   },
   "user": {
+    "productRemovedFromCart": "Product uit winkelwagen verwijderd",
     "noProductsMatchFilters": "Er zijn geen producten die overeenkomen met uw filters.",
     "productAddedToCart": "Product toegevoegd aan winkelwagen",
     "profiles": "profielen",

@@ -1,0 +1,211 @@
+{
+  "en": {
+    "subject": "Confirm your email — Difmark",
+    "preheader": "One quick step to finish setting up your Difmark account.",
+    "eyebrow": "ACCOUNT VERIFICATION",
+    "heading": "Welcome to Difmark.",
+    "body": "Thanks for joining our gaming marketplace. Confirm your email address to finish creating your account and start exploring games, gift cards and more.",
+    "button": "Confirm my email",
+    "fallback": "Button not working? Copy this link into your browser:",
+    "ignore": "If you did not create this account, you can ignore this email.",
+    "footer": "Games. Gift cards. Digital experiences."
+  },
+  "vi": {
+    "subject": "Xác nhận email của bạn — Difmark",
+    "preheader": "Chỉ còn một bước để hoàn tất tài khoản Difmark.",
+    "eyebrow": "XÁC NHẬN TÀI KHOẢN",
+    "heading": "Chào mừng đến Difmark.",
+    "body": "Cảm ơn bạn đã tham gia cộng đồng game của chúng tôi. Xác nhận địa chỉ email để hoàn tất tài khoản và bắt đầu khám phá game, thẻ quà tặng cùng nhiều sản phẩm khác.",
+    "button": "Xác nhận email của tôi",
+    "fallback": "Nếu nút không hoạt động, hãy sao chép liên kết này vào trình duyệt:",
+    "ignore": "Nếu bạn không tạo tài khoản này, bạn có thể bỏ qua email.",
+    "footer": "Game. Thẻ quà tặng. Trải nghiệm số."
+  },
+  "de": {
+    "subject": "E-Mail bestätigen — Difmark",
+    "preheader": "Nur noch ein Schritt bis zu deinem Difmark-Konto.",
+    "eyebrow": "KONTOBESTÄTIGUNG",
+    "heading": "Willkommen bei Difmark.",
+    "body": "Danke, dass du unserem Gaming-Marktplatz beitrittst. Bestätige deine E-Mail-Adresse, um dein Konto einzurichten und Spiele, Geschenkkarten und mehr zu entdecken.",
+    "button": "E-Mail bestätigen",
+    "fallback": "Der Button funktioniert nicht? Kopiere diesen Link in deinen Browser:",
+    "ignore": "Falls du dieses Konto nicht erstellt hast, kannst du diese E-Mail ignorieren.",
+    "footer": "Spiele. Geschenkkarten. Digitale Erlebnisse."
+  },
+  "fr": {
+    "subject": "Confirmez votre e-mail — Difmark",
+    "preheader": "Une dernière étape pour finaliser votre compte Difmark.",
+    "eyebrow": "VÉRIFICATION DU COMPTE",
+    "heading": "Bienvenue sur Difmark.",
+    "body": "Merci de rejoindre notre marketplace gaming. Confirmez votre adresse e-mail pour finaliser votre compte et découvrir des jeux, cartes cadeaux et bien plus.",
+    "button": "Confirmer mon e-mail",
+    "fallback": "Le bouton ne fonctionne pas ? Copiez ce lien dans votre navigateur :",
+    "ignore": "Si vous n’avez pas créé ce compte, vous pouvez ignorer cet e-mail.",
+    "footer": "Jeux. Cartes cadeaux. Expériences numériques."
+  },
+  "es": {
+    "subject": "Confirma tu correo — Difmark",
+    "preheader": "Un último paso para completar tu cuenta de Difmark.",
+    "eyebrow": "VERIFICACIÓN DE CUENTA",
+    "heading": "Bienvenido a Difmark.",
+    "body": "Gracias por unirte a nuestro marketplace de juegos. Confirma tu correo para completar tu cuenta y descubrir juegos, tarjetas regalo y mucho más.",
+    "button": "Confirmar mi correo",
+    "fallback": "¿El botón no funciona? Copia este enlace en tu navegador:",
+    "ignore": "Si no creaste esta cuenta, puedes ignorar este correo.",
+    "footer": "Juegos. Tarjetas regalo. Experiencias digitales."
+  },
+  "pt": {
+    "subject": "Confirme seu e-mail — Difmark",
+    "preheader": "Só falta um passo para concluir sua conta Difmark.",
+    "eyebrow": "VERIFICAÇÃO DA CONTA",
+    "heading": "Bem-vindo ao Difmark.",
+    "body": "Obrigado por se juntar ao nosso marketplace de jogos. Confirme seu e-mail para concluir sua conta e descobrir jogos, cartões-presente e muito mais.",
+    "button": "Confirmar meu e-mail",
+    "fallback": "O botão não funciona? Copie este link no seu navegador:",
+    "ignore": "Se você não criou esta conta, pode ignorar este e-mail.",
+    "footer": "Jogos. Cartões-presente. Experiências digitais."
+  },
+  "nl": {
+    "subject": "Bevestig je e-mail — Difmark",
+    "preheader": "Nog één stap om je Difmark-account af te ronden.",
+    "eyebrow": "ACCOUNTVERIFICATIE",
+    "heading": "Welkom bij Difmark.",
+    "body": "Bedankt dat je je aansluit bij onze gamingmarktplaats. Bevestig je e-mailadres om je account af te ronden en games, cadeaukaarten en meer te ontdekken.",
+    "button": "Mijn e-mail bevestigen",
+    "fallback": "Werkt de knop niet? Kopieer deze link naar je browser:",
+    "ignore": "Als je dit account niet hebt aangemaakt, kun je deze e-mail negeren.",
+    "footer": "Games. Cadeaukaarten. Digitale ervaringen."
+  },
+  "it": {
+    "subject": "Conferma la tua e-mail — Difmark",
+    "preheader": "Manca solo un passaggio per completare il tuo account Difmark.",
+    "eyebrow": "VERIFICA DELL’ACCOUNT",
+    "heading": "Benvenuto su Difmark.",
+    "body": "Grazie per esserti unito al nostro marketplace di giochi. Conferma la tua e-mail per completare l’account e scoprire giochi, carte regalo e molto altro.",
+    "button": "Conferma la mia e-mail",
+    "fallback": "Il pulsante non funziona? Copia questo link nel browser:",
+    "ignore": "Se non hai creato questo account, puoi ignorare questa e-mail.",
+    "footer": "Giochi. Carte regalo. Esperienze digitali."
+  },
+  "pl": {
+    "subject": "Potwierdź adres e-mail — Difmark",
+    "preheader": "Jeszcze jeden krok, aby utworzyć konto Difmark.",
+    "eyebrow": "WERYFIKACJA KONTA",
+    "heading": "Witaj w Difmark.",
+    "body": "Dziękujemy za dołączenie do naszej platformy z grami. Potwierdź adres e-mail, aby dokończyć tworzenie konta i odkrywać gry, karty podarunkowe i wiele więcej.",
+    "button": "Potwierdź mój e-mail",
+    "fallback": "Przycisk nie działa? Skopiuj ten link do przeglądarki:",
+    "ignore": "Jeśli nie utworzono tego konta, możesz zignorować ten e-mail.",
+    "footer": "Gry. Karty podarunkowe. Cyfrowe doświadczenia."
+  },
+  "ja": {
+    "subject": "メールアドレスを確認 — Difmark",
+    "preheader": "あと一歩でDifmarkアカウントの登録が完了します。",
+    "eyebrow": "アカウントの確認",
+    "heading": "Difmarkへようこそ。",
+    "body": "ゲームマーケットプレイスへのご登録ありがとうございます。メールアドレスを確認して登録を完了し、ゲームやギフトカードなどをお楽しみください。",
+    "button": "メールアドレスを確認",
+    "fallback": "ボタンが機能しない場合は、このリンクをブラウザーにコピーしてください。",
+    "ignore": "このアカウントを作成していない場合は、このメールを無視してください。",
+    "footer": "ゲーム。ギフトカード。デジタル体験。"
+  },
+  "zh": {
+    "subject": "确认您的邮箱 — Difmark",
+    "preheader": "只需再完成一步，即可设置好您的 Difmark 账户。",
+    "eyebrow": "账户验证",
+    "heading": "欢迎来到 Difmark。",
+    "body": "感谢您加入我们的游戏交易平台。请确认您的邮箱以完成账户注册，开始探索游戏、礼品卡和更多数字产品。",
+    "button": "确认我的邮箱",
+    "fallback": "如果按钮无法使用，请将此链接复制到浏览器：",
+    "ignore": "如果您没有创建此账户，可以忽略这封邮件。",
+    "footer": "游戏。礼品卡。数字体验。"
+  },
+  "ko": {
+    "subject": "이메일 인증 — Difmark",
+    "preheader": "한 단계만 더 진행하면 Difmark 계정 설정이 완료됩니다.",
+    "eyebrow": "계정 인증",
+    "heading": "Difmark에 오신 것을 환영합니다.",
+    "body": "게임 마켓플레이스에 가입해 주셔서 감사합니다. 이메일을 인증해 계정 설정을 마치고 게임, 기프트 카드 등 다양한 상품을 만나보세요.",
+    "button": "이메일 인증하기",
+    "fallback": "버튼이 작동하지 않으면 이 링크를 브라우저에 복사하세요:",
+    "ignore": "계정을 만들지 않았다면 이 이메일을 무시하셔도 됩니다.",
+    "footer": "게임. 기프트 카드. 디지털 경험."
+  },
+  "tr": {
+    "subject": "E-postanızı doğrulayın — Difmark",
+    "preheader": "Difmark hesabınızı tamamlamak için son bir adım.",
+    "eyebrow": "HESAP DOĞRULAMA",
+    "heading": "Difmark’a hoş geldiniz.",
+    "body": "Oyun pazarımıza katıldığınız için teşekkürler. Hesabınızı tamamlamak ve oyunları, hediye kartlarını ve daha fazlasını keşfetmek için e-postanızı doğrulayın.",
+    "button": "E-postamı doğrula",
+    "fallback": "Düğme çalışmıyor mu? Bu bağlantıyı tarayıcınıza kopyalayın:",
+    "ignore": "Bu hesabı siz oluşturmadıysanız bu e-postayı yok sayabilirsiniz.",
+    "footer": "Oyunlar. Hediye kartları. Dijital deneyimler."
+  },
+  "fi": {
+    "subject": "Vahvista sähköpostisi — Difmark",
+    "preheader": "Enää yksi vaihe Difmark-tilisi viimeistelyyn.",
+    "eyebrow": "TILIN VAHVISTUS",
+    "heading": "Tervetuloa Difmarkiin.",
+    "body": "Kiitos, että liityit pelimarkkinapaikkaamme. Vahvista sähköpostisi viimeistelläksesi tilisi ja löytääksesi pelejä, lahjakortteja ja paljon muuta.",
+    "button": "Vahvista sähköpostini",
+    "fallback": "Eikö painike toimi? Kopioi tämä linkki selaimeesi:",
+    "ignore": "Jos et luonut tätä tiliä, voit jättää tämän viestin huomiotta.",
+    "footer": "Pelejä. Lahjakortteja. Digitaalisia elämyksiä."
+  },
+  "ar": {
+    "subject": "تأكيد بريدك الإلكتروني — Difmark",
+    "preheader": "خطوة واحدة لإكمال إعداد حسابك في Difmark.",
+    "eyebrow": "التحقق من الحساب",
+    "heading": "مرحبًا بك في Difmark.",
+    "body": "شكرًا لانضمامك إلى سوق الألعاب لدينا. أكد بريدك الإلكتروني لإكمال إنشاء حسابك واستكشاف الألعاب وبطاقات الهدايا والمزيد.",
+    "button": "تأكيد بريدي الإلكتروني",
+    "fallback": "إذا لم يعمل الزر، انسخ هذا الرابط إلى متصفحك:",
+    "ignore": "إذا لم تنشئ هذا الحساب، يمكنك تجاهل هذه الرسالة.",
+    "footer": "ألعاب. بطاقات هدايا. تجارب رقمية."
+  },
+  "el": {
+    "subject": "Επιβεβαίωση email — Difmark",
+    "preheader": "Ένα ακόμη βήμα για να ολοκληρώσετε τον λογαριασμό σας στο Difmark.",
+    "eyebrow": "ΕΠΙΒΕΒΑΙΩΣΗ ΛΟΓΑΡΙΑΣΜΟΥ",
+    "heading": "Καλώς ήρθατε στο Difmark.",
+    "body": "Ευχαριστούμε που συμμετέχετε στην αγορά παιχνιδιών μας. Επιβεβαιώστε το email σας για να ολοκληρώσετε τον λογαριασμό σας και να ανακαλύψετε παιχνίδια, δωροκάρτες και πολλά άλλα.",
+    "button": "Επιβεβαίωση email",
+    "fallback": "Δεν λειτουργεί το κουμπί; Αντιγράψτε αυτόν τον σύνδεσμο στο πρόγραμμα περιήγησης:",
+    "ignore": "Αν δεν δημιουργήσατε αυτόν τον λογαριασμό, μπορείτε να αγνοήσετε το email.",
+    "footer": "Παιχνίδια. Δωροκάρτες. Ψηφιακές εμπειρίες."
+  },
+  "no": {
+    "subject": "Bekreft e-posten din — Difmark",
+    "preheader": "Bare ett steg igjen for å fullføre Difmark-kontoen din.",
+    "eyebrow": "KONTOBEKREFTELSE",
+    "heading": "Velkommen til Difmark.",
+    "body": "Takk for at du blir med på spillmarkedet vårt. Bekreft e-posten din for å fullføre kontoen og oppdage spill, gavekort og mer.",
+    "button": "Bekreft e-posten min",
+    "fallback": "Fungerer ikke knappen? Kopier denne lenken til nettleseren din:",
+    "ignore": "Hvis du ikke opprettet denne kontoen, kan du ignorere denne e-posten.",
+    "footer": "Spill. Gavekort. Digitale opplevelser."
+  },
+  "da": {
+    "subject": "Bekræft din e-mail — Difmark",
+    "preheader": "Kun ét trin tilbage for at færdiggøre din Difmark-konto.",
+    "eyebrow": "KONTOBEKRÆFTELSE",
+    "heading": "Velkommen til Difmark.",
+    "body": "Tak, fordi du tilmelder dig vores spilmarked. Bekræft din e-mail for at færdiggøre kontoen og udforske spil, gavekort og mere.",
+    "button": "Bekræft min e-mail",
+    "fallback": "Virker knappen ikke? Kopiér dette link til din browser:",
+    "ignore": "Hvis du ikke oprettede denne konto, kan du ignorere denne e-mail.",
+    "footer": "Spil. Gavekort. Digitale oplevelser."
+  },
+  "sv": {
+    "subject": "Bekräfta din e-post — Difmark",
+    "preheader": "Bara ett steg kvar för att slutföra ditt Difmark-konto.",
+    "eyebrow": "KONTOBEKRÄFTELSE",
+    "heading": "Välkommen till Difmark.",
+    "body": "Tack för att du går med i vår spelmarknadsplats. Bekräfta din e-post för att slutföra kontot och upptäcka spel, presentkort och mer.",
+    "button": "Bekräfta min e-post",
+    "fallback": "Fungerar inte knappen? Kopiera den här länken till din webbläsare:",
+    "ignore": "Om du inte skapade det här kontot kan du ignorera e-postmeddelandet.",
+    "footer": "Spel. Presentkort. Digitala upplevelser."
+  }
+}

@@ -4,18 +4,83 @@ import Image from "next/image";
 import dynamic from "next/dynamic";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronRight, Tag } from "lucide-react";
+import {
+  Bell,
+  ChevronRight,
+  MessageCircle,
+  Tag,
+  type LucideIcon,
+} from "lucide-react";
 import NavSearch from "./NavSearch";
 import SearchButton from "./SearchButton";
-import ChatInboxButton from "./ChatInboxButton";
 import { Separator } from "@base-ui/react";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/lib/supabase";
+import { useTranslations } from "next-intl";
+import CategoriesDropdown from "./CategoriesDropdown";
+import CartButton from "./CartButton";
+import SignInButton from "./SignInButton";
 
-const CategoriesDropdown = dynamic(() => import("./CategoriesDropdown"));
-const CartButton = dynamic(() => import("./CartButton"));
-const NotificationButton = dynamic(() => import("./NotificationButton"));
-const SignInButton = dynamic(() => import("./SignInButton"));
+function AccountAction({
+  icon: Icon,
+  label,
+  pending = false,
+}: {
+  icon: LucideIcon;
+  label: string;
+  pending?: boolean;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      aria-busy={pending || undefined}
+      disabled={pending}
+      onClick={() => window.dispatchEvent(new Event("difmark:open-login"))}
+      className="relative flex h-10 w-10 items-center justify-center rounded-lg text-steel-500 transition hover:bg-white/[0.06] hover:text-dm-text-primary focus-visible:ring-2 focus-visible:ring-[#4ade80]/70 focus-visible:outline-none"
+    >
+      <Icon size={24} aria-hidden="true" />
+    </button>
+  );
+}
+
+function NotificationLoading() {
+  const t = useTranslations("nav");
+  return <AccountAction icon={Bell} label={t("notificationsTitle")} pending />;
+}
+function InboxLoading() {
+  const t = useTranslations("nav");
+  return <AccountAction icon={MessageCircle} label={t("messages")} pending />;
+}
+const ChatInboxButton = dynamic(() => import("./ChatInboxButton"), {
+  loading: InboxLoading,
+});
+const NotificationButton = dynamic(() => import("./NotificationButton"), {
+  loading: NotificationLoading,
+});
+
+function AccountActions() {
+  const { user, isLoading } = useAuth();
+  const t = useTranslations("nav");
+  return user ? (
+    <>
+      <NotificationButton accountId={user.id} />
+      <ChatInboxButton accountId={user.id} />
+    </>
+  ) : (
+    <>
+      <AccountAction
+        icon={Bell}
+        label={t("notificationsTitle")}
+        pending={isLoading}
+      />
+      <AccountAction
+        icon={MessageCircle}
+        label={t("messages")}
+        pending={isLoading}
+      />
+    </>
+  );
+}
 
 interface ListingProduct {
   id: string;
@@ -29,7 +94,6 @@ export default function MainNavSection() {
   const router = useRouter();
   const pathname = usePathname();
   const searchContainerRef = useRef<HTMLDivElement | null>(null);
-  const { user } = useAuth();
 
   const [isCategoriesOpen, setIsCategoriesOpen] = useState(false);
   const [searchValue, setSearchValue] = useState("");
@@ -50,6 +114,8 @@ export default function MainNavSection() {
 
     const delayDebounce = setTimeout(async () => {
       try {
+        const { supabase } = await import("@/lib/supabase");
+        if (!active) return;
         const { data, error } = await supabase
           .from("products")
           .select("id, title, price, image_url, platform")
@@ -162,10 +228,10 @@ export default function MainNavSection() {
         <Separator orientation="vertical" className="h-6 w-[1px] bg-gray-700" />
 
         {/* Center Navigation - Search Bar */}
-        <div className="hidden flex-1 items-center 770:flex">
+        <div className="hidden min-w-0 flex-1 items-center 770:flex">
           <div
             ref={searchContainerRef}
-            className="relative flex w-full rounded-lg bg-surface-overlay p-[2px]"
+            className="relative flex w-full min-w-0 rounded-lg bg-surface-overlay p-[2px]"
           >
             {/* Categories Dropdown */}
             <CategoriesDropdown
@@ -192,22 +258,22 @@ export default function MainNavSection() {
 
             {shouldShowSuggestions && (
               <div className="absolute top-[calc(100%+8px)] right-0 left-0 z-[80] overflow-hidden rounded-xl border border-[#2a3547] bg-[#151c28] shadow-2xl backdrop-blur-sm">
-                <div className="max-h-[440px] space-y-2 overflow-y-auto p-2 custom-scrollbar">
+                <div className="custom-scrollbar max-h-[440px] space-y-2 overflow-y-auto p-2">
                   {isSearching ? (
                     <div className="space-y-2">
                       {[...Array(3)].map((_, i) => (
                         <div
                           key={i}
-                          className="flex w-full items-stretch overflow-hidden rounded-lg bg-[#1e2633] border border-[#2a3547]/10 h-[72px]"
+                          className="flex h-[72px] w-full items-stretch overflow-hidden rounded-lg border border-[#2a3547]/10 bg-[#1e2633]"
                         >
                           <div className="h-full w-[128px] shrink-0 animate-pulse bg-slate-700/50" />
-                          <div className="flex-1 flex items-center justify-between px-3.5">
-                            <div className="space-y-2 flex-1 min-w-0 pr-4">
+                          <div className="flex flex-1 items-center justify-between px-3.5">
+                            <div className="min-w-0 flex-1 space-y-2 pr-4">
                               <div className="h-2 w-16 animate-pulse rounded bg-slate-700/50" />
                               <div className="h-4 w-40 animate-pulse rounded bg-slate-700/50" />
                               <div className="h-2 w-24 animate-pulse rounded bg-slate-700/50" />
                             </div>
-                            <div className="h-full w-[116px] shrink-0 flex flex-col items-center justify-center gap-1.5 bg-[#252e3e]/50 px-3">
+                            <div className="flex h-full w-[116px] shrink-0 flex-col items-center justify-center gap-1.5 bg-[#252e3e]/50 px-3">
                               <div className="h-2.5 w-8 animate-pulse rounded bg-slate-700/50" />
                               <div className="h-5 w-16 animate-pulse rounded bg-slate-700/50" />
                             </div>
@@ -222,7 +288,7 @@ export default function MainNavSection() {
                         type="button"
                         onMouseDown={(event) => event.preventDefault()}
                         onClick={() => handleSelectProduct(product)}
-                        className="group flex w-full items-stretch overflow-hidden rounded-lg bg-[#1e2633] border border-[#2a3547]/30 text-left transition-colors hover:bg-[#283244]"
+                        className="group flex w-full items-stretch overflow-hidden rounded-lg border border-[#2a3547]/30 bg-[#1e2633] text-left transition-colors hover:bg-[#283244]"
                       >
                         <div className="relative h-[72px] w-[128px] shrink-0 overflow-hidden">
                           <Image
@@ -239,10 +305,10 @@ export default function MainNavSection() {
                             <p className="text-[10px] font-semibold tracking-wider text-gray-400 uppercase">
                               Offers available
                             </p>
-                            <p className="truncate text-base font-bold text-white mt-0.5">
+                            <p className="mt-0.5 truncate text-base font-bold text-white">
                               {product.title}
                             </p>
-                            <p className="truncate text-xs text-gray-400 mt-0.5 lowercase">
+                            <p className="mt-0.5 truncate text-xs text-gray-400 lowercase">
                               {Array.isArray(product.platform)
                                 ? product.platform.join(" / ")
                                 : product.platform}
@@ -254,7 +320,7 @@ export default function MainNavSection() {
                               <Tag className="h-3 w-3" />
                               <span>from</span>
                             </div>
-                            <p className="text-lg font-bold text-white mt-0.5">
+                            <p className="mt-0.5 text-lg font-bold text-white">
                               $ {product.price.toFixed(2)}
                             </p>
                           </div>
@@ -262,8 +328,8 @@ export default function MainNavSection() {
                       </button>
                     ))
                   ) : (
-                    <div className="rounded-lg bg-[#1e2633] border border-[#2a3547]/30 px-4 py-6 text-center text-sm text-gray-400">
-                      No results found for "{searchValue.trim()}"
+                    <div className="rounded-lg border border-[#2a3547]/30 bg-[#1e2633] px-4 py-6 text-center text-sm text-gray-400">
+                      No results found for &quot;{searchValue.trim()}&quot;
                     </div>
                   )}
                 </div>
@@ -295,12 +361,7 @@ export default function MainNavSection() {
         {/* Right Side Actions */}
         <Separator orientation="vertical" className="h-6 w-[1px] bg-gray-700" />
         <div className="hidden items-center 990:flex 990:gap-6">
-          {user && (
-            <>
-              <NotificationButton accountId={user.id} />
-              <ChatInboxButton accountId={user.id} />
-            </>
-          )}
+          <AccountActions />
           <CartButton />
           <Separator
             orientation="vertical"
@@ -309,17 +370,10 @@ export default function MainNavSection() {
         </div>
       </div>
       <div className="flex items-center gap-3 800:gap-5">
-        {user ? (
-          <div className="flex items-center gap-1.5 sm:gap-3 990:hidden">
-            <NotificationButton accountId={user.id} />
-            <ChatInboxButton accountId={user.id} />
-            <CartButton />
-          </div>
-        ) : (
-          <div className="flex items-center gap-1.5 sm:gap-3 990:hidden">
-            <CartButton />
-          </div>
-        )}
+        <div className="flex items-center gap-1.5 990:hidden sm:gap-3">
+          <AccountActions />
+          <CartButton />
+        </div>
         <SignInButton />
       </div>
     </>

@@ -4,8 +4,6 @@
  * Desktop grid for second 2 category cards (Gift Cards, Software)
  */
 
-"use client";
-
 import { CategoryCard } from "../shared/CategoryCard";
 import { useTranslations } from "next-intl";
 

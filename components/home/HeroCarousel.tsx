@@ -50,7 +50,8 @@ export function HeroCarousel({ activeTab }: HeroCarouselProps) {
         src="/bg-hero-carousel.jpg"
         alt=""
         fill
-        fetchPriority="low"
+        sizes="100vw"
+        fetchPriority="high"
         loading="eager"
         className="object-cover object-center"
         aria-hidden="true"

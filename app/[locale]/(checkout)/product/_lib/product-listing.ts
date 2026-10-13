@@ -104,7 +104,7 @@ const mapDbProductToClientProduct = (row: any): Product => {
 export async function fetchListingProducts(): Promise<Product[]> {
   const { data, error } = await supabase
     .from("products")
-    .select("*")
+    .select("id,title,price,image_url,platform,category,region")
     .eq("status", "published");
 
   if (error) {

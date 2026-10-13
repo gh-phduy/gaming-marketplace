@@ -107,6 +107,9 @@
     "logout": "Logout"
   },
   "auth": {
+    "signupSuccessTitle": "Account created successfully",
+    "checkEmailTitle": "Check your email",
+    "checkEmailDescription": "We sent a confirmation link to {email}. Open the email to verify your account, then return here to sign in. Check your spam folder if you cannot find it.",
     "welcomeBack": "Welcome Back",
     "loginSubtitle": "Sign in to access your account",
     "email": "Email",
@@ -387,6 +390,9 @@
     "stripeTestPaymentMode": "💡 Stripe Test Payment Mode",
     "useCard": "Use card:",
     "expiryCvcZip": "Expiry: any future date (e.g., 12/29) | CVC: 123 | ZIP: any numbers",
+    "useTestCard": "Use test card",
+    "testCardReady": "Test card selected. Click Pay to continue without entering card details.",
+    "enterCardManually": "Enter card manually",
     "processingDots": "Processing...",
     "pay": "Pay",
     "completed": "Completed",
@@ -398,6 +404,7 @@
     "loading": "Loading..."
   },
   "user": {
+    "productRemovedFromCart": "Product removed from cart",
     "noProductsMatchFilters": "No products match your filters.",
     "productAddedToCart": "Product added to cart",
     "profiles": "profiles",

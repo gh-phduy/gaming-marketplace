@@ -338,7 +338,7 @@ export default function CheckoutClient() {
               }}
               stripe={stripePromise}
             >
-              <CheckoutForm amount={activePayment.amount} orderItems={activePayment.items} />
+              <CheckoutForm amount={activePayment.amount} orderItems={activePayment.items} clientSecret={activePayment.clientSecret} />
             </Elements>
           )}
         </div>

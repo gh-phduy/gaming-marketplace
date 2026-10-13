@@ -1,13 +1,20 @@
 "use client";
 
-import ProductCarousel from "../product/ProductCarousel";
+import ResponsiveGameList from "../shared/ResponsiveGameList";
 import SectionHeader from "../shared/SectionHeader";
 import PopularGameCard from "./PopularGameCard";
 import { useTranslations } from "next-intl";
 import type { HomepageGame } from "@/lib/homepage-products";
+import { getHomepageGamePreviewVideo } from "@/lib/game-preview-video";
+import { useCart } from "@/contexts/CartContext";
 
-export default function PopularGamesSection({ games }: { games: HomepageGame[] }) {
+export default function PopularGamesSection({
+  games,
+}: {
+  games: HomepageGame[];
+}) {
   const t = useTranslations("home");
+  const { addToCart } = useCart();
 
   return (
     <section
@@ -25,41 +32,29 @@ export default function PopularGamesSection({ games }: { games: HomepageGame[] }
         viewAllAriaLabel={t("viewAllPopularGames")}
       />
 
-      {/* Grid Layout (Desktop >= 800px) */}
-      <div
-        className="mt-10 hidden grid-cols-1 gap-4 800:grid 990:grid-cols-3 1920:grid-cols-4"
-        role="list"
-        aria-label={t("popularGamesAria")}
-      >
-        {games.map((game: any) => (
+      <ResponsiveGameList label={t("popularGamesAria")}>
+        {games.map((game) => (
           <PopularGameCard
             key={game.id}
             id={game.id}
             title={game.title}
             price={`$ ${game.price}`}
             coverImage={game.image_url}
-            previewVideo={game.video_url}
+            previewVideo={getHomepageGamePreviewVideo(game)}
             platform={game.platform}
+            onAddToCart={() =>
+              addToCart({
+                id: game.id,
+                name: game.title,
+                image: game.image_url,
+                platform: game.platform,
+                price: Number(game.price),
+                currency: game.currency,
+              })
+            }
           />
         ))}
-      </div>
-
-      {/* Carousel Slider Layout (Mobile/Tablet < 800px) */}
-      <div className="block 800:hidden">
-        <ProductCarousel>
-          {games.map((game: any) => (
-            <PopularGameCard
-              key={game.id}
-              id={game.id}
-              title={game.title}
-              price={`$ ${game.price}`}
-              coverImage={game.image_url}
-              previewVideo={game.video_url}
-              platform={game.platform}
-            />
-          ))}
-        </ProductCarousel>
-      </div>
+      </ResponsiveGameList>
     </section>
   );
 }

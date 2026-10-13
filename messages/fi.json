@@ -107,6 +107,9 @@
     "logout": "Kirjaudu ulos"
   },
   "auth": {
+    "signupSuccessTitle": "Tili luotu onnistuneesti",
+    "checkEmailTitle": "Tarkista sähköpostisi",
+    "checkEmailDescription": "Lähetimme vahvistuslinkin osoitteeseen {email}. Vahvista tilisi ja palaa kirjautumaan. Tarkista myös roskapostikansio.",
     "welcomeBack": "Tervetuloa takaisin",
     "loginSubtitle": "Kirjaudu sisään päästäksesi tilillesi",
     "email": "Sähköposti",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Stripe Test -maksutila",
     "useCard": "Käytä korttia:",
     "expiryCvcZip": "Viimeinen voimassaolopäivä: mikä tahansa tuleva päivämäärä (esim. 29.12.) | CVC: 123 | Postinumero: mitkä tahansa numerot",
+    "useTestCard": "Käytä testikorttia",
+    "testCardReady": "Testikortti valittu. Jatka painamalla Maksa ilman korttitietojen syöttämistä.",
+    "enterCardManually": "Syötä kortti käsin",
     "processingDots": "Käsitellään...",
     "pay": "Maksaa",
     "completed": "Valmis",
@@ -396,6 +402,7 @@
     "loading": "Ladataan..."
   },
   "user": {
+    "productRemovedFromCart": "Tuote poistettu ostoskorista",
     "noProductsMatchFilters": "Yksikään tuote ei vastaa suodattimiasi.",
     "productAddedToCart": "Tuote lisätty ostoskoriin",
     "profiles": "profiilit",

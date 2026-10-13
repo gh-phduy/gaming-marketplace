@@ -60,13 +60,15 @@ export default function ProductOverview({ data }: ProductOverviewProps) {
 
     try {
       // 1. Check if conversation already exists
-      let { data: conversation, error } = await supabase
+      const conversationResult = await supabase
         .from("conversations")
         .select("*")
         .eq("seller_id", data.seller.id)
         .eq("buyer_id", user.id)
         .eq("listing_title", data.data.name)
         .maybeSingle();
+      const { error } = conversationResult;
+      let { data: conversation } = conversationResult;
 
       if (error) {
         console.error("Error fetching conversation:", error);

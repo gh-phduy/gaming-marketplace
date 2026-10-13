@@ -7,10 +7,13 @@
 
 "use client";
 
-import { useRef, useState, useCallback, useEffect } from "react";
+import { useCallback } from "react";
+import { useGamePreview } from "@/hooks/useGamePreview";
+import GamePreviewVideo from "@/components/shared/GamePreviewVideo";
 import Image from "next/image";
-import { BsPersonFillCheck, BsBasket3Fill } from "react-icons/bs";
+import { BsPersonFillCheck } from "react-icons/bs";
 import { useTranslations } from "next-intl";
+import GameCardCartButton from "@/components/shared/GameCardCartButton";
 
 /* ============================================
    TYPES
@@ -43,7 +46,6 @@ const DEFAULTS = {
   title: "Deliver At All Costs",
   price: "$38.30",
   coverImage: "/product1.png",
-  previewVideo: "/video/product1.webm",
   sellerName: "Easy-key",
   sellerAvatar: "/avt1.png",
   sellerRank: "🦄 Legendary",
@@ -60,75 +62,37 @@ export default function AddToCartCard({
   title = DEFAULTS.title,
   price = DEFAULTS.price,
   coverImage = DEFAULTS.coverImage,
-  previewVideo = DEFAULTS.previewVideo,
+  previewVideo,
   sellerName = DEFAULTS.sellerName,
   sellerAvatar = DEFAULTS.sellerAvatar,
   sellerRank = DEFAULTS.sellerRank,
   onAddToCart,
 }: AddToCartCardProps) {
   const t = useTranslations("product");
-  const [isHovered, setIsHovered] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
-  const isHoveredRef = useRef(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-
-  const handleMouseEnter = useCallback(() => {
-    // Only proceed if the device has a real mouse (prevents touch/tap from triggering hover)
-    const hasMouse = window.matchMedia("(hover: hover) and (pointer: fine)").matches;
-    if (!hasMouse) return;
-
-    isHoveredRef.current = true;
-    
-    if (!videoSrc) {
-      // Trigger video load
-      setVideoSrc(previewVideo);
-    } else if (videoRef.current && videoRef.current.readyState >= 3) {
-      // If already loaded, play immediately
-      setIsHovered(true);
-      videoRef.current.play().catch(() => {});
-    }
-  }, [videoSrc, previewVideo]);
-
-  const handleCanPlay = useCallback(() => {
-    // Only play and animate if the mouse is still hovering
-    if (isHoveredRef.current && videoRef.current) {
-      setIsHovered(true);
-      videoRef.current.play().catch(() => {});
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    isHoveredRef.current = false;
-    setIsHovered(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-  }, []);
+  const preview = useGamePreview(previewVideo);
 
   const handleAddToCart = useCallback(() => {
     onAddToCart?.();
   }, [onAddToCart]);
 
   return (
-    <article className="relative h-[300px] w-[360px]">
+    <article
+      ref={preview.containerRef}
+      {...preview.interactionProps}
+      className="relative h-[300px] w-[360px]"
+    >
       <div
-        className="group absolute top-1/2 left-1/2 flex h-[275px] w-full -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col overflow-hidden rounded-lg bg-surface-base transition-all duration-700 hover:h-[300px]"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
+        className={
+          "group absolute top-1/2 left-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col overflow-hidden rounded-lg bg-surface-base " +
+          preview.panelClass
+        }
         tabIndex={0}
-        onFocus={handleMouseEnter}
-        onBlur={handleMouseLeave}
         aria-label={`${title} - ${price}`}
       >
         {/* Media Container */}
         <div className="relative flex-1">
           {/* Cover Image */}
-          <div
-            className={`absolute inset-0 h-full w-full transition-opacity duration-300 ${
-              isHovered ? "opacity-0" : "opacity-100"
-            }`}
-          >
+          <div className="absolute inset-0 h-full w-full">
             <Image
               src={coverImage}
               alt={title}
@@ -139,19 +103,7 @@ export default function AddToCartCard({
           </div>
 
           {/* Preview Video */}
-          <video
-            ref={videoRef}
-            className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${
-              isHovered ? "opacity-100" : "opacity-0"
-            }`}
-            src={videoSrc}
-            muted
-            loop
-            playsInline
-            preload="none"
-            onCanPlay={handleCanPlay}
-            aria-hidden="true"
-          />
+          <GamePreviewVideo preview={preview} />
 
           {/* Seller Info Overlay */}
           <div className="absolute bottom-0 w-full">
@@ -177,31 +129,32 @@ export default function AddToCartCard({
               </div>
 
               {/* Add to Cart Button (slides in on hover) */}
-              <div className="absolute inset-0 w-[225px] -translate-x-full transition duration-1000 group-hover:translate-x-0">
-                <button
+              <div
+                className={
+                  preview.enabled
+                    ? "absolute inset-0 w-[200px] transition-transform duration-700 ease-in-out " +
+                      (preview.active ? "translate-x-0" : "-translate-x-full")
+                    : "absolute top-2.5 right-2 h-[45px] w-[45px] transition-none"
+                }
+              >
+                <GameCardCartButton
+                  title={title}
+                  label={t("addToCart")}
+                  expanded={preview.enabled}
                   onClick={handleAddToCart}
-                  className="flex h-full w-full items-center justify-center gap-x-3 bg-dm-accent-green px-5 pr-12 transition-colors hover:bg-dm-accent-green-hover"
-                  style={{
-                    clipPath:
-                      "polygon(0 0, calc(100% - 30px) 0, 100% 50%, calc(100% - 30px) 100%, 0 100%)",
-                  }}
-                  aria-label={`Add ${title} to cart`}
-                >
-                  <BsBasket3Fill
-                    className="text-dm-text-primary"
-                    aria-hidden="true"
-                  />
-                  <span className="text-[14px] font-bold text-dm-text-primary">
-                    {t("addToCart")}
-                  </span>
-                </button>
+                />
               </div>
             </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="flex h-[57px] w-full items-center justify-between bg-surface-card px-2">
+        <div
+          className={
+            "flex h-[57px] w-full items-center justify-between px-2 " +
+            preview.footerClass
+          }
+        >
           <h3 className="truncate text-xl font-semibold text-dm-text-primary">
             {title}
           </h3>

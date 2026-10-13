@@ -14,6 +14,7 @@ import {
 } from "react-icons/md";
 import { FaTicketAlt, FaHandHoldingUsd } from "react-icons/fa";
 import { MenuItem, MenuSection } from "./MenuComponents";
+import { useRouter } from "@/i18n/routing";
 
 /* ==========================================================================
    TYPE DEFINITIONS & INTERFACES
@@ -21,6 +22,7 @@ import { MenuItem, MenuSection } from "./MenuComponents";
 
 interface UserMenuContentProps {
   t: (key: string) => string;
+  onNavigate?: () => void;
 }
 
 /* ==========================================================================
@@ -33,10 +35,12 @@ interface UserMenuContentProps {
  * Renders the categorized menu sections list inside the user profile drawer sidebar.
  * Composes list groups for Dashboard, Finances, Support Tickets, and Settings.
  */
-export function UserMenuContent({ t }: UserMenuContentProps) {
+export function UserMenuContent({ t, onNavigate }: UserMenuContentProps) {
+  const router = useRouter();
   // Reusable page redirection handler
   const navigateTo = (href: string) => {
-    window.location.href = href;
+    onNavigate?.();
+    router.push(href);
   };
 
   return (
@@ -53,7 +57,8 @@ export function UserMenuContent({ t }: UserMenuContentProps) {
           label="Seller dashboard"
           onClick={() => navigateTo("/account/dashboard#seller-workspace")}
         />
-        <MenuItem icon={<MdShoppingBag />} label={t("myOrders")} />
+        <MenuItem icon={<MdShoppingBag />} label={t("myOrders")}
+          onClick={() => navigateTo("/account/dashboard#dashboard-recent-orders")} />
       </MenuSection>
 
       {/* Group 2: User Wallet, Rewards & Balance info */}

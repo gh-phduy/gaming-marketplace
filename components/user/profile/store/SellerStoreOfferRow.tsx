@@ -18,7 +18,6 @@ import PlatformBadges from "@/components/shared/PlatformBadges";
 interface SellerStoreOfferRowProps {
   offer: SellerOfferItem;
   viewMode: "list" | "grid";
-  onAddedToCart: () => void;
 }
 
 function formatPrice(currency: string, price: number) {
@@ -28,7 +27,6 @@ function formatPrice(currency: string, price: number) {
 export default function SellerStoreOfferRow({
   offer,
   viewMode,
-  onAddedToCart,
 }: SellerStoreOfferRowProps) {
   const t = useTranslations("product");
   const { addToCart } = useCart();
@@ -43,7 +41,6 @@ export default function SellerStoreOfferRow({
       price: offer.data.price,
       currency: offer.data.currency,
     });
-    onAddedToCart();
   };
 
   if (viewMode === "grid") {

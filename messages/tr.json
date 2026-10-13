@@ -107,6 +107,9 @@
     "logout": "Çıkış Yap"
   },
   "auth": {
+    "signupSuccessTitle": "Hesap başarıyla oluşturuldu",
+    "checkEmailTitle": "E-postanızı kontrol edin",
+    "checkEmailDescription": "{email} adresine bir doğrulama bağlantısı gönderdik. Hesabınızı doğrulayıp giriş yapmak için geri dönün. Spam klasörünü de kontrol edin.",
     "welcomeBack": "Tekrar hoş geldiniz",
     "loginSubtitle": "Hesabınıza erişmek için giriş yapın",
     "email": "E-posta",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Şerit Testi Ödeme Modu",
     "useCard": "Kartı kullan:",
     "expiryCvcZip": "Son kullanma tarihi: gelecekteki herhangi bir tarih (örn. 12/29) | CVC: 123 | Posta Kodu: herhangi bir sayı",
+    "useTestCard": "Test kartını kullan",
+    "testCardReady": "Test kartı seçildi. Kart bilgilerini girmeden devam etmek için Öde düğmesine basın.",
+    "enterCardManually": "Kartı elle gir",
     "processingDots": "İşleniyor...",
     "pay": "Ödemek",
     "completed": "Tamamlandı",
@@ -396,6 +402,7 @@
     "loading": "Yükleniyor..."
   },
   "user": {
+    "productRemovedFromCart": "Ürün sepetten kaldırıldı",
     "noProductsMatchFilters": "Filtrelerinizle eşleşen ürün yok.",
     "productAddedToCart": "Ürün sepete eklendi",
     "profiles": "profiller",

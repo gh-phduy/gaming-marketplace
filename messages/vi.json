@@ -107,6 +107,9 @@
     "logout": "Đăng xuất"
   },
   "auth": {
+    "signupSuccessTitle": "Đăng ký thành công",
+    "checkEmailTitle": "Kiểm tra email của bạn",
+    "checkEmailDescription": "Chúng tôi đã gửi liên kết xác nhận đến {email}. Mở email để xác nhận tài khoản, rồi quay lại đây để đăng nhập. Kiểm tra mục thư rác nếu bạn chưa thấy email.",
     "welcomeBack": "Chào mừng trở lại",
     "loginSubtitle": "Đăng nhập để truy cập tài khoản của bạn",
     "email": "Email",
@@ -387,6 +390,9 @@
     "stripeTestPaymentMode": "💡 Chế độ thanh toán thử nghiệm sọc",
     "useCard": "Sử dụng thẻ:",
     "expiryCvcZip": "Hết hạn: bất kỳ ngày nào trong tương lai (ví dụ: 29/12) | CVC: 123 | ZIP: bất kỳ số nào",
+    "useTestCard": "Dùng thẻ test",
+    "testCardReady": "Đã chọn thẻ test. Bấm thanh toán để tiếp tục, không cần nhập thông tin thẻ.",
+    "enterCardManually": "Nhập thẻ thủ công",
     "processingDots": "Đang xử lý...",
     "pay": "Chi trả",
     "completed": "Đã hoàn thành",
@@ -398,6 +404,7 @@
     "loading": "Đang tải..."
   },
   "user": {
+    "productRemovedFromCart": "Đã xóa sản phẩm khỏi giỏ hàng",
     "noProductsMatchFilters": "Không có sản phẩm nào phù hợp với bộ lọc của bạn.",
     "productAddedToCart": "Đã thêm sản phẩm vào giỏ hàng",
     "profiles": "hồ sơ",

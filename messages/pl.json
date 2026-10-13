@@ -107,6 +107,9 @@
     "logout": "Wyloguj się"
   },
   "auth": {
+    "signupSuccessTitle": "Konto zostało utworzone",
+    "checkEmailTitle": "Sprawdź swoją skrzynkę",
+    "checkEmailDescription": "Wysłaliśmy link potwierdzający na {email}. Potwierdź konto i wróć, aby się zalogować. Sprawdź również folder spam.",
     "welcomeBack": "Witaj ponownie",
     "loginSubtitle": "Zaloguj się, aby uzyskać dostęp do swojego konta",
     "email": "E-mail",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 Tryb płatności testowej w paski",
     "useCard": "Użyj karty:",
     "expiryCvcZip": "Wygaśnięcie: dowolna data w przyszłości (np. 29/12) | CVC: 123 | KOD ZIP: dowolne numery",
+    "useTestCard": "Użyj karty testowej",
+    "testCardReady": "Wybrano kartę testową. Kliknij Zapłać, aby kontynuować bez wpisywania danych karty.",
+    "enterCardManually": "Wpisz dane karty ręcznie",
     "processingDots": "Przetwarzanie...",
     "pay": "Płacić",
     "completed": "Ukończono",
@@ -396,6 +402,7 @@
     "loading": "Ładowanie..."
   },
   "user": {
+    "productRemovedFromCart": "Produkt usunięty z koszyka",
     "noProductsMatchFilters": "Żadne produkty nie pasują do wybranych filtrów.",
     "productAddedToCart": "Produkt dodany do koszyka",
     "profiles": "profile",

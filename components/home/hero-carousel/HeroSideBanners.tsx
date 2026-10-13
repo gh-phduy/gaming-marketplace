@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { HERO_SIDE_BANNERS } from "@/lib/constants/hero";
 import type { HeroTab } from "./types";
 
@@ -20,6 +20,7 @@ export function HeroSideBanners({ activeTab }: HeroSideBannersProps) {
   return (
     <div className="h-full w-full">
       <Link
+        prefetch={false}
         href={banner.link}
         className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-3xl bg-black/30 shadow-lg transition-all hover:shadow-2xl"
       >

@@ -1,10 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import { useState } from "react";
 import { TopUpGame } from "@/lib/constants/products";
 import { cn } from "@/lib/utils";
+import { useGamePreviewEnabled } from "@/hooks/useGamePreview";
 
 /* ==========================================================================
    TYPE DEFINITIONS & INTERFACES
@@ -28,6 +29,7 @@ interface TopUpGameCardProps {
  */
 export function TopUpGameCard({ game, className }: TopUpGameCardProps) {
   const [imgError, setImgError] = useState(false);
+  const animated = useGamePreviewEnabled();
 
   // Normalizes routing pathways based on categorizations (e.g. services vs games)
   const categoryPath =
@@ -36,8 +38,8 @@ export function TopUpGameCard({ game, className }: TopUpGameCardProps) {
   return (
     <div
       className={cn(
-        "group relative block overflow-hidden rounded-xl sm:rounded-2xl bg-[#1a1a1f]",
-        "w-full aspect-[4/5] sm:aspect-square shrink-0 cursor-pointer shadow-lg",
+        "group relative block overflow-hidden rounded-xl bg-[#1a1a1f] sm:rounded-2xl",
+        "aspect-[4/5] w-full shrink-0 cursor-pointer shadow-lg sm:aspect-square",
         className,
       )}
     >
@@ -47,7 +49,14 @@ export function TopUpGameCard({ game, className }: TopUpGameCardProps) {
       >
         {/* Game Banner Image & Failure Fallback */}
         {!imgError ? (
-          <div className="absolute inset-0 transition-transform duration-500 ease-out group-hover:scale-110">
+          <div
+            className={
+              "absolute inset-0 " +
+              (animated
+                ? "transition-transform duration-500 ease-out group-hover:scale-110"
+                : "transition-none")
+            }
+          >
             <Image
               src={game.coverImage}
               alt={game.name}
@@ -62,7 +71,14 @@ export function TopUpGameCard({ game, className }: TopUpGameCardProps) {
         )}
 
         {/* Gradient Overlay for Text Visibility */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 transition-opacity duration-300 group-hover:opacity-100" />
+        <div
+          className={
+            "absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-80 " +
+            (animated
+              ? "transition-opacity duration-300 group-hover:opacity-100"
+              : "transition-none")
+          }
+        />
 
         {/* Title Name Label (Always visible for mobile UX) */}
         <div className="absolute right-0 bottom-0 left-0 flex flex-col justify-end p-3 sm:p-5">
@@ -74,4 +90,3 @@ export function TopUpGameCard({ game, className }: TopUpGameCardProps) {
     </div>
   );
 }
-

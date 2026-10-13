@@ -7,8 +7,10 @@ import {
 } from "@/components/ui/popover";
 import { AiOutlineAppstore } from "react-icons/ai";
 import { BiSolidDownArrow } from "react-icons/bi";
-import NavCategories from "../NavCategories";
+import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
+
+const NavCategories = dynamic(() => import("../NavCategories"));
 
 interface CategoriesDropdownProps {
   isOpen: boolean;
@@ -19,20 +21,19 @@ export default function CategoriesDropdown({
   isOpen,
   onOpenChange,
 }: CategoriesDropdownProps) {
-  const tNav = useTranslations("nav");
   const tCommon = useTranslations("common");
   return (
     <Popover modal={true} open={isOpen} onOpenChange={onOpenChange}>
       <PopoverTrigger
-        className="flex shrink-0 cursor-pointer items-center gap-x-2 rounded-lg bg-brand-light px-4 py-1 text-[16px] text-dm-text-secondary transition-all duration-500 hover:text-dm-text-primary"
+        className="flex shrink-0 cursor-pointer items-center gap-x-2 rounded-lg bg-brand-light px-3 py-1 text-[16px] whitespace-nowrap text-dm-text-secondary transition-all duration-500 hover:text-dm-text-primary 1200:px-4"
         aria-expanded={isOpen}
         aria-haspopup="menu"
-        aria-label={tNav("openCategoriesMenu")}
+        aria-label={tCommon("allCategories")}
       >
-        <span className="hidden 1000:inline">{tCommon("allCategories")}</span>
+        <span className="hidden 1200:inline">{tCommon("allCategories")}</span>
         <AiOutlineAppstore
           size={24}
-          className="inline 1000:hidden"
+          className="inline 1200:hidden"
           aria-hidden="true"
         />
         <BiSolidDownArrow

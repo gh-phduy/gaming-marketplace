@@ -1,10 +1,11 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from "@/i18n/routing";
 import Image from "next/image";
 import { BiSolidKey } from "react-icons/bi";
 import PlatformBadges from "@/components/shared/PlatformBadges";
 import { useTranslations } from "next-intl";
+import { useGamePreviewEnabled } from "@/hooks/useGamePreview";
 
 /* ============================================
    TYPES
@@ -23,6 +24,7 @@ interface ProductGridItemProps {
   image?: string;
   /** Platform identifier or list of platforms */
   platform?: string | string[];
+  eager?: boolean;
 }
 
 /* ============================================
@@ -52,15 +54,23 @@ export default function ProductGridItem({
   formattedPrice,
   image = DEFAULTS.image,
   platform = DEFAULTS.platform,
+  eager = false,
 }: ProductGridItemProps) {
   const t = useTranslations("product");
+  const animated = useGamePreviewEnabled();
   const displayPrice =
     formattedPrice || (price ? `$${price.toFixed(2)}` : "$0.00");
 
   return (
     <Link
+        prefetch={false}
       href={`/buy-cheap?id=${id || 1}`}
-      className="group relative flex flex-col overflow-hidden rounded-lg border border-[#30363d] bg-midnight-750 transition-all hover:border-dm-accent-yellow/50 hover:shadow-lg"
+      className={
+        "group relative flex flex-col overflow-hidden rounded-lg border border-[#30363d] bg-midnight-750 " +
+        (animated
+          ? "transition-all hover:border-dm-accent-yellow/50 hover:shadow-lg"
+          : "transition-none")
+      }
     >
       {/* Image Container */}
       <div className="relative aspect-video w-full overflow-hidden bg-midnight-800">
@@ -68,7 +78,14 @@ export default function ProductGridItem({
           src={image}
           alt={title}
           fill
-          className="object-cover transition-transform duration-500 group-hover:scale-105"
+          loading={eager ? "eager" : "lazy"}
+          fetchPriority={eager ? "high" : "auto"}
+          className={
+            "object-cover " +
+            (animated
+              ? "transition-transform duration-500 group-hover:scale-105"
+              : "transition-none")
+          }
           sizes="(max-width: 480px) 50vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, (max-width: 1280px) 25vw, 20vw"
         />
 
@@ -99,9 +116,16 @@ export default function ProductGridItem({
 
       {/* Footer Content */}
       <div className="bg-midnight-750 p-2 sm:p-3">
-        <h3 className="line-clamp-1 text-xs font-semibold text-dm-text-primary text-steel-500 transition-colors group-hover:text-dm-accent-yellow sm:text-sm">
+        <h2
+          className={
+            "line-clamp-1 text-xs font-semibold text-dm-text-primary text-steel-500 sm:text-sm " +
+            (animated
+              ? "transition-colors group-hover:text-dm-accent-yellow"
+              : "transition-none")
+          }
+        >
           {title}
-        </h3>
+        </h2>
       </div>
     </Link>
   );

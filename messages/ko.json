@@ -107,6 +107,9 @@
     "logout": "로그아웃"
   },
   "auth": {
+    "signupSuccessTitle": "계정이 생성되었습니다",
+    "checkEmailTitle": "이메일을 확인해 주세요",
+    "checkEmailDescription": "{email} 주소로 확인 링크를 보냈습니다. 이메일에서 계정을 인증한 후 돌아와 로그인해 주세요. 이메일이 보이지 않으면 스팸 폴더도 확인해 주세요.",
     "welcomeBack": "다시 오신 것을 환영합니다",
     "loginSubtitle": "계정에 액세스하려면 로그인하세요",
     "email": "이메일",
@@ -385,6 +388,9 @@
     "stripeTestPaymentMode": "💡 스트라이프 테스트 결제 모드",
     "useCard": "카드 사용:",
     "expiryCvcZip": "만료: 미래 날짜(예: 12/29) | CVC: 123 | 우편번호: 임의의 숫자",
+    "useTestCard": "테스트 카드 사용",
+    "testCardReady": "테스트 카드가 선택되었습니다. 카드 정보를 입력하지 않고 결제를 눌러 진행하세요.",
+    "enterCardManually": "카드 정보 직접 입력",
     "processingDots": "처리 중...",
     "pay": "지불하다",
     "completed": "완료",
@@ -396,6 +402,7 @@
     "loading": "로드 중..."
   },
   "user": {
+    "productRemovedFromCart": "상품을 장바구니에서 삭제했습니다",
     "noProductsMatchFilters": "필터와 일치하는 제품이 없습니다.",
     "productAddedToCart": "장바구니에 추가된 상품",
     "profiles": "프로필",

@@ -5,8 +5,6 @@
  * Features hover effects with dynamic background images
  */
 
-"use client";
-
 import Image from "next/image";
 import { HiShieldCheck } from "react-icons/hi";
 import { FaCreditCard } from "react-icons/fa";
@@ -57,6 +55,7 @@ function FeatureCard({
         src={hoverImage}
         alt=""
         fill
+        sizes="(max-width: 990px) 33vw, (min-width: 1920px) 530px, 33vw"
         className="z-10 origin-center rounded-full object-cover opacity-0 transition-all duration-1000 ease-out group-hover:opacity-100"
         aria-hidden="true"
       />
@@ -140,6 +139,7 @@ export default function FeaturesSection() {
         src="/about-us-1.webp"
         alt=""
         fill
+        sizes="100vw"
         className="z-10 object-cover"
         aria-hidden="true"
         priority={false}

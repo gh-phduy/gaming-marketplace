@@ -4,7 +4,10 @@ import {
   TOPUP_GAME_DETAILS,
   type TopUpGameDetail,
 } from "@/components/home/directtopup/detail/topup-detail-data";
-import { TOPUP_GAMES } from "@/lib/constants/products";
+
+// Match the top-up index: locale configuration is resolved per request.
+// Generating only category/slug without locale made production fallback renders fail.
+export const dynamic = "force-dynamic";
 
 type DirectTopUpGamePageProps = {
   params: Promise<{
@@ -12,14 +15,6 @@ type DirectTopUpGamePageProps = {
     slug: string;
   }>;
 };
-
-export function generateStaticParams() {
-  return TOPUP_GAMES.filter((g) => TOPUP_GAME_DETAILS[g.slug]).map((game) => {
-    const category =
-      game.category === "services" ? "services" : `${game.category}-games`;
-    return { category, slug: game.slug };
-  });
-}
 
 export default async function DirectTopUpGamePage({
   params,

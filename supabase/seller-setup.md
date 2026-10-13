@@ -60,3 +60,32 @@ identical PlayStation or Xbox logos on the same card.
 The command can be rerun after reseeding the demo catalog. Cards and listing
 filters use the same platform normalization; homepage platform links distinguish
 PS4 from PS5 and Xbox One from Xbox Series X/S.
+
+## Stored demo seller activity
+
+Run `node supabase/scripts/seed-seller-activity.cjs` after provisioning the demo
+sellers. It verifies each account's seed marker and email before updating it.
+The command stores ratings and avatar URLs in `public.users`, and distributes
+the demo sales baseline across each seller's published `public.products.sales`.
+Review counts, positive-review counts, and five sample review excerpts per seller
+are stored in Supabase Auth `app_metadata.marketplace_demo_activity`. These are
+explicitly demo summaries, not payment orders or a complete review ledger.
+
+`lib/seller-activity.server.ts` reads only that activity namespace using the
+server service-role key, then passes public review fields to the directory and
+seller profile. The homepage and directory both read `public.users.rating`.
+The UI does not generate fallback ratings or sales for unseeded accounts.
+
+A snapshot of prior ratings, avatars, product sales and demo metadata is saved to
+`.codex-artifacts/supabase-validation/seller-activity-before.json`. Reruns skip
+already seeded activity, preserving later sales and ratings instead of adding
+the baseline twice. Local avatar SVG files are recreated on every run.
+
+## Uploaded seller avatars
+
+Run `node supabase/scripts/assign-seller-avatars.cjs` to assign the ten public
+images in `Image/avt_user` to the ten provisioned demo sellers in account order.
+The script checks each image URL before writing, updates both `users.avatar_url`
+and Auth `user_metadata.avatar_url`, and reads both back to verify all ten users.
+Prior avatar URLs are saved in the ignored
+`.codex-artifacts/supabase-validation/seller-avatars-before.json` snapshot.

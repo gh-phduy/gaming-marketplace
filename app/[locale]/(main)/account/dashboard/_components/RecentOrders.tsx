@@ -16,6 +16,8 @@ import type { OrderSummary } from "../_lib/dashboard.data";
 
 interface RecentOrdersProps {
   orders: OrderSummary[];
+  loading?: boolean;
+  error?: string;
 }
 
 const statusConfig: Record<
@@ -46,6 +48,8 @@ const statusConfig: Record<
     bgColor: "bg-red-500/10",
     label: "Cancelled",
   },
+  failed: { icon: XCircle, color: "text-dm-accent-red", bgColor: "bg-red-500/10", label: "Failed" },
+  refunded: { icon: CheckCircle2, color: "text-steel-500", bgColor: "bg-steel-500/10", label: "Refunded" },
 };
 
 /* ==========================================================================
@@ -57,7 +61,7 @@ const statusConfig: Record<
  *
  * Renders a listing feed of the buyer/seller transaction orders.
  */
-export default function DashboardRecentOrders({ orders }: RecentOrdersProps) {
+export default function DashboardRecentOrders({ orders, loading, error }: RecentOrdersProps) {
   return (
     <div
       id="dashboard-recent-orders"
@@ -68,17 +72,15 @@ export default function DashboardRecentOrders({ orders }: RecentOrdersProps) {
           <Package className="h-5 w-5 text-steel-500" />
           <h2 className="text-base font-bold text-white">Recent Orders</h2>
         </div>
-        <button
-          type="button"
-          className="group inline-flex items-center gap-1 text-xs font-medium text-forest-500 transition hover:text-forest-100"
-        >
-          View all
-          <ChevronRight className="h-3.5 w-3.5 transition-transform group-hover:translate-x-0.5" />
-        </button>
+        <span className="text-xs text-steel-500">Latest 10 orders</span>
       </div>
 
       <div className="mt-4 space-y-3">
-        {orders.length === 0 ? (
+        {loading || error ? (
+          <p role="status" className="py-8 text-center text-sm text-steel-500">
+            {error || "Loading your orders…"}
+          </p>
+        ) : orders.length === 0 ? (
           <div className="py-8 text-center text-sm text-steel-500">
             No recent orders
           </div>

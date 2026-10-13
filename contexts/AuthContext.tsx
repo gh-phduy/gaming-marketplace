@@ -7,7 +7,7 @@ import {
   useState,
   ReactNode,
 } from "react";
-import { supabase } from "@/lib/supabase";
+import type { Subscription } from "@supabase/supabase-js";
 
 interface User {
   id: string;
@@ -46,9 +46,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let active = true;
+    let subscription: Subscription | undefined;
     const initializeAuth = async () => {
       try {
-        const { data: { session } } = await supabase.auth.getSession();
+        const { supabase } = await import("@/lib/supabase");
+        if (!active) return;
+        subscription = supabase.auth.onAuthStateChange((event, session) => {
+          if (!active) return;
+          if (session?.user) {
+            setUser(mapSupabaseUser(session.user));
+            localStorage.removeItem("auth_token");
+          } else if (!localStorage.getItem("auth_token")) {
+            setUser(null);
+          }
+          setIsLoading(false);
+        }).data.subscription;
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        if (!active) return;
         if (session?.user) {
           setUser(mapSupabaseUser(session.user));
         } else {
@@ -66,32 +83,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       } catch (error) {
         console.error("Error getting initial session:", error);
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     };
 
     initializeAuth();
 
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        if (session?.user) {
-          setUser(mapSupabaseUser(session.user));
-          // Clean up legacy token if Supabase session is active
-          localStorage.removeItem("auth_token");
-        } else {
-          // Only clear user if there is no legacy token (to allow co-existence during testing)
-          const legacyToken = localStorage.getItem("auth_token");
-          if (!legacyToken) {
-            setUser(null);
-          }
-        }
-        setIsLoading(false);
-      }
-    );
-
     return () => {
-      subscription.unsubscribe();
+      active = false;
+      subscription?.unsubscribe();
     };
   }, []);
 
@@ -107,6 +107,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = async () => {
     try {
+      const { supabase } = await import("@/lib/supabase");
       await supabase.auth.signOut();
     } catch (error) {
       console.error("Failed to sign out from Supabase:", error);

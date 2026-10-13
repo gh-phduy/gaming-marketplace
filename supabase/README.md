@@ -51,6 +51,41 @@ Các nhóm nguồn liên quan:
 - Auth: `app/api/auth/signup/route.ts`, `components/auth/EmailLoginForm.tsx`,
   `EmailSignUpForm.tsx`, `OAuthProviders.tsx`, `contexts/AuthContext.tsx`.
 
+## Đăng ký và đăng nhập email
+
+Giữ Email provider, Allow new users to sign up và Confirm email bật trong Supabase.
+API `/api/auth/signup` dùng public signup và giữ chính sách xác nhận email của dự án.
+Form hiển thị hướng dẫn kiểm tra hộp thư khi tài khoản cần xác nhận; đăng nhập email
+dùng `signInWithPassword`. Luồng này không dùng Admin API để tự xác nhận email.
+
+Vào **Authentication → Emails → SMTP Settings** để cấu hình SMTP riêng.
+SMTP mặc định của Supabase chỉ gửi cho email thành viên của tổ chức dự án.
+Nếu dùng Resend, thêm và xác minh `auth.gamingmarketplace.click` bằng các bản ghi DNS
+do Resend cung cấp, rồi tạo API key có quyền gửi email.
+
+| Trường SMTP trong Supabase | Giá trị |
+| --- | --- |
+| Sender email | `no-reply@auth.gamingmarketplace.click` |
+| Sender name | `Gaming Marketplace` |
+| Host | `smtp.resend.com` |
+| Port | `465` |
+| Username | `resend` |
+| Password | API key Resend, nhập trực tiếp trong Supabase |
+
+Vào **Authentication → URL Configuration**: Site URL là
+`https://gamingmarketplace.click`; thêm các URL trong `auth-redirect-urls.txt`.
+Danh sách dùng URL cụ thể cho đủ 19 ngôn ngữ ở domain chính và `www`, cùng wildcard
+cho localhost khi phát triển. Link xác nhận quay về trang chủ của ngôn ngữ đăng ký.
+Supabase client hiện dùng implicit flow và nhận session từ link xác nhận.
+
+Sau khi SMTP được lưu, thử đăng ký bằng email bạn quản lý, mở thư xác nhận và kiểm
+tra đăng nhập. Không tạo tài khoản hoặc gửi email thật trong unit tests.
+
+Tài liệu: [Supabase SMTP](https://supabase.com/docs/guides/auth/auth-smtp),
+[Supabase redirects](https://supabase.com/docs/guides/auth/redirect-urls),
+[Resend domains](https://resend.com/docs/dashboard/domains/introduction),
+[Resend SMTP](https://resend.com/changelog/smtp-service).
+
 ## Cột và quan hệ
 
 - `users`: `id` UUID của `auth.users`; `email`, `display_name`, `avatar_url`, `rating`,
@@ -201,6 +236,31 @@ Truy vấn lọc bằng cột, không phụ thuộc tên thư mục URL, chỉ �
 và tối đa 8 dòng/mục theo `sort_order`, `id`. Khi SQL chạy xong, tải lại trang web.
 Kết quả SQL cuối hiển thị số sản phẩm đủ điều kiện của từng mục, kể cả mục có 0 dòng.
 Các dữ liệu Popular Games đang có được giữ nguyên. Thư mục khác không được cấp quyền mới.
+
+## Video preview cho các mục trang chủ
+
+Các thẻ dùng chung `lib/game-preview-video.ts` để ghép tên game trong URL ảnh
+với video đã xác minh trong bucket `Image`. `video_url` đã nhập trên sản phẩm
+được ưu tiên. Mapping này chạy tại chỗ, không list Storage hoặc tải video khi
+render trang; nguồn video chỉ được gán khi tương tác trên desktop. Mobile giữ ảnh.
+
+| Mục | Thư mục video | Đã nối với game hiện có |
+| --- | --- | --- |
+| Popular Games | `popular_games_vd` | 8/8 |
+| Upcoming Games | `up_coming_vd` | 8/8 |
+| New on Difmark | `new_on_difmark_vd` | 7/8 |
+| Weekly Chart | `weekly_chart_vd` | 6/8 |
+| Under $100 | `under_price_vd` | 7/8 |
+
+GTA VI trong Weekly Chart dùng lại `up_coming_vd/gta.webm`. Mapping cũng hỗ trợ
+ảnh trong các thư mục `_large`, và chỉ nhận diện đúng game thay vì ghép gần giống.
+Chưa có video khớp Valheim, Psychonauts 2, Shape of Dreams và Call of Duty Black Ops;
+bốn game này tiếp tục hiện ảnh. Các file cho game khác chưa có trong catalog được
+giữ nguyên trong Storage; ứng dụng không thay đổi danh sách game theo video.
+
+Kiểm tra nội dung bằng SHA-256 ngày 13/10/2026 xác nhận `halloween.webm` và
+`nba.webm` đang giống hệt nhau, tương tự `doom.webm` và `doom_eternal.webm`.
+Cần thay lại file bị nhầm; code hiện nối theo tên file mà người dùng đã upload.
 
 ## Kiểm tra và tái tạo inventory
 

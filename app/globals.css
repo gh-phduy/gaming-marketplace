@@ -2,6 +2,25 @@
 
 @custom-variant dark (&:is(.dark *));
 
+/* Fade only the swipe viewport, keeping the section title and actions sharp. */
+.game-carousel-viewport {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-image: linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+}
+
+/* Three columns / six cards on tablets and laptops; four / eight on wide screens.
+   Below 800px all cards remain available in the horizontal carousel. */
+@media (min-width: 800px) {
+  .game-carousel-viewport {
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  .game-list > :nth-child(n + 7) { display: none; }
+}
+@media (min-width: 1920px) {
+  .game-list > :nth-child(n + 7) { display: block; }
+}
+
 @theme {
   /* Forest Colors */
   --color-forest-100: #d0f0d6;
@@ -451,4 +470,3 @@ input:-webkit-autofill:active {
   border: 2px solid transparent;
   background-clip: padding-box;
 }
-

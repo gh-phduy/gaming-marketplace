@@ -27,10 +27,9 @@
     "app/[locale]/(checkout)/product/_components/useProductDetail.ts",
     "app/[locale]/(checkout)/product/_lib/product-listing.ts",
     "app/[locale]/(checkout)/product/page.tsx",
-    "app/[locale]/(main)/(with-hero)/direct-top-up/[category]/[slug]/page.tsx",
-    "app/[locale]/(main)/(with-hero)/direct-top-up/page.tsx",
-    "app/[locale]/(main)/(with-hero)/layout.tsx",
-    "app/[locale]/(main)/(with-hero)/page.tsx",
+    "app/[locale]/(main)/direct-top-up/[category]/[slug]/page.tsx",
+    "app/[locale]/(main)/direct-top-up/page.tsx",
+    "app/[locale]/(main)/page.tsx",
     "app/[locale]/(main)/[slug]/page.tsx",
     "app/[locale]/(main)/_components/CategoryLandingClient.tsx",
     "app/[locale]/(main)/_components/MarketplaceCategoryPageClient.tsx",
@@ -300,7 +299,7 @@
     "vitest.setup.ts"
   ],
   "summary": {
-    "sourceFiles": 298,
+    "sourceFiles": 297,
     "tableQuerySites": 34,
     "tables": [
       "conversations",

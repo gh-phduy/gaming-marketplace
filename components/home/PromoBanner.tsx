@@ -4,8 +4,6 @@
  * Banner section displaying promotional text about game deals
  */
 
-"use client";
-
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -27,6 +25,7 @@ export default function PromoBanner() {
         src="/about-us-2.webp"
         alt=""
         fill
+        sizes="100vw"
         className="z-10 object-cover"
         aria-hidden="true"
         priority={false}

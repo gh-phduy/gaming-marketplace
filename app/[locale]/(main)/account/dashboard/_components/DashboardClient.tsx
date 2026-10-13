@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { UserDashboardProfile } from "../_lib/dashboard.data";
+import { getBuyerOrders } from "@/lib/buyer-orders";
 import DashboardVerificationBanner from "./VerificationBanner";
 import DashboardWalletSection from "./WalletSection";
 import DashboardRecentOrders from "./RecentOrders";
@@ -11,9 +12,7 @@ import DashboardSellerWorkspace from "./DashboardSellerWorkspace";
 import { useAuth } from "@/contexts/AuthContext";
 import { useSettings } from "@/contexts/SettingsContext";
 import { LANGUAGES, CURRENCIES } from "@/components/auth/userMenu/constants";
-import {
-  normalizeSellerRouteKey,
-} from "@/components/user/seller-profile.route";
+import { normalizeSellerRouteKey } from "@/components/user/seller-profile.route";
 
 // Import modular presentational components
 import { DashboardProfileCard } from "./DashboardProfileCard";
@@ -41,7 +40,34 @@ interface DashboardClientProps {
 export default function DashboardClient({ profile }: DashboardClientProps) {
   const { user, isLoading } = useAuth();
   const router = useRouter();
-  const { language: currentLangCode, currency: currentCurrencyCode } = useSettings();
+  const { language: currentLangCode, currency: currentCurrencyCode } =
+    useSettings();
+  const [orderHistory, setOrderHistory] = useState<{
+    buyerId: string;
+    orders: UserDashboardProfile["recentOrders"];
+    error?: string;
+  }>();
+  useEffect(() => {
+    if (!user?.id) return;
+    const buyerId = user.id;
+    // Ignore a late response after logout, account switching or unmounting.
+    let active = true;
+    void getBuyerOrders(buyerId).then(
+      (orders) => {
+        if (active) setOrderHistory({ buyerId, orders });
+      },
+      (error) => {
+        if (active)
+          setOrderHistory({ buyerId, orders: [], error: error.message });
+      },
+    );
+    return () => {
+      active = false;
+    };
+  }, [user?.id]);
+  // Hide the previous account's results while the next account is loading.
+  const currentOrders =
+    orderHistory?.buyerId === user?.id ? orderHistory : undefined;
 
   // Redirect to home if user session is not authenticated
   useEffect(() => {
@@ -64,10 +90,10 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
       currentCurrencyCode === "EUR"
         ? "EU"
         : currentCurrencyCode === "GBP"
-        ? "GB"
-        : currentCurrencyCode === "JPY"
-        ? "JP"
-        : "US";
+          ? "GB"
+          : currentCurrencyCode === "JPY"
+            ? "JP"
+            : "US";
 
     return {
       ...profile,
@@ -147,7 +173,11 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
         {/* Recent Transaction Orders & Security logs */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
           <div className="lg:col-span-2">
-            <DashboardRecentOrders orders={accountProfile.recentOrders} />
+            <DashboardRecentOrders
+              orders={currentOrders?.orders ?? []}
+              loading={!currentOrders}
+              error={currentOrders?.error}
+            />
           </div>
           <DashboardSecurityCard isVerified={accountProfile.isVerified} />
         </div>
@@ -155,4 +185,3 @@ export default function DashboardClient({ profile }: DashboardClientProps) {
     </main>
   );
 }
-

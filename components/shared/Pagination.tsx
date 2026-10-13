@@ -51,16 +51,19 @@ function NavButton({
   onClick,
   disabled,
   children,
+  label,
 }: {
   onClick: () => void;
   disabled: boolean;
   children: ReactNode;
+  label: string;
 }) {
   return (
     <button
       type="button"
       onClick={onClick}
       disabled={disabled}
+      aria-label={label}
       className="flex h-10 items-center gap-1 rounded-md bg-midnight-800 px-3 text-sm font-bold text-white transition hover:bg-midnight-700 disabled:pointer-events-none disabled:opacity-40"
     >
       {children}
@@ -133,6 +136,7 @@ export default function SharedPagination({
       className="flex items-center justify-center gap-2"
     >
       <NavButton
+        label={previousLabel}
         onClick={() => goToPage(normalizedCurrentPage - 1)}
         disabled={normalizedCurrentPage === 1}
       >
@@ -145,6 +149,7 @@ export default function SharedPagination({
       {renderPages(desktopPages, "desktop", "hidden lg:flex")}
 
       <NavButton
+        label={nextLabel}
         onClick={() => goToPage(normalizedCurrentPage + 1)}
         disabled={normalizedCurrentPage === totalPages}
       >

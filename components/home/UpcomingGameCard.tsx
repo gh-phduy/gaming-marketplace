@@ -1,18 +1,12 @@
-/**
- * UpcomingGameItem Component
- *
- * Game card with release date badge and video preview on hover
- * Uses GSAP for smooth animations
- */
-
 "use client";
 
-import { useRef, useState, useEffect, useCallback } from "react";
+import { useGamePreview } from "@/hooks/useGamePreview";
+import GamePreviewVideo from "@/components/shared/GamePreviewVideo";
 import Image from "next/image";
-import Link from "next/link";
-import { gsap } from "gsap";
+import { Link } from "@/i18n/routing";
 import PlatformBadges from "@/components/shared/PlatformBadges";
 import { useTranslations } from "next-intl";
+import GameCardCartOverlay from "@/components/shared/GameCardCartOverlay";
 
 /* ============================================
    TYPES
@@ -32,6 +26,7 @@ interface UpcomingGameItemProps {
   previewVideo?: string;
   /** Platform icon */
   platform?: string;
+  onAddToCart?: () => void;
 }
 
 /* ============================================
@@ -42,16 +37,7 @@ const DEFAULTS = {
   title: "Deliver At All Costs",
   price: "$38.30",
   coverImage: "/product2.jpg",
-  previewVideo: "/video/product2.webm",
   platform: "pc" as const,
-} as const;
-
-/** Animation durations */
-const ANIMATION = {
-  containerExpand: 0.7,
-  imageFade: 0.3,
-  videoFade: 0.3,
-  footerColor: 0.5,
 } as const;
 
 /* ============================================
@@ -69,213 +55,91 @@ export default function UpcomingGameItem({
   price = DEFAULTS.price,
   releaseDate,
   coverImage = DEFAULTS.coverImage,
-  previewVideo = DEFAULTS.previewVideo,
+  previewVideo,
   platform = DEFAULTS.platform,
+  onAddToCart,
 }: UpcomingGameItemProps) {
   const t = useTranslations("home");
-  // State
-  const [isHovered, setIsHovered] = useState(false);
-  const [videoSrc, setVideoSrc] = useState<string | undefined>(undefined);
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    const checkIsMobile = () => {
-      const isTouch = !window.matchMedia("(hover: hover) and (pointer: fine)")
-        .matches;
-      const isSmallScreen = window.innerWidth <= 800;
-      setIsMobile(isTouch || isSmallScreen);
-    };
-    checkIsMobile();
-    window.addEventListener("resize", checkIsMobile);
-    return () => window.removeEventListener("resize", checkIsMobile);
-  }, []);
-
-  // Refs
-  const isHoveredRef = useRef(false);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLDivElement>(null);
-  const footerRef = useRef<HTMLDivElement>(null);
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
-
-  // Initialize GSAP timeline
-  useEffect(() => {
-    if (!containerRef.current || !imageRef.current || !footerRef.current) {
-      return;
-    }
-
-    timelineRef.current = gsap.timeline({ paused: true });
-
-    timelineRef.current
-      .to(
-        containerRef.current,
-        {
-          height: "300px",
-          duration: ANIMATION.containerExpand,
-          ease: "power2.out",
-        },
-        0,
-      )
-      .to(
-        imageRef.current,
-        {
-          opacity: 0,
-          duration: ANIMATION.imageFade,
-          ease: "power2.out",
-        },
-        0,
-      )
-      .to(
-        videoRef.current,
-        {
-          opacity: 1,
-          duration: ANIMATION.videoFade,
-          ease: "power2.out",
-        },
-        0.1,
-      )
-      .to(
-        footerRef.current,
-        {
-          backgroundColor: "#2A3240",
-          duration: ANIMATION.footerColor,
-          ease: "power2.out",
-        },
-        0.3,
-      );
-
-    return () => {
-      timelineRef.current?.kill();
-    };
-  }, []);
-
-  // Autoplay video when src is set and still hovered
-  useEffect(() => {
-    if (videoSrc && isHoveredRef.current && videoRef.current) {
-      videoRef.current.play().catch(() => {});
-    }
-  }, [videoSrc]);
-
-  // Event handlers
-  const handleMouseEnter = useCallback(() => {
-    const hasMouse = window.matchMedia(
-      "(hover: hover) and (pointer: fine)",
-    ).matches;
-    if (!hasMouse) return;
-
-    isHoveredRef.current = true;
-
-    if (!videoSrc) {
-      setVideoSrc(previewVideo);
-    } else if (videoRef.current) {
-      videoRef.current.play().catch(() => {});
-      if (videoRef.current.readyState >= 3) {
-        setIsHovered(true);
-        timelineRef.current?.play();
-      }
-    }
-  }, [videoSrc, previewVideo]);
-
-  const handleCanPlay = useCallback(() => {
-    if (isHoveredRef.current && videoRef.current) {
-      setIsHovered(true);
-      videoRef.current.play().catch(() => {});
-      timelineRef.current?.play();
-    }
-  }, []);
-
-  const handleMouseLeave = useCallback(() => {
-    isHoveredRef.current = false;
-    setIsHovered(false);
-    if (videoRef.current) {
-      videoRef.current.pause();
-      videoRef.current.currentTime = 0;
-    }
-    timelineRef.current?.reverse();
-  }, []);
+  const productT = useTranslations("product");
+  const preview = useGamePreview(previewVideo);
 
   return (
     <article
+      ref={preview.containerRef}
+      {...preview.interactionProps}
       className="relative mx-auto h-[300px] w-[252px] select-none 800:w-full"
       role="listitem"
     >
-      <Link href={`/buy-cheap?id=${id}`} className="block h-full w-full">
-        <div
-          ref={containerRef}
-          className="group absolute top-1/2 left-1/2 flex h-[275px] w-full -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col overflow-hidden rounded-lg bg-surface-base"
-          onMouseEnter={handleMouseEnter}
-          onMouseLeave={handleMouseLeave}
-          tabIndex={0}
-          onFocus={handleMouseEnter}
-          onBlur={handleMouseLeave}
-          aria-label={[
-            title,
-            releaseDate && `${t("releaseLabel")} ${releaseDate}`,
-            price,
-          ]
-            .filter(Boolean)
-            .join(" - ")}
+      <div
+        className={
+          "group absolute top-1/2 left-1/2 flex w-full -translate-x-1/2 -translate-y-1/2 cursor-pointer flex-col overflow-hidden rounded-lg bg-surface-base " +
+          preview.panelClass
+        }
+      >
+        <Link
+          prefetch={false}
+          href={`/buy-cheap?id=${id}`}
+          className="flex h-full w-full flex-col focus-visible:outline-2 focus-visible:outline-green-400"
         >
           {/* Media Container */}
           <div className="relative flex-1">
             {/* Release Date Badge */}
             {releaseDate && (
               <div
-                className="pointer-events-none absolute z-20 flex items-center justify-center bg-[#95740080] px-2 py-[10px]"
+                className="pointer-events-none absolute top-0 left-0 z-20 flex h-[30px] items-center rounded-br-sm bg-[#8a783c]/80 px-2.5 text-[12px] whitespace-nowrap text-[#fff1c2]"
                 aria-label={`${t("releaseDateLabel")} ${releaseDate}`}
               >
-                <span className="text-[12px] text-dm-accent-yellow">
-                  {t("releaseLabel")} {releaseDate}
+                <span>
+                  {t("releaseLabel")}&nbsp;
+                  <strong className="font-bold">{releaseDate}</strong>
                 </span>
               </div>
             )}
 
             {/* Cover Image */}
-            <div ref={imageRef} className="absolute inset-0 h-full w-full">
+            <div className="absolute inset-0 h-full w-full">
               <Image
                 src={coverImage}
                 alt={title}
                 fill
                 className="object-cover"
-                sizes="(max-width: 800px) 252px, 100%"
+                sizes="(max-width: 800px) 252px, (min-width: 1920px) 25vw, 33vw"
               />
             </div>
 
             {/* Preview Video */}
-            {!isMobile && (
-              <video
-                ref={videoRef}
-                className="absolute inset-0 h-full w-full object-cover opacity-0"
-                src={videoSrc}
-                muted
-                loop
-                playsInline
-                preload="none"
-                onCanPlay={handleCanPlay}
-                aria-hidden="true"
-              />
-            )}
+            <GamePreviewVideo preview={preview} />
 
             {/* Price Overlay */}
             <div className="absolute bottom-0 w-full">
-              <div className="relative flex h-[65px] w-full items-center justify-between gap-x-2 bg-surface-card/30 px-4 text-dm-text-primary backdrop-blur-xs">
+              <div className="relative flex h-[40px] w-full items-center justify-between gap-x-2 bg-surface-card/30 px-4 text-dm-text-primary backdrop-blur-xs 800:h-[65px]">
                 <PlatformBadges platform={platform} size={18} />
-                <span className="shrink-0 text-xl font-semibold">{price}</span>
+                <span className="shrink-0 text-[15px] font-semibold whitespace-nowrap 800:text-xl">{price}</span>
               </div>
             </div>
           </div>
 
           {/* Footer */}
           <div
-            ref={footerRef}
-            className="flex h-[57px] w-full items-center justify-between bg-surface-card px-2"
+            className={
+              "flex h-[57px] w-full shrink-0 items-center justify-between pl-2 " +
+              (preview.enabled ? "pr-2 " : "pr-14 ") +
+              preview.footerClass
+            }
           >
-            <h3 className="truncate text-xl font-semibold text-dm-text-primary">
+            <h3 className="min-w-0 truncate text-[14px] font-medium text-dm-text-primary 800:text-xl 800:font-semibold">
               {title}
             </h3>
           </div>
-        </div>
-      </Link>
+        </Link>
+        <GameCardCartOverlay
+          title={title}
+          label={productT("addToCart")}
+          enabled={preview.enabled}
+          active={preview.active}
+          onAddToCart={onAddToCart}
+        />
+      </div>
     </article>
   );
 }

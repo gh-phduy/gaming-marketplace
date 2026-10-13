@@ -1,6 +1,5 @@
 "use client";
 
-import React from "react";
 import { useTranslations } from "next-intl";
 
 interface TextImageProps {
@@ -16,7 +15,6 @@ export function CanvasTextImage({
   size = "3rem",
   className = "",
 }: TextImageProps) {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
   const t = useTranslations("home");
 
   // Determine translation key based on input text (case-insensitive)
@@ -38,43 +36,30 @@ export function CanvasTextImage({
     displayText = t("under100");
   }
 
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.crossOrigin = "anonymous";
-
-    img.onload = () => {
-      const fontSize = parseInt(size) || 48;
-      canvas.width = displayText.length * fontSize * 0.8;
-      canvas.height = fontSize * 1.5;
-
-      // Vẽ ảnh
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-      // Set composite mode để chỉ giữ lại phần text
-      ctx.globalCompositeOperation = "destination-in";
-
-      // Vẽ text
-      ctx.font = `bold ${fontSize}px Arial`;
-      ctx.fillStyle = "black";
-      ctx.textAlign = "center";
-      ctx.textBaseline = "middle";
-      ctx.fillText(displayText.toUpperCase(), canvas.width / 2, canvas.height / 2);
-    };
-
-    img.src = imageUrl;
-  }, [displayText, imageUrl, size]);
-
+  // Reserve the final heading dimensions in the server HTML. CSS paints the
+  // same image through the glyphs without a canvas effect or an image onload.
   return (
-    <canvas
-      ref={canvasRef}
+    <span
+      aria-hidden="true"
       className={className}
-      style={{ maxWidth: "100%", height: "auto" }}
-    />
+      style={{
+        display: "inline-block",
+        flexShrink: 1,
+        width: `calc(${size} * ${displayText.length * 0.8})`,
+        maxWidth: "100%",
+        lineHeight: 1.5,
+        font: `bold ${size}/1.5 Arial, sans-serif`,
+        textAlign: "center",
+        textTransform: "uppercase",
+        whiteSpace: "nowrap",
+        backgroundImage: `url("${imageUrl}")`,
+        backgroundSize: "100% 100%",
+        backgroundClip: "text",
+        WebkitBackgroundClip: "text",
+        color: "transparent",
+      }}
+    >
+      {displayText}
+    </span>
   );
 }
