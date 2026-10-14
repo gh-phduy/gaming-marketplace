@@ -33,10 +33,12 @@ type AuthView = "providers" | "email-login" | "email-signup";
  */
 export default function SignIn({
   triggerClassName,
+  initialOpen = false,
 }: {
   triggerClassName?: string;
+  initialOpen?: boolean;
 }) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [isOpen, setIsOpen] = useState(initialOpen);
   const [view, setView] = useState<AuthView>("providers");
   const [toast, setToast] = useState<{
     message: string;

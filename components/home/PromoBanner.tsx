@@ -4,6 +4,7 @@
  * Banner section displaying promotional text about game deals
  */
 
+import aboutUs2Image from "@/public/about-us-2.webp";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 
@@ -22,7 +23,7 @@ export default function PromoBanner() {
     >
       {/* Background image */}
       <Image
-        src="/about-us-2.webp"
+        src={aboutUs2Image.src}
         alt=""
         fill
         sizes="100vw"

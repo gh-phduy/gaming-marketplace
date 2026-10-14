@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev --webpack",
     "build": "opennextjs-cloudflare build",
+    "postbuild": "node scripts/prepare-cloudflare-cache.mjs",
     "build:next": "next build",
     "preview": "opennextjs-cloudflare preview",
     "deploy": "wrangler deploy --keep-vars",

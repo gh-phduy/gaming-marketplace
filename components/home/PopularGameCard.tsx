@@ -34,7 +34,7 @@ export default function PopularGameItem({
     <article
       ref={preview.containerRef}
       {...preview.interactionProps}
-      className="relative mx-auto h-[300px] w-[252px] select-none 800:w-full"
+      className="game-card relative mx-auto h-[300px] w-[252px] select-none 800:w-full"
       role="listitem"
     >
       <div

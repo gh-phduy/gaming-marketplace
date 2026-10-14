@@ -1,5 +1,14 @@
 @import "tailwindcss";
 
+/* Mobile cards have a fixed footprint. Skip painting offscreen contents while
+   retaining that space; desktop previews need to paint beyond the card bounds. */
+@media (width < 800px) {
+  .game-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 300px;
+  }
+}
+
 @custom-variant dark (&:is(.dark *));
 
 /* Fade only the swipe viewport, keeping the section title and actions sharp. */

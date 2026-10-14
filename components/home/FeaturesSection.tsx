@@ -5,6 +5,10 @@
  * Features hover effects with dynamic background images
  */
 
+import hoverAb1Image from "@/public/hover-ab-1.webp";
+import hoverAb3Image from "@/public/hover-ab-3.webp";
+import hoverAb2Image from "@/public/hover-ab-2.webp";
+import aboutUs1Image from "@/public/about-us-1.webp";
 import Image from "next/image";
 import { HiShieldCheck } from "react-icons/hi";
 import { FaCreditCard } from "react-icons/fa";
@@ -109,7 +113,7 @@ export default function FeaturesSection() {
       iconSize: 30,
       title: t("buyerProtection"),
       description: t("secureTransactionsAndPersonalData"),
-      hoverImage: "/hover-ab-1.webp",
+      hoverImage: hoverAb1Image.src,
     },
     {
       id: "secure-payment",
@@ -117,7 +121,7 @@ export default function FeaturesSection() {
       iconSize: 28,
       title: t("securePayment"),
       description: t("secureTransactionsAndPersonalData"),
-      hoverImage: "/hover-ab-3.webp",
+      hoverImage: hoverAb3Image.src,
     },
     {
       id: "customer-support",
@@ -125,7 +129,7 @@ export default function FeaturesSection() {
       iconSize: 28,
       title: t("support247"),
       description: t("secureTransactionsAndPersonalData"),
-      hoverImage: "/hover-ab-2.webp",
+      hoverImage: hoverAb2Image.src,
     },
   ];
 
@@ -136,7 +140,7 @@ export default function FeaturesSection() {
     >
       {/* Background image */}
       <Image
-        src="/about-us-1.webp"
+        src={aboutUs1Image.src}
         alt=""
         fill
         sizes="100vw"

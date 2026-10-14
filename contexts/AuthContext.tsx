@@ -47,8 +47,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let active = true;
+    let started = false;
     let subscription: Subscription | undefined;
+    const storageKey = `sb-${
+      new URL(
+        process.env.NEXT_PUBLIC_SUPABASE_URL ||
+          "https://placeholder-project.supabase.co",
+      ).hostname.split(".")[0]
+    }-auth-token`;
     const initializeAuth = async () => {
+      if (started || !active) return;
+      started = true;
+      removeListeners();
       try {
         const { supabase } = await import("@/lib/supabase");
         if (!active) return;
@@ -87,10 +97,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     };
 
-    initializeAuth();
+    const interaction = () => {
+      void initializeAuth();
+    };
+    const storage = (event: StorageEvent) => {
+      if (event.key === storageKey || event.key === "auth_token") interaction();
+    };
+    const removeListeners = () => {
+      window.removeEventListener("pointerdown", interaction);
+      window.removeEventListener("click", interaction);
+      window.removeEventListener("keydown", interaction);
+      window.removeEventListener("storage", storage);
+      window.removeEventListener("difmark:auth-client-ready", interaction);
+    };
+
+    // Returning buyers restore immediately. New visitors load the SDK only
+    // when they interact, or another part of the app starts using Supabase.
+    let hasSession = true;
+    try {
+      const hash = new URLSearchParams(window.location.hash.slice(1));
+      const search = new URLSearchParams(window.location.search);
+      hasSession = Boolean(
+        hash.has("access_token") ||
+        search.has("code") ||
+        localStorage.getItem(storageKey) ||
+        localStorage.getItem("auth_token"),
+      );
+    } catch {
+      // Let the SDK handle browsers where storage is unavailable.
+    }
+    if (hasSession) {
+      void initializeAuth();
+    } else {
+      setIsLoading(false);
+      window.addEventListener("pointerdown", interaction, { passive: true });
+      window.addEventListener("click", interaction);
+      window.addEventListener("keydown", interaction);
+      window.addEventListener("storage", storage);
+      window.addEventListener("difmark:auth-client-ready", interaction);
+    }
 
     return () => {
       active = false;
+      removeListeners();
       subscription?.unsubscribe();
     };
   }, []);

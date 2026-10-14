@@ -11,6 +11,11 @@
 
 "use client";
 
+import bgTimeSaleImage from "@/public/bg-time-sale.webp";
+import flashSale261Weekly1Image from "@/public/flash-sale/261_weekly_1.webp";
+import flashSale260Weekly1Image from "@/public/flash-sale/260_weekly_1.webp";
+import flashSale262Weekly1Image from "@/public/flash-sale/262_weekly_1.webp";
+import flashSale263Weekly1Image from "@/public/flash-sale/263_weekly_1.webp";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import CountdownTimer from "../shared/CountdownTimer";
@@ -105,7 +110,7 @@ export default function FlashSaleSection() {
       <div className="h-[222px] 1000:h-[280px] 1300:h-[380px] 1440:h-[455px] w-full flex items-center justify-center relative bg-surface-base overflow-hidden">
         {/* Background */}
         <Image
-          src="/bg-time-sale.webp"
+          src={bgTimeSaleImage.src}
           alt=""
           fill
           sizes="100vw"
@@ -116,13 +121,13 @@ export default function FlashSaleSection() {
 
         {/* Left Images */}
         <DiagonalImage
-          src="/flash-sale/261_weekly_1.webp"
+          src={flashSale261Weekly1Image.src}
           alt="Palworld"
           position="left-near"
           hasHoverEffect
         />
         <DiagonalImage
-          src="/flash-sale/260_weekly_1.webp"
+          src={flashSale260Weekly1Image.src}
           alt="Baldur's Gate 3"
           position="left-far"
         />
@@ -134,13 +139,13 @@ export default function FlashSaleSection() {
 
         {/* Right Images */}
         <DiagonalImage
-          src="/flash-sale/262_weekly_1.webp"
+          src={flashSale262Weekly1Image.src}
           alt="Cyberpunk 2077"
           position="right-near"
           hasHoverEffect
         />
         <DiagonalImage
-          src="/flash-sale/263_weekly_1.webp"
+          src={flashSale263Weekly1Image.src}
           alt="Resident Evil 4"
           position="right-far"
         />

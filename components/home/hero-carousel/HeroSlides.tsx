@@ -22,11 +22,12 @@ import { useHeroCarouselSelection } from "./hooks";
  */
 export function HeroSlides({ activeTab }: HeroSlidesProps) {
   const [api, setApi] = useState<CarouselApi>();
+  const [firstSlideLoaded, setFirstSlideLoaded] = useState(false);
   const { current, scrollTo } = useHeroCarouselSelection(api);
   const slides = activeTab === "digital" ? HERO_SLIDES : HERO_SLIDES_TOPUP;
 
   useEffect(() => {
-    if (!api) return;
+    if (!api || !firstSlideLoaded) return;
 
     const autoScrollInterval = window.setInterval(() => {
       api.scrollNext();
@@ -35,7 +36,7 @@ export function HeroSlides({ activeTab }: HeroSlidesProps) {
     return () => {
       window.clearInterval(autoScrollInterval);
     };
-  }, [api]);
+  }, [api, firstSlideLoaded]);
 
   return (
     // overflow-hidden + rounded-3xl clips ALL slides during Embla's
@@ -51,15 +52,6 @@ export function HeroSlides({ activeTab }: HeroSlidesProps) {
       >
         <CarouselContent className="h-full">
           {slides.map((slide, index) => {
-            const mobileImage = slide.image
-              .replace(
-                /\/hero-slide-(\d+)\.webp$/,
-                "/hero-slide-mobile-$1.webp",
-              )
-              .replace(
-                /\/hero-slide-tab-(\d+)\.webp$/,
-                "/hero-slide-tab-mobile-$1.webp",
-              );
             const common = {
               alt: slide.alt || slide.id,
               fill: true,
@@ -76,22 +68,43 @@ export function HeroSlides({ activeTab }: HeroSlidesProps) {
             });
             const { props: mobile } = getImageProps({
               ...common,
-              src: mobileImage,
-              sizes: "100vw",
+              src: slide.mobileImage,
+              sizes: "calc(100vw - 48px)",
             });
 
             const slideContent = (
               <div className="relative h-full w-full">
-                <picture>
-                  <source
-                    media="(max-width: 699px)"
-                    srcSet={mobile.srcSet}
-                    sizes={mobile.sizes}
-                  />
-                  {/* The browser chooses the right art direction before hydration. */}
-                  { }
-                  <img {...desktop} alt={common.alt} />
-                </picture>
+                {/* Hidden slides start loading after the first banner arrives. */}
+                {(index === 0 || index === current || firstSlideLoaded) && (
+                  <picture>
+                    <source
+                      media="(max-width: 699px)"
+                      srcSet={mobile.srcSet}
+                      sizes={mobile.sizes}
+                    />
+                    {/* The browser chooses the right art direction before hydration. */}
+                    {}
+                    <img
+                      {...desktop}
+                      alt={common.alt}
+                      ref={(image) => {
+                        // A cached image may finish before hydration attaches
+                        // the load handler. Release the other slides in that case.
+                        if (
+                          index === 0 &&
+                          image?.complete &&
+                          image.naturalWidth > 0
+                        )
+                          setFirstSlideLoaded(true);
+                      }}
+                      onLoad={
+                        index === 0
+                          ? () => setFirstSlideLoaded(true)
+                          : undefined
+                      }
+                    />
+                  </picture>
+                )}
               </div>
             );
 

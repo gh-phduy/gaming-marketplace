@@ -98,7 +98,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const dismissNotification = useCallback(() => setNotification(null), []);
 
   useEffect(() => {
-    setCartItems(readCartItemsFromStorage());
+    const savedItems = readCartItemsFromStorage();
+    // Keep the initial empty array stable so every card does not render again.
+    if (savedItems.length) setCartItems(savedItems);
     setHasHydratedCart(true);
   }, []);
 

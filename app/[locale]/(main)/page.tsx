@@ -19,7 +19,8 @@ import GamesSection from "@/components/shared/GamesSection";
 import FlashSaleSection from "@/components/home/FlashSaleSection";
 import PlatformsSection from "@/components/home/PlatformsSection";
 import LatestNewsSection from "@/components/home/LatestNewsSection";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { getHomepageProducts } from "@/lib/homepage-products";
 import { getPopularSellers } from "@/lib/popular-sellers";
 import { Suspense } from "react";
@@ -29,9 +30,29 @@ import ResponsiveGameList from "@/components/shared/ResponsiveGameList";
 type Products = ReturnType<typeof getHomepageProducts>;
 type Sellers = ReturnType<typeof getPopularSellers>;
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
-export default function HomePage() {
+export function generateStaticParams() {
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  // CI intentionally uses placeholder credentials. Configured builds prerender
+  // the public catalog so a cold edge can serve build assets without waiting on DB.
+  if (
+    !process.env.NEXT_PUBLIC_SUPABASE_URL ||
+    !key ||
+    key.includes("placeholder")
+  ) {
+    return [];
+  }
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  setRequestLocale(locale);
   const products = getHomepageProducts();
   const sellers = getPopularSellers();
   return (

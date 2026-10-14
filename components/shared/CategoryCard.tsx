@@ -95,6 +95,7 @@ export function CategoryCard({ data }: CategoryCardProps) {
                     alt={data.title}
                     width={284}
                     height={400}
+                    sizes="(min-width: 1640px) 284px, (min-width: 1200px) 240px, (min-width: 1000px) 208px, 177px"
                     className="w-full h-full object-cover transition-all duration-1000 group-hover:scale-105 1000:group-hover:scale-110 group-hover:-translate-x-1 group-hover:-translate-y-2 1000:group-hover:-translate-x-3 1000:group-hover:-translate-y-4"
                 />
             </div>

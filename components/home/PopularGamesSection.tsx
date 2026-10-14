@@ -1,20 +1,16 @@
-"use client";
-
-import ResponsiveGameList from "../shared/ResponsiveGameList";
 import SectionHeader from "../shared/SectionHeader";
-import PopularGameCard from "./PopularGameCard";
-import { useTranslations } from "next-intl";
+import HomepageGameList from "../shared/HomepageGameList";
+import { getTranslations } from "next-intl/server";
 import type { HomepageGame } from "@/lib/homepage-products";
 import { getHomepageGamePreviewVideo } from "@/lib/game-preview-video";
-import { useCart } from "@/contexts/CartContext";
+import { getHomepageCartItem } from "@/lib/homepage-cart-item";
 
-export default function PopularGamesSection({
+export default async function PopularGamesSection({
   games,
 }: {
   games: HomepageGame[];
 }) {
-  const t = useTranslations("home");
-  const { addToCart } = useCart();
+  const t = await getTranslations("home");
 
   return (
     <section
@@ -32,29 +28,15 @@ export default function PopularGamesSection({
         viewAllAriaLabel={t("viewAllPopularGames")}
       />
 
-      <ResponsiveGameList label={t("popularGamesAria")}>
-        {games.map((game) => (
-          <PopularGameCard
-            key={game.id}
-            id={game.id}
-            title={game.title}
-            price={`$ ${game.price}`}
-            coverImage={game.image_url}
-            previewVideo={getHomepageGamePreviewVideo(game)}
-            platform={game.platform}
-            onAddToCart={() =>
-              addToCart({
-                id: game.id,
-                name: game.title,
-                image: game.image_url,
-                platform: game.platform,
-                price: Number(game.price),
-                currency: game.currency,
-              })
-            }
-          />
-        ))}
-      </ResponsiveGameList>
+      <HomepageGameList
+        variant="popular"
+        label={t("popularGamesAria")}
+        games={games.map((game) => ({
+          item: getHomepageCartItem(game),
+          price: `$ ${game.price}`,
+          previewVideo: getHomepageGamePreviewVideo(game),
+        }))}
+      />
     </section>
   );
 }

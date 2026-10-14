@@ -1,22 +1,20 @@
-"use client";
-
-import ResponsiveGameList from "../shared/ResponsiveGameList";
-import UpcomingGameCard from "./UpcomingGameCard";
-import { useFormatter, useTranslations } from "next-intl";
+import HomepageGameList from "../shared/HomepageGameList";
+import { getFormatter, getTranslations } from "next-intl/server";
 import SectionHeader from "../shared/SectionHeader";
 import type { HomepageGame } from "@/lib/homepage-products";
 import { getHomepageGamePreviewVideo } from "@/lib/game-preview-video";
 import { getUpcomingReleaseDate } from "@/lib/upcoming-release-dates";
-import { useCart } from "@/contexts/CartContext";
+import { getHomepageCartItem } from "@/lib/homepage-cart-item";
 
-export default function UpcomingGamesSection({
+export default async function UpcomingGamesSection({
   games,
 }: {
   games: HomepageGame[];
 }) {
-  const t = useTranslations("home");
-  const { addToCart } = useCart();
-  const format = useFormatter();
+  const [t, format] = await Promise.all([
+    getTranslations("home"),
+    getFormatter(),
+  ]);
   const formatReleaseDate = (date: string | null) =>
     date
       ? format.dateTime(new Date(`${date}T00:00:00Z`), {
@@ -45,30 +43,17 @@ export default function UpcomingGamesSection({
             : t("viewAll")
         }
       />
-      <ResponsiveGameList label={t("upcomingGamesAria")} layout="columns">
-        {games.map((game) => (
-          <UpcomingGameCard
-            key={game.id}
-            id={game.id}
-            title={game.title}
-            price={`${game.currency}${Number(game.price).toFixed(2)}`}
-            coverImage={game.image_url}
-            previewVideo={getHomepageGamePreviewVideo(game)}
-            platform={game.platform}
-            releaseDate={formatReleaseDate(getUpcomingReleaseDate(game))}
-            onAddToCart={() =>
-              addToCart({
-                id: game.id,
-                name: game.title,
-                image: game.image_url,
-                platform: game.platform,
-                price: Number(game.price),
-                currency: game.currency,
-              })
-            }
-          />
-        ))}
-      </ResponsiveGameList>
+      <HomepageGameList
+        variant="upcoming"
+        label={t("upcomingGamesAria")}
+        layout="columns"
+        games={games.map((game) => ({
+          item: getHomepageCartItem(game),
+          price: `${game.currency}${Number(game.price).toFixed(2)}`,
+          previewVideo: getHomepageGamePreviewVideo(game),
+          releaseDate: formatReleaseDate(getUpcomingReleaseDate(game)),
+        }))}
+      />
     </section>
   );
 }

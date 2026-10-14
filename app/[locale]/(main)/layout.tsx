@@ -3,12 +3,18 @@ import NavBar from "@/components/layout/NavBar";
 import { AppProviders } from "@/contexts/AppProviders";
 import LazyFloatingChat from "@/components/chat/LazyFloatingChat";
 import MarketplaceHero from "@/components/layout/MarketplaceHero";
+import { setRequestLocale } from "next-intl/server";
 
-export default function MainLayout({
+export default async function MainLayout({
   children,
+  params,
 }: {
   children: React.ReactNode;
+  params: Promise<{ locale: string }>;
 }) {
+  const { locale } = await params;
+  // Layouts can render independently from the page during ISR generation.
+  setRequestLocale(locale);
   return (
     <>
       <AppProviders>

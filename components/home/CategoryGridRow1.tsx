@@ -4,6 +4,10 @@
  * Desktop grid for first 2 category cards (Game Currency, Game Points)
  */
 
+import bgHero1Image from "@/public/bg-hero1.webp";
+import hero1Image from "@/public/hero_1.webp";
+import bgHero2Image from "@/public/bg-hero2.webp";
+import hero2Image from "@/public/hero_2.webp";
 import { CategoryCard } from "../shared/CategoryCard";
 import { useTranslations } from "next-intl";
 
@@ -25,8 +29,8 @@ export default function CategoryGridRow1() {
       title: t("gameCurrency"),
       description: t("gameCurrencyDesc"),
       productCount: `155 ${t("products")}`,
-      bgImage: "/bg-hero1.webp",
-      heroImage: "/hero_1.webp",
+      bgImage: bgHero1Image.src,
+      heroImage: hero1Image.src,
       gradientColor: "to-blue-500/10",
       href: "/buy-game-currency",
     },
@@ -35,8 +39,8 @@ export default function CategoryGridRow1() {
       title: t("gamePoints"),
       description: t("gamePointsDesc"),
       productCount: `1825 ${t("products")}`,
-      bgImage: "/bg-hero2.webp",
-      heroImage: "/hero_2.webp",
+      bgImage: bgHero2Image.src,
+      heroImage: hero2Image.src,
       gradientColor: "to-purple-500/10",
       href: "/buy-game-cards",
     },

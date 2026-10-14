@@ -2,6 +2,7 @@
 
 import { Link, usePathname } from "@/i18n/routing";
 import Image from "next/image";
+import logoImage from "@/public/Difmark-logo.png";
 import { ROUTES } from "@/lib/constants";
 import CheckoutNavSection from "./nav/CheckoutNavSection";
 import MainNavSection from "./nav/MainNavSection";
@@ -47,7 +48,7 @@ export default function NavBar() {
             className={`relative block h-[30px] w-[130px] shrink-0 ${isCheckoutPage ? "hidden md:block" : ""}`}
           >
             <Image
-              src="/Difmark-logo.png"
+              src={logoImage.src}
               alt="Difmark - Digital Game Marketplace"
               fill
               sizes="130px"

@@ -4,6 +4,10 @@
  * Desktop grid for second 2 category cards (Gift Cards, Software)
  */
 
+import bgHero3Image from "@/public/bg-hero3.webp";
+import hero3Image from "@/public/hero_3.webp";
+import bgHero4Image from "@/public/bg-hero4.webp";
+import hero4Image from "@/public/hero_4.webp";
 import { CategoryCard } from "../shared/CategoryCard";
 import { useTranslations } from "next-intl";
 
@@ -25,8 +29,8 @@ export default function CategoryGridRow2() {
       title: t("giftCards"),
       description: t("giftCardsDesc"),
       productCount: `14937 ${t("products")}`,
-      bgImage: "/bg-hero3.webp",
-      heroImage: "/hero_3.webp",
+      bgImage: bgHero3Image.src,
+      heroImage: hero3Image.src,
       gradientColor: "to-green-500/10",
       href: "/buy-gift-cards",
     },
@@ -35,8 +39,8 @@ export default function CategoryGridRow2() {
       title: t("software"),
       description: t("softwareDesc"),
       productCount: `964 ${t("products")}`,
-      bgImage: "/bg-hero4.webp",
-      heroImage: "/hero_4.webp",
+      bgImage: bgHero4Image.src,
+      heroImage: hero4Image.src,
       gradientColor: "to-red-500/10",
       href: "/buy-software",
     },

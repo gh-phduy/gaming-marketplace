@@ -1,10 +1,10 @@
 "use client";
 
-import Image from "next/image";
+import heroBackgroundSmall from "@/public/generated/hero-background-640.webp";
+import heroBackgroundMedium from "@/public/generated/hero-background-1280.webp";
+import heroBackgroundLarge from "@/public/generated/hero-background-2160.webp";
 import { useTranslations } from "next-intl";
-import {
-  HERO_GRID_COLUMNS_WITH_SIDE_BANNER,
-} from "./hero-carousel/config";
+import { HERO_GRID_COLUMNS_WITH_SIDE_BANNER } from "./hero-carousel/config";
 import { HeroCategoryTiles } from "./hero-carousel/HeroCategoryTiles";
 import { HeroSideBanners } from "./hero-carousel/HeroSideBanners";
 import { HeroSlides } from "./hero-carousel/HeroSlides";
@@ -33,10 +33,10 @@ interface HeroCarouselProps {
  */
 export function HeroCarousel({ activeTab }: HeroCarouselProps) {
   const t = useTranslations("home");
-  
+
   // Grid layout columns configurations
   const gridColumnsClass = `grid-cols-1 ${HERO_GRID_COLUMNS_WITH_SIDE_BANNER}`;
-  
+
   // Compute height adaptively based on the active tab's media requirements
   const mediaRowHeightClass =
     activeTab === "digital"
@@ -46,17 +46,19 @@ export function HeroCarousel({ activeTab }: HeroCarouselProps) {
   return (
     <div className="relative flex w-full justify-center py-8">
       {/* Background Graphic */}
-      <Image
-        src="/bg-hero-carousel.jpg"
+      {/* Pre-sized build assets avoid an image transformation on a cold edge. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={heroBackgroundLarge.src}
+        srcSet={`${heroBackgroundSmall.src} 640w, ${heroBackgroundMedium.src} 1280w, ${heroBackgroundLarge.src} 2160w`}
         alt=""
-        fill
         sizes="100vw"
         fetchPriority="high"
         loading="eager"
-        className="object-cover object-center"
+        className="absolute inset-0 h-full w-full object-cover object-center"
         aria-hidden="true"
       />
-      
+
       <div className="relative z-10">
         <div className="mx-auto w-full">
           {/* Navigation Category Tabs */}
@@ -83,7 +85,7 @@ export function HeroCarousel({ activeTab }: HeroCarouselProps) {
             >
               {/* Main Slides */}
               <HeroSlides activeTab={activeTab} />
-              
+
               {/* Side Banners (hidden on mobile/tablets) */}
               <div className="hidden h-full 1100:block">
                 <HeroSideBanners activeTab={activeTab} />
@@ -100,4 +102,3 @@ export function HeroCarousel({ activeTab }: HeroCarouselProps) {
     </div>
   );
 }
-

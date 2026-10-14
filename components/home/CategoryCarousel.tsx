@@ -10,6 +10,14 @@
 
 "use client";
 
+import bgHero1Image from "@/public/bg-hero1.webp";
+import hero1Image from "@/public/hero_1.webp";
+import bgHero2Image from "@/public/bg-hero2.webp";
+import hero2Image from "@/public/hero_2.webp";
+import bgHero3Image from "@/public/bg-hero3.webp";
+import hero3Image from "@/public/hero_3.webp";
+import bgHero4Image from "@/public/bg-hero4.webp";
+import hero4Image from "@/public/hero_4.webp";
 import ProductCarousel from "../product/ProductCarousel";
 import { CategoryCard, CategoryCardData } from "../shared/CategoryCard";
 import { useTranslations } from "next-intl";
@@ -26,8 +34,8 @@ const getCategoryCards = (t: any): CategoryCardData[] => [
     title: t("gameCurrency"),
     description: t("gameCurrencyDesc"),
     productCount: `155 ${t("products")}`,
-    bgImage: "/bg-hero1.webp",
-    heroImage: "/hero_1.webp",
+    bgImage: bgHero1Image.src,
+    heroImage: hero1Image.src,
     gradientColor: "to-blue-500/10",
     href: "/buy-game-currency",
   },
@@ -36,8 +44,8 @@ const getCategoryCards = (t: any): CategoryCardData[] => [
     title: t("gamePoints"),
     description: t("gamePointsDesc"),
     productCount: `1825 ${t("products")}`,
-    bgImage: "/bg-hero2.webp",
-    heroImage: "/hero_2.webp",
+    bgImage: bgHero2Image.src,
+    heroImage: hero2Image.src,
     gradientColor: "to-purple-500/10",
     href: "/buy-game-cards",
   },
@@ -46,8 +54,8 @@ const getCategoryCards = (t: any): CategoryCardData[] => [
     title: t("giftCards"),
     description: t("giftCardsDesc"),
     productCount: `14937 ${t("products")}`,
-    bgImage: "/bg-hero3.webp",
-    heroImage: "/hero_3.webp",
+    bgImage: bgHero3Image.src,
+    heroImage: hero3Image.src,
     gradientColor: "to-green-500/10",
     href: "/buy-gift-cards",
   },
@@ -56,8 +64,8 @@ const getCategoryCards = (t: any): CategoryCardData[] => [
     title: t("software"),
     description: t("softwareDesc"),
     productCount: `964 ${t("products")}`,
-    bgImage: "/bg-hero4.webp",
-    heroImage: "/hero_4.webp",
+    bgImage: bgHero4Image.src,
+    heroImage: hero4Image.src,
     gradientColor: "to-red-500/10",
     href: "/buy-software",
   },

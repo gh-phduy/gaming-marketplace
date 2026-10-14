@@ -1,12 +1,9 @@
-"use client";
-
-import ResponsiveGameList from "./ResponsiveGameList";
-import GameCard from "./GameCard";
+import HomepageGameList from "./HomepageGameList";
 import SectionHeader from "./SectionHeader";
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import type { HomepageGame } from "@/lib/homepage-products";
 import { getHomepageGamePreviewVideo } from "@/lib/game-preview-video";
-import { useCart } from "@/contexts/CartContext";
+import { getHomepageCartItem } from "@/lib/homepage-cart-item";
 
 interface GamesProps {
   title: string;
@@ -14,9 +11,8 @@ interface GamesProps {
   games: HomepageGame[];
 }
 
-export default function Games({ title, sectionType, games }: GamesProps) {
-  const t = useTranslations("home");
-  const { addToCart } = useCart();
+export default async function Games({ title, sectionType, games }: GamesProps) {
+  const t = await getTranslations("home");
 
   return (
     <section
@@ -39,34 +35,20 @@ export default function Games({ title, sectionType, games }: GamesProps) {
         viewAllAriaLabel={`View all ${title.toLowerCase()}`}
       />
 
-      <ResponsiveGameList label={`${title} games`} layout="columns">
-        {games.map((game) => (
-          <GameCard
-            key={game.id}
-            id={game.id}
-            title={game.title}
-            platform={game.platform}
-            price={`${game.currency}${Number(game.price).toFixed(2)}`}
-            coverImage={game.image_url}
-            previewVideo={getHomepageGamePreviewVideo(game)}
-            onAddToCart={() =>
-              addToCart({
-                id: game.id,
-                name: game.title,
-                image: game.image_url,
-                platform: game.platform,
-                price: Number(game.price),
-                currency: game.currency,
-              })
-            }
-            sellerName={game.seller?.display_name || "Unknown Seller"}
-            sellerAvatar={game.seller?.avatar_url || "/avt1.png"}
-            sellerRank={
-              (game.seller?.rating ?? 0) >= 4.9 ? "🦄 Legendary" : "⭐ Verified"
-            }
-          />
-        ))}
-      </ResponsiveGameList>
+      <HomepageGameList
+        variant="standard"
+        label={`${title} games`}
+        layout="columns"
+        games={games.map((game) => ({
+          item: getHomepageCartItem(game),
+          price: `${game.currency}${Number(game.price).toFixed(2)}`,
+          previewVideo: getHomepageGamePreviewVideo(game),
+          sellerName: game.seller?.display_name || "Unknown Seller",
+          sellerAvatar: game.seller?.avatar_url || "/avt1.png",
+          sellerRank:
+            (game.seller?.rating ?? 0) >= 4.9 ? "🦄 Legendary" : "⭐ Verified",
+        }))}
+      />
     </section>
   );
 }
