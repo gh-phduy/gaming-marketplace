@@ -35,7 +35,7 @@ const DEFAULTS = {
   initialHours: 1,
   initialMinutes: 32,
   initialSeconds: 48,
-  ctaHref: "/deals",
+  ctaHref: "/product",
 } as const;
 
 /* ============================================
