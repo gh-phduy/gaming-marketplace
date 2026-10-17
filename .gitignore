@@ -3,8 +3,6 @@
 # dependencies
 backend/node_modules
 /node_modules
-/.codex-artifacts/supabase-validation/
-/.codex-artifacts/payment-validation/
 /.pnp
 .pnp.*
 .yarn/*
@@ -51,8 +49,12 @@ backend/*.sqlite
 # typescript
 *.tsbuildinfo
 next-env.d.ts
-# Local verification artifacts and Cloudflare build output
+# Local AI instructions, editor settings and verification artifacts
+/.agents/
+/.vscode/
 /.codex-artifacts/
+
+# Cloudflare build output
 /.wrangler/
 /.cloudflare/
 /.open-next/
